@@ -39,7 +39,24 @@ const io = new Server(server);
 
 //Return page
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/content/index.html');
+    //TODO: use JWT to check token
+    if(req.cookies['cookie2'])
+        res.sendFile(__dirname + '/content/chatroom.html');
+    else
+        res.sendFile(__dirname + '/content/login.html'); 
+});
+
+app.get('/test', (req, res) => {
+    const cookieOptions = {
+        /*expires: new Date(
+          Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+        ),*/
+        httpOnly: true
+      };
+
+    res.cookie('cookie100', 'token c', cookieOptions);
+
+    res.sendFile(__dirname + '/content/chatroom.html');
 });
 
 //Create socket listener

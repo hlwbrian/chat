@@ -1,5 +1,6 @@
 const express = require('express');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const xss = require('xss-clean');
 const rateLimiter = require('express-rate-limit');
@@ -23,6 +24,7 @@ app.use('/login', limit);
 app.use(express.json({limit : '10kb'}));
 app.use(xss());
 app.use(mongoSanitize());
+app.use(cookieParser());
 
 //Include all routes
 app.use('/users/', userRoutes);

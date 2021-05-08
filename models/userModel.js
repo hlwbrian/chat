@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
     accountName : {
@@ -25,6 +27,17 @@ const userSchema = new mongoose.Schema({
     }
     //icon
 });
+
+//Encrypt Password before save the data in the db
+userSchema.pre('save', async function(next) {
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+});
+
+//Add Schema methods
+userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
+    return await bcrypt.compare(candidatePassword, userPassword);
+}
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;
