@@ -9,7 +9,7 @@ const app = express();
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 
-app.use(helmet());
+//app.use(helmet());
 if(process.env.ENVIRONMENT === 'dev'){
     app.use(morgan('dev'));
 }
