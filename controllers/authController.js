@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const jwt_decode = require('jwt-decode');
 const User = require('./../models/userModel');
 const path = require('path');
 const url = require('url');
@@ -19,22 +20,23 @@ const createSendToken = (user, statusCode, res) => {
         expires: new Date (
             Date.now() + process.env.JWT_EXPIRE_COOKIE * 60 * 60 * 24 * 1000
         ),
-        httpOnly: true
+        //httpOnly: true
     }
-    cookieOptions.secure = true;
+    //cookieOptions.secure = true;
 
     res.cookie('chatJWT', token, cookieOptions);
 
     //remove password from output
     user.password = undefined;
 
-    res.status(statusCode).json({
+    /*res.status(statusCode).json({
         status: 'success',
         token,
         data: {
             user
         }
-    });
+    });*/
+    res.sendFile('/Users/brianwong/Desktop/chat/content/chatroom.html');
 }
 
 exports.signup = catchAsync(async (req, res, next) => {
@@ -42,7 +44,6 @@ exports.signup = catchAsync(async (req, res, next) => {
     const password = req.query.password;
     const email = req.query.email;
     const phoneNo = req.query.phoneNo;
-    console.log(req);
     const newUser = await User.create({accountName, password, email, phoneNo});
     createSendToken(newUser, 200, res);
 });
@@ -70,3 +71,26 @@ exports.login = catchAsync( async (req, res, next) => {
     
     //res.sendFile('/Users/brianwong/Desktop/chat/content/login.html');
 });
+
+exports.protect = catchAsync(async (req, res, next) => {
+    //GET token and check if it exists
+    let token;
+    
+    if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+        token = req.headers.authorization.split(' ')[1];
+    }
+
+    if(!token){
+        res.send(400);
+    }
+
+    const decoded = jwt_decode(token);
+    
+    const currentUser = await User.findById(decoded.id);
+    if(!currentUser) {
+        next();
+    }
+
+    req.user = currentUser;
+    next();
+})

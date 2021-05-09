@@ -5,6 +5,10 @@ const chatSchema = mongoose.Schema({
         type: Boolean,
         required: [true, 'Is group indicator must be provided']
     },
+    chatroomName: {
+        type: String,
+        required: [true, 'A chatroom must have a chatroom name']
+    },
     members: [String],
     details: [{
         sender: {

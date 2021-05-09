@@ -11,3 +11,23 @@ exports.createChat = catchAsync(async (req, res, next) => {
       }
     });
 });
+
+exports.getChat = catchAsync(async (req, res, next) => {
+  const chatID = req.user.chatrooms;
+  const records = await Chat.find({ '_id': { $in: chatID } }).select({"details" : 0});
+
+  res.status(200).json({
+      msg: 'success',
+      records
+  });
+});
+
+exports.getConversation = catchAsync(async (req, res, next) => {
+  const chatID = req.query;
+  const record = await Chat.find(chatID).select({"details" : 1});
+
+  res.status(200).json({
+      msg: 'success',
+      record
+  });
+});

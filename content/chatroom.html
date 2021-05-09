@@ -14,16 +14,25 @@
             #messages { list-style-type: none; margin: 0; padding: 0; }
             #messages > li { padding: 0.5rem 1rem; }
             #messages > li:nth-child(odd) { background: #efefef; }
+
+            .chatroom {display: none;}
         </style>
     </head>
     <body>
-        <!-- TESTING add comment -->
-        <h3>Welcome back to iChat</h3>
-        <ul id="messages"></ul>
-        <form id="form" action="">
-            <input id="input" autocomplete="off" /><button>Send</button>
-        </form>
+        <div class="pageContainer">
+            <div class="chatList">
+            </div>
+            <div class="chatroom">
+                <p class="goBack">Go Back</p>
+                <h3 id="header">Welcome back to iChat</h3>
+                <ul id="messages"></ul>
+                <form id="form" action="">
+                    <input id="input" autocomplete="off" /><button>Send</button>
+                </form>
+            </div>
+        </div>      
     </body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io(); 
@@ -37,5 +46,85 @@
             input.value = '';
             }
         });       
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        function printChatList(dataArr) {
+            var html = '<p>No chatroom found</p>';
+            if(dataArr.records.length > 0){
+                html = '<ul>';
+                    
+                for(var [key, value] of dataArr.records.entries()){
+                    html += '<li data-id="'+value._id+'" class="chatItem">' + value.chatroomName + '</li>';
+                }
+                html += '</ul>';
+            }
+
+            $('.chatList').append(html);
+        }
+
+        function printChatContent(dataArr) {
+            var html = '';
+            if(dataArr.record[0].details.length > 0){
+                html = '<ul>';
+                    
+                for(var [key, value] of dataArr.record[0].details.entries()){
+                    html += '<li>' + value.content + '</li>';
+                }
+                html += '</ul>';
+            }
+            console.log(html);
+            $('#messages').append(html);
+        }
+
+        //Init function for this page
+        const init = () => {
+            $.ajax
+            ({
+                type: "GET",
+                url: "/chat/getChat",
+                dataType: 'json',
+                async: false,
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                success:function(data) {
+                    printChatList(data);
+                }
+            });
+        }
+        init();
+
+
+        //When a chatroom is clicked, show chatroom
+        $('.goBack').click(function(){
+            $('.chatList').show();
+            $('.chatroom').hide();
+        });
+
+        $('.chatItem').click(function(){
+            var chatID = $(this).data('id');
+            $('.chatList').hide();
+            $('.chatroom').show();
+
+            $.ajax
+            ({
+                type: "GET",
+                url: "/chat/getConversation",
+                dataType: 'json',
+                async: false,
+                data: {_id : chatID},
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                success:function(data) {
+                   printChatContent(data);
+                }
+            });
+        });
     </script>
 </html>
