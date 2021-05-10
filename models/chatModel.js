@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
+const AppError = require('./../utils/appError');
 
 const chatSchema = mongoose.Schema({
     chatID: {
         type: Number,
-        required: [true, 'A chatroom must have an ID'],
         unqiue: [true, 'A chatroom must have an unique ID'],
         default: 0
     },
@@ -34,16 +34,14 @@ const chatSchema = mongoose.Schema({
     }
 });
 
-const Chat = mongoose.model('Chat', chatSchema);
-
 //Auto increment chat ID
 chatSchema.pre('save', function(next){
-    let latestRecord = Chat.find().sort({chatCreate : -1});
-
-    if(latestRecord)
-        this.chatID = latestRecord.chatID + 1;
-
+    mongoose.models['Chat'].findOne({}, {}, { sort: { 'chatCreate' : -1 } }, function(err, data) {
+        this.chatID = data.chatID + 1;
+    });
+   
     next();
 });
 
+const Chat = mongoose.model('Chat', chatSchema);
 module.exports = Chat;
