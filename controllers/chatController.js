@@ -14,11 +14,18 @@ exports.createChat = catchAsync(async (req, res, next) => {
 
 exports.getChat = catchAsync(async (req, res, next) => {
   const chatID = req.user.chatrooms;
-  const records = await Chat.find({ '_id': { $in: chatID } }).select({"details" : 0});
+  const records = await Chat.find({ 'chatID': { $in: chatID } }, {'conversations' : {$slice: 1} });
+  const userInfo = {
+    username : req.user.username,
+    email : req.user.email,
+    phone : req.user.phoneNo,
+    userID : req.user.userID
+  }
 
   res.status(200).json({
       msg: 'success',
-      records
+      records,
+      request: userInfo
   });
 });
 

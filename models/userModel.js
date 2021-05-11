@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const userSchema = new mongoose.Schema({
-    chatrooms: [String], //save chatID
+    chatrooms: [Number], //save chatID
     username : {
         type: String,
         required : [true, 'A user must have a account name'],

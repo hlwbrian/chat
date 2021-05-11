@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chat - Chatrooms list</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <div id="chatlistPage">
+            <div class="userInfo">
+                <p class="username"></p>
+                <p class="email"></p>
+                <p class="phone"></p>
+                <p class="userID"></p>
+            </div>
+            <ul id="chatlist"></ul>
+        </div>
+    </body>
+    <script>
+        //common function
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        (function init(){
+            $.ajax
+            ({
+                type: "GET",
+                url: "/chat/getChat",
+                dataType: 'json',
+                async: false,
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                success:function(data) {
+                    //insert user data
+                    $('.username').text(data.request.username);
+                    $('.phone').text(data.request.phone);
+                    $('.email').text(data.request.email);
+                    $('.userID').text(data.request.userID);
+
+                    //insert chatlist data
+                    if(data.records.length > 0){
+                        var html;
+                        var datetime = new Date(data.records[0].conversations[0]['timestamp']);
+                        var datetimeFormat = datetime.getFullYear() + '/' + datetime.getMonth() + '/' + datetime.getDate() + ' ' + datetime.getMinutes() + ':' + datetime.getSeconds();
+                        html = '<li data-id="'+data.records[0].chatID+'">' + 
+                            'Chatroom name : ' + data.records[0]['chatroomName'] + '<br/>' +
+                            data.records[0].conversations[0]['message'] + ' ' + datetimeFormat +
+                        '</li>';
+
+                        $('#chatlist').append(html);
+                    }
+                }
+            });
+        })();
+    </script>
+</html>
