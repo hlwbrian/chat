@@ -5,6 +5,7 @@ const User = require('./../models/userModel');
 const path = require('path');
 const url = require('url');
 const catchAsync = require('./../utils/catchAsync.js');
+const AppError = require('../utils/appError');
 
 //Sign token with user ID
 const signToken = id => {
@@ -30,7 +31,8 @@ const createSendToken = (user, statusCode, res) => {
     user.password = undefined;
 
     res.status(200).json({
-        status: 'success'
+        status: 'success',
+        message: 'Logged-in, welcome back'
     });
 }
 
@@ -42,27 +44,20 @@ exports.signup = catchAsync(async (req, res, next) => {
 });
 
 exports.login = catchAsync( async (req, res, next) => {
-    const username = req.query.username;
-    const password = req.query.password;
-
-    //Check if username & password are filled
-    if(!username || !password){
-    }
+    const username = req.body.username;
+    const password = req.body.password;
 
     //find users
-    const user = await User.findOne({accountName : username});
+    const user = await User.findOne({username : username});
     
     if(!user || !(await user.correctPassword(password, user.password))){
-        console.log('Cannot find this user');
-        res.sendFile('/Users/brianwong/Desktop/chat/content/login.html');
+        res.status(404).json({
+            status: 'failed',
+            message: 'Incorrect Username or Password'
+        })
     }else{
-        console.log('User fonund!!!!');
         createSendToken(user, 200, res);
     }
-
-    //TODO update
-    
-    //res.sendFile('/Users/brianwong/Desktop/chat/content/login.html');
 });
 
 exports.protect = catchAsync(async (req, res, next) => {

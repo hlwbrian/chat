@@ -9,43 +9,27 @@
         <div class="pageContainer">
             <div class="loginContainer">
                 <h2>Login First!</h2>
-                <form id="loginForm" action="/users/login/">
-                    <input type="text" name="username" id="username" placeholder="Username: ..."></input>
-                    <input type="text" name="password" id="password" placeholder="Password: ..."></input>
+                <form id="loginForm" action="">
+                    <input type="text" required maxlength="32" minlength="1" name="username" id="login-username" placeholder="Username: ..."></input>
+                    <input type="password" required minlength="6" maxlength="16" name="password" id="login-password" placeholder="Password: ..."></input>
                     <button type="submit">submit</button>
                 </form>
             </div>
             <div class="singupContainer">
                 <h2>Signup First!</h2>
                 <form id="signupForm" action="">
-                    <input type="text" maxlength="32" minlength="1" name="username" id="signup-username" placeholder="username: (Characters: Max: 32, Min: 1)"></input>
-                    <input type="password" name="password" minlength="6" maxlength="16" id="signup-password" placeholder="Password: (Characters: Max: 16, Min: 6)"></input>
+                    <input required type="text" maxlength="32" minlength="1" name="username" id="signup-username" placeholder="username: (Characters: Max: 32, Min: 1)"></input>
+                    <input required type="password" name="password" minlength="6" maxlength="16" id="signup-password" placeholder="Password: (Characters: Max: 16, Min: 6)"></input>
                     <labal id="confirmText">The password must be match</labal>
-                    <input type="password" name="passwordConfirm"  minlength="6" maxlength="16" id="passwordConfirm" oninput="confirmCheck(this)" placeholder="Confirm your password: ..."></input>
-                    <input type="email" name="email" id="email" placeholder="Email: ..."></input>
-                    <input type="phone" name="phoneNo" id="phoneNo" placeholder="Phone: ..."></input>
+                    <input required type="password" name="passwordConfirm"  minlength="6" maxlength="16" id="passwordConfirm" oninput="confirmCheck(this)" placeholder="Confirm your password: ..."></input>
+                    <input required type="email" name="email" id="email" placeholder="Email: ..."></input>
+                    <input required type="phone" name="phoneNo" id="phoneNo" placeholder="Phone: ..."></input>
                     <button type="submit" disabled="true" id="signupBtn">submit</button>
                 </form>
             </div>
         </div>
     </body>
     <script>
-        //Common function
-        /*var login = function(){
-            $.ajax({
-                type: "GET",
-                url: "/chat/getChat",
-                dataType: 'json',
-                async: false,
-                headers: {
-                    "authorization": "Bearer " + getCookie('chatJWT')
-                },
-                success:function(data) {
-                    printChatList(data);
-                }
-            });
-        }*/
-
         var register = function(){
             alert('submit!')
             $.ajax({
@@ -84,10 +68,41 @@
                     }
                 },
                 success: function(data){
-                    //Call login function
                     window.location = '/chatroom.html';
                 }                
             });
+        });
+
+        //Common function
+        function login(){
+            var data = {
+                username : $('#login-username').val(),
+                password : $('#login-password').val()
+            }
+            
+            $.ajax({
+                type: 'POST',
+                url: '/users/login',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                async: false,
+                data: JSON.stringify(data),
+                error: function(err){
+                    console.log(err);
+                    if(err.status === 404){
+                        var errMsg = 'Incorrect password or username';
+                        alert(errMsg);
+                    }
+                },
+                success: function(){
+                    window.location = '/chatroom.html';
+                }
+            });
+        }
+
+        $('#loginForm').submit( function(event) {
+            event.preventDefault();
+            login();
         });
 
         //function to check if password confirm are matched

@@ -10,7 +10,7 @@ router
 
 router
     .route('/login')
-    .get(authController.login);
+    .post(authController.login);
 
 //Protect all routes with authController.protec
 router.use(authController.protect);
