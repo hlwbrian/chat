@@ -13,7 +13,7 @@ process.on('uncaughtException', err => {
 //import setting
 dotenv.config({path: './config.env'});
 const port = process.env.PORT || 3000;
-const app = require('./app.js');
+const app = require('./app');
 
 //connect to MongoDB Atlas
 const DB = process.env.DB.replace(
@@ -39,11 +39,7 @@ const io = new Server(server);
 
 //Return page
 app.get('/', (req, res) => {
-    //TODO: use JWT to check token
-    if(req.cookies['chatJWT'])
-        res.sendFile(__dirname + '/content/chatroom.html');
-    else
-        res.sendFile(__dirname + '/content/login.html'); 
+    res.sendFile(__dirname + '/content/login.html'); 
 });
 
 //Create socket listener

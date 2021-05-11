@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <title>Chat - Login</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     </head>
     <body>
         <div class="pageContainer">
@@ -16,14 +17,87 @@
             </div>
             <div class="singupContainer">
                 <h2>Signup First!</h2>
-                <form id="signupForm" action="/users/signup/">
-                    <input type="text" name="accountName" id="accountName" placeholder="Username: ..."></input>
-                    <input type="text" name="password" id="password" placeholder="Password: ..."></input>
+                <form id="signupForm" action="">
+                    <input type="text" maxlength="32" minlength="1" name="username" id="signup-username" placeholder="username: (Characters: Max: 32, Min: 1)"></input>
+                    <input type="password" name="password" minlength="6" maxlength="16" id="signup-password" placeholder="Password: (Characters: Max: 16, Min: 6)"></input>
+                    <labal id="confirmText">The password must be match</labal>
+                    <input type="password" name="passwordConfirm"  minlength="6" maxlength="16" id="passwordConfirm" oninput="confirmCheck(this)" placeholder="Confirm your password: ..."></input>
                     <input type="email" name="email" id="email" placeholder="Email: ..."></input>
                     <input type="phone" name="phoneNo" id="phoneNo" placeholder="Phone: ..."></input>
-                    <button type="submit">submit</button>
+                    <button type="submit" disabled="true" id="signupBtn">submit</button>
                 </form>
             </div>
         </div>
     </body>
+    <script>
+        //Common function
+        /*var login = function(){
+            $.ajax({
+                type: "GET",
+                url: "/chat/getChat",
+                dataType: 'json',
+                async: false,
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                success:function(data) {
+                    printChatList(data);
+                }
+            });
+        }*/
+
+        var register = function(){
+            alert('submit!')
+            $.ajax({
+                type: 'POST',
+                url: '/users/signup',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: {}
+            })
+        }
+
+        $('#signupForm').submit( function(event) {
+            event.preventDefault();
+
+            var data = {
+                username : $('#signup-username').val(),
+                password : $('#signup-password').val(),
+                passwordConfirm : $('#passwordConfirm').val(),
+                email : $('#email').val(),
+                phoneNo : $('#phoneNo').val()
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/users/signup',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                async: false,
+                data: JSON.stringify(data),
+                error: function(err){              
+                    if(err.responseJSON.error.statusCode === 400){
+                        var fieldName = err.responseJSON.message.substring(err.responseJSON.message.lastIndexOf(':') + 1).trim();
+                        if(fieldName === 'phoneNo') fieldName = 'phone number';
+                        var errMsg = 'Please use another value for ' + fieldName;
+                        alert(errMsg);
+                    }
+                },
+                success: function(data){
+                    //Call login function
+                    window.location = '/chatroom.html';
+                }                
+            });
+        });
+
+        //function to check if password confirm are matched
+        function confirmCheck(input) {
+            if (input.value === $('#signup-password').val()) {
+                $('#confirmText').hide();
+                $('#signupBtn').prop('disabled', false);
+            }else{
+                $('#confirmText').show();
+            }
+        }
+    </script>
 </html>

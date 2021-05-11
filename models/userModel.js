@@ -2,17 +2,16 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const userSchema = new mongoose.Schema({
-    accountName : {
+    chatrooms: [String], //save chatID
+    username : {
         type: String,
-        required : [true, 'A user must have a account name']
+        required : [true, 'A user must have a account name'],
+        maxlength: 32,
+        minlength: 1
     },
-    password: {
-        type: String,
-        required: [true, 'A user must have a user password']
-    },
-    chatrooms: [String],
     email: {
         type: String,
         required: [true, 'A user must have an email address'],
@@ -24,13 +23,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'A user must have a phone number'],
         unique: true,
-    }
-    //icon
+    },
+    password: {
+        type: String,
+        required: [true, 'A user must have a user password']
+    },
+    resetToken: String
 });
 
-//Encrypt Password before save the data in the db
 userSchema.pre('save', async function(next) {
+    //Encrypt the password before save
     this.password = await bcrypt.hash(this.password, 12);
+    
     next();
 });
 
@@ -39,24 +43,6 @@ userSchema.methods.correctPassword = async function(candidatePassword, userPassw
     return await bcrypt.compare(candidatePassword, userPassword);
 }
 
+userSchema.plugin(AutoIncrement, {inc_field: 'userID'});
 const User = mongoose.model('User', userSchema);
 module.exports = User;
-
-/*
-//Users Data Structure
-{
-	data: {
-		members: [
-			{
-				memberID: String,
-				accountName: String,
-				password: String,
-				conversations: [Chatid],
-				phoneNo : Number,
-				email : String,
-				icon : String
-			}
-		]
-	}
-}
-*/

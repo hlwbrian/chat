@@ -20,7 +20,7 @@ const createSendToken = (user, statusCode, res) => {
         expires: new Date (
             Date.now() + process.env.JWT_EXPIRE_COOKIE * 60 * 60 * 24 * 1000
         ),
-        //httpOnly: true
+        //TODO: httpOnly: true
     }
     //cookieOptions.secure = true;
 
@@ -29,22 +29,15 @@ const createSendToken = (user, statusCode, res) => {
     //remove password from output
     user.password = undefined;
 
-    /*res.status(statusCode).json({
-        status: 'success',
-        token,
-        data: {
-            user
-        }
-    });*/
-    res.sendFile('/Users/brianwong/Desktop/chat/content/chatroom.html');
+    res.status(200).json({
+        status: 'success'
+    });
 }
 
 exports.signup = catchAsync(async (req, res, next) => {
-    const accountName = req.query.accountName;
-    const password = req.query.password;
-    const email = req.query.email;
-    const phoneNo = req.query.phoneNo;
-    const newUser = await User.create({accountName, password, email, phoneNo});
+    const {username, password, passwordConfirm, email, phoneNo} = req.body;
+
+    const newUser = await User.create({username, password, passwordConfirm, email, phoneNo});
     createSendToken(newUser, 200, res);
 });
 

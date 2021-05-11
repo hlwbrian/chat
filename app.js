@@ -9,6 +9,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const app = express();
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const errorControl = require('./controllers/errorController');
 
 //app.use(helmet());
 if(process.env.ENVIRONMENT === 'dev'){
@@ -26,8 +27,14 @@ app.use(xss());
 app.use(mongoSanitize());
 app.use(cookieParser());
 
+// Serving static files
+app.use(express.static(`${__dirname}/content`));
+
 //Include all routes
 app.use('/users/', userRoutes);
 app.use('/chat/', chatRoutes);
+
+//include error control in express middleware
+app.use(errorControl);
 
 module.exports = app;
