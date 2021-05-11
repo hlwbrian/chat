@@ -1,15 +1,36 @@
 const Chat = require('./../models/chatModel');
+const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 
 exports.createChat = catchAsync(async (req, res, next) => {
-    const newChat = await Chat.create(req.body);
-  
-    res.status(201).json({
-      status: 'success',
-      data: {
-        chat: newChat
+    const userData = req.body.username.split('#');
+    
+    if(userData[1] != req.user.userID){
+      const user = await User.find({username: userData[0], userID: userData[1]});
+      let newChat;
+
+      if(user.length > 0){
+        //create new chat
+        newChat = await Chat.create({chatroomName : req.body.chatroom, members : [userData[1], req.user.userID]});
+        //create two user's chatrooms
+        updatedUsers = await User.updateMany({userID : {$in : [userData[1], req.user.userID]}}, {$push : {chatrooms : newChat.chatID}});
+        
+        res.status(201).json({
+          status: 'success',
+          records: newChat
+        }); 
+      } else{
+        res.status(404).json({
+          status: 'failed',
+          message: 'User not found'
+        });
       }
-    });
+    }else{
+      res.status(401).json({
+        status: 'failed',
+        message: 'Cannot create a chatroom yourself'
+      });
+    }    
 });
 
 exports.getChat = catchAsync(async (req, res, next) => {

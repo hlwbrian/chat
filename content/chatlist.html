@@ -9,13 +9,26 @@
     </head>
     <body>
         <div id="chatlistPage">
+            <!-- show personal info -->
+            <h3>Personal Info:</h3>
             <div class="userInfo">
-                <p class="username"></p>
                 <p class="email"></p>
                 <p class="phone"></p>
                 <p class="userID"></p>
             </div>
+
+            <!-- Chatroom list -->
+            <h3>Chatroom list</h3>
             <ul id="chatlist"></ul>
+
+            <!-- create chatroom -->
+            <h3>Create chat</h3>
+            <form id="createChat">
+                <p>Add your friend's' ID: e.g. john#315</p>
+                <input type="text" placeholder="john#315" pattern="[a-z0-9]+#[0-9]+" required id="username">
+                <input type="text" placeholder="chatroom name" required id="chatroomName" minlength="1" maxlength="32">
+                <button type="submit">create</button>
+            </form>
         </div>
     </body>
     <script>
@@ -26,6 +39,7 @@
             if (parts.length === 2) return parts.pop().split(';').shift();
         }
 
+        //Load chat list
         (function init(){
             $.ajax
             ({
@@ -38,25 +52,60 @@
                 },
                 success:function(data) {
                     //insert user data
-                    $('.username').text(data.request.username);
                     $('.phone').text(data.request.phone);
                     $('.email').text(data.request.email);
-                    $('.userID').text(data.request.userID);
+                    $('.userID').text(data.request.username + '#' + data.request.userID);
 
                     //insert chatlist data
                     if(data.records.length > 0){
-                        var html;
-                        var datetime = new Date(data.records[0].conversations[0]['timestamp']);
-                        var datetimeFormat = datetime.getFullYear() + '/' + datetime.getMonth() + '/' + datetime.getDate() + ' ' + datetime.getMinutes() + ':' + datetime.getSeconds();
-                        html = '<li data-id="'+data.records[0].chatID+'">' + 
-                            'Chatroom name : ' + data.records[0]['chatroomName'] + '<br/>' +
-                            data.records[0].conversations[0]['message'] + ' ' + datetimeFormat +
-                        '</li>';
+                        var html = '', datetime, datetimeFormat;
+                        for(var i = 0; i < data.records.length; i++){                            
+                            html += '<li data-id="'+data.records[i].chatID+'">' + 
+                            'Chatroom name : ' + data.records[i]['chatroomName'] + '<br/>';
+                            
+                            if(data.records[i].conversations.length > 0){
+                                datetime = new Date(data.records[i].conversations[i]['timestamp']);
+                                datetimeFormat = datetime.getFullYear() + '/' + datetime.getMonth() + '/' + datetime.getDate() + ' ' + datetime.getMinutes() + ':' + datetime.getSeconds();
+                                html += data.records[i].conversations[i]['message'] + ' ' + datetimeFormat;
+                            }
+                            
+                            html += '</li>';
+                        }
+                        
 
                         $('#chatlist').append(html);
                     }
                 }
             });
         })();
+
+        //Create chat
+        $('#createChat').submit(function(event){
+            event.preventDefault();
+            var data ={
+                username:  $('#username').val(),
+                chatroom: $('#chatroomName').val()
+            }
+            
+            $.ajax
+            ({
+                type: "POST",
+                url: "/chat/create",
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                async: false,
+                data: JSON.stringify(data),
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                success:function(data) {
+                    //insert chatlist data
+                    var html='', datetime, datetimeFormat;
+                    html += '<li data-id="'+data.records.chatID+'">' + 
+                         'Chatroom name : ' + data.records['chatroomName'] + '</li>';
+                    $('#chatlist').append(html);
+                }
+            });
+        });
     </script>
 </html>

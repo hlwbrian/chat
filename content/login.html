@@ -20,7 +20,7 @@
             <div class="singupContainer">
                 <h2>Signup First!</h2>
                 <form id="signupForm" action="">
-                    <input required type="text" maxlength="32" minlength="1" name="username" id="signup-username" placeholder="username: (Characters: Max: 32, Min: 1)"></input>
+                    <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-z0-9]+" id="signup-username" placeholder="username: Eng small letter & number only (Characters: Max: 32, Min: 1)"></input>
                     <input required type="password" name="password" minlength="6" maxlength="16" id="signup-password" placeholder="Password: (Characters: Max: 16, Min: 6)"></input>
                     <labal id="confirmText">The password must be match</labal>
                     <input required type="password" name="passwordConfirm"  minlength="6" maxlength="16" id="passwordConfirm" oninput="confirmCheck(this)" placeholder="Confirm your password: ..."></input>
@@ -33,7 +33,6 @@
     </body>
     <script>
         var register = function(){
-            alert('submit!')
             $.ajax({
                 type: 'POST',
                 url: '/users/signup',
