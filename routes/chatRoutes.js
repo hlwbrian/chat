@@ -29,4 +29,8 @@ router
     .route('/changeChatName')
     .patch(chatController.changeChatName);
 
+router
+    .route('/leave')
+    .patch(chatController.leaveChat);
+
 module.exports = router;

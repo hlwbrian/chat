@@ -180,7 +180,7 @@
             $.ajax
             ({
                 type: "PATCH",
-                url: "/chat/leaveChat",
+                url: "/chat/leave",
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 async: false,
@@ -192,7 +192,7 @@
                     alert('failed');
                 },
                 success:function(data) {
-                    console.log(data);
+                    window.location = '/chatlist.html';
                 }
             });
         });

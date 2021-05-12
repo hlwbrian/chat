@@ -115,7 +115,7 @@ exports.addMember = catchAsync(async (req, res, next) => {
 exports.changeChatName = catchAsync(async (req, res, next) => {
     const newName = req.body.chatroomName;
     const updateChat = await Chat.updateOne( {chatID: req.chat.currentChatID}, {$set : {chatroomName : newName}});
-    
+
     if(updateChat){
       res.status(201).json({
         status: 'success',
@@ -127,4 +127,33 @@ exports.changeChatName = catchAsync(async (req, res, next) => {
         message: 'Chatroom not found'
       });
     } 
+});
+
+exports.leaveChat = catchAsync(async (req, res, next) => {
+  const userData = `${req.user.username}#${req.user.userID}`;
+  
+  const chatRecord = await Chat.findOne({chatID: req.chat.currentChatID});
+  if(chatRecord.members.length > 1){
+    //remove users chatroom list
+    const updateUser = await User.updateOne({userID: req.user.userID}, {$pull : {chatrooms : req.chat.currentChatID}});
+    //remove chat members list element
+    const updateChat = await Chat.updateOne({chatID: req.chat.currentChatID}, {$pull : {members : userData}});
+
+    if(updateUser && updateChat){
+      res.status(201).json({
+        status: 'success'
+      });
+    }else{
+      res.status(404).json({
+        status: 'failed'
+      });
+    }
+  }else{
+    const delChat = await Chat.deleteOne({chatID: req.chat.currentChatID});
+
+    res.status(201).json({
+      status: 'success',
+      msg: 'chat deleted'
+    });
+  }
 });
