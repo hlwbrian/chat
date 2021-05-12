@@ -15,4 +15,8 @@ router
 //Protect all routes with authController.protec
 router.use(authController.protect);
 
+router
+    .route('/update')
+    .patch(userController.update);
+
 module.exports = router;
