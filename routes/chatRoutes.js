@@ -15,4 +15,11 @@ router
     .route('/getChat')
     .get(chatController.getChat);
 
+//secureChat save current chat ID in req.currentChatID
+router.use(authController.secureChat);
+router
+    .route('/getConversation')
+    .post(chatController.getConversation);
+
+
 module.exports = router;

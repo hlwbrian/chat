@@ -14,17 +14,13 @@
             #messages { list-style-type: none; margin: 0; padding: 0; }
             #messages > li { padding: 0.5rem 1rem; }
             #messages > li:nth-child(odd) { background: #efefef; }
-
-            .chatroom {display: none;}
         </style>
     </head>
     <body>
         <div class="pageContainer">
-            <div class="chatList">
-            </div>
             <div class="chatroom">
                 <p class="goBack">Go Back</p>
-                <h3 id="header">Welcome back to iChat</h3>
+                <h3 id="header"></h3>
                 <ul id="messages"></ul>
                 <form id="form" action="">
                     <input id="input" autocomplete="off" /><button>Send</button>
@@ -35,7 +31,57 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io(); 
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        (function init() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var data = {
+                currentChatID : urlParams.get('chatroom')
+            }
+            
+            $.ajax
+            ({
+                type: "POST",
+                url: "/chat/getConversation",
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                async: false,
+                data: JSON.stringify(data),
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                error:function(data){
+                },
+                success:function(data) {
+                    let chatroomName = data.content[0].chatroomName;
+                    let content = data.content[0].conversations;
+                    let html = '';
+                    
+                    $('#header').text(chatroomName);
+                    if(content.length > 0){
+                        for(var value of content){
+                            html += '<li>' +
+                                'sender' + value.sender + 
+                                'message' + value.message +
+                                'timestamp' + value.timestamp +
+                            '</li>';
+                        }
+                        
+                        $('#messages').append(html);
+                    }
+                }
+            });
+        })();
+
+        $('.goBack').click(function(){
+            window.location = '/chatlist.html';
+        });
+
+        /*const socket = io(); 
         var form = document.getElementById('form');
         var input = document.getElementById('input');
 
@@ -45,13 +91,7 @@
             socket.emit('chat message', input.value);
             input.value = '';
             }
-        });       
-
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
+        });
 
         function printChatList(dataArr) {
             var html = '<p>No chatroom found</p>';
@@ -77,54 +117,7 @@
                 }
                 html += '</ul>';
             }
-            console.log(html);
             $('#messages').append(html);
-        }
-
-        //Init function for this page
-        const init = () => {
-            $.ajax
-            ({
-                type: "GET",
-                url: "/chat/getChat",
-                dataType: 'json',
-                async: false,
-                headers: {
-                    "authorization": "Bearer " + getCookie('chatJWT')
-                },
-                success:function(data) {
-                    printChatList(data);
-                }
-            });
-        }
-        init();
-
-
-        //When a chatroom is clicked, show chatroom
-        $('.goBack').click(function(){
-            $('.chatList').show();
-            $('.chatroom').hide();
-        });
-
-        $('.chatItem').click(function(){
-            var chatID = $(this).data('id');
-            $('.chatList').hide();
-            $('.chatroom').show();
-
-            $.ajax
-            ({
-                type: "GET",
-                url: "/chat/getConversation",
-                dataType: 'json',
-                async: false,
-                data: {_id : chatID},
-                headers: {
-                    "authorization": "Bearer " + getCookie('chatJWT')
-                },
-                success:function(data) {
-                   printChatContent(data);
-                }
-            });
-        });
+        }*/      
     </script>
 </html>

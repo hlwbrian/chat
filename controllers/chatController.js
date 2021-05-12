@@ -51,11 +51,21 @@ exports.getChat = catchAsync(async (req, res, next) => {
 });
 
 exports.getConversation = catchAsync(async (req, res, next) => {
-  const chatID = req.query;
-  const record = await Chat.find(chatID).select({"details" : 1});
+  var data = {
+    chatID: req.chat.currentChatID
+  };
 
-  res.status(200).json({
+  const conversations = await Chat.find(data).select({"conversations" : 1, 'chatroomName' : 1});
+
+  if(conversations){
+    res.status(200).json({
       msg: 'success',
-      record
-  });
+      content: conversations
+    });
+  }else{
+    res.status(404).json({
+      msg: 'failed'
+    });
+  }
+
 });

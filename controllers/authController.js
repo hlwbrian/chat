@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const jwt_decode = require('jwt-decode');
 const User = require('./../models/userModel');
+const Chat = require('./../models/chatModel');
 const path = require('path');
 const url = require('url');
 const catchAsync = require('./../utils/catchAsync.js');
@@ -81,4 +82,13 @@ exports.protect = catchAsync(async (req, res, next) => {
 
     req.user = currentUser;
     next();
-})
+});
+
+exports.secureChat = catchAsync(async (req, res, next) => {
+    let data = {
+        currentChatID : req.body.currentChatID
+    }
+    req.chat = data;
+    next();
+});
+
