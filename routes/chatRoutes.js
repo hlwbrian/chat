@@ -21,5 +21,9 @@ router
     .route('/getConversation')
     .post(chatController.getConversation);
 
+router
+    .route('/addMember')
+    .post(chatController.addMember);
+
 
 module.exports = router;

@@ -11,9 +11,9 @@ exports.createChat = catchAsync(async (req, res, next) => {
 
       if(user.length > 0){
         //create new chat
-        newChat = await Chat.create({chatroomName : req.body.chatroom, members : [userData[1], req.user.userID]});
+        newChat = await Chat.create({chatroomName : req.body.chatroom, members : [user[0].username + '#' + user[0].userID, req.user.username + '#' + req.user.userID]});
         //create two user's chatrooms
-        updatedUsers = await User.updateMany({userID : {$in : [userData[1], req.user.userID]}}, {$push : {chatrooms : newChat.chatID}});
+        updatedUsers = await User.updateMany({userID : {$in : [user[0].userID, req.user.userID]}}, {$push : {chatrooms : newChat.chatID}});
         
         res.status(201).json({
           status: 'success',
@@ -55,7 +55,7 @@ exports.getConversation = catchAsync(async (req, res, next) => {
     chatID: req.chat.currentChatID
   };
 
-  const conversations = await Chat.find(data).select({"conversations" : 1, 'chatroomName' : 1});
+  const conversations = await Chat.find(data).select({"conversations" : 1, 'chatroomName' : 1, 'members': 1});
 
   if(conversations){
     res.status(200).json({
@@ -68,4 +68,46 @@ exports.getConversation = catchAsync(async (req, res, next) => {
     });
   }
 
+});
+
+exports.addMember = catchAsync(async (req, res, next) => {
+    const userData = req.body.username.split('#');
+
+    if(userData[1] != req.user.userID){
+      const user = await User.find({username: userData[0], userID: userData[1]});
+      
+      if(user.length > 0){
+        //find if user is already in chatroom
+        targetChatroom = await Chat.findOne({chatID : req.chat.currentChatID});
+        let isExist = targetChatroom.members.includes(userData[0] + '#' + userData[1]);
+
+        if(!isExist){
+          //push member id into chatroom array
+          updatedUsers = await User.updateOne({userID : userData[1]}, {$push : {chatrooms : req.chat.currentChatID}});
+          //push chat id into chatroom array
+          updatedChat = await Chat.updateOne({chatID : req.chat.currentChatID}, {$push : {members : user[0].username + '#' + user[0].userID}});
+
+          res.status(201).json({
+            status: 'success',
+            message: 'Member added',
+            member : userData.join('#')
+          });
+        }else{
+          res.status(404).json({
+            status: 'failed',
+            message: 'user is already in the chatroom'
+          });
+        }
+      }else{
+        res.status(404).json({
+          status: 'failed',
+          message: 'user not found'
+        });
+      }
+    }else{
+      res.status(401).json({
+        status: 'failed',
+        message: 'cannot add yourself to the group'
+      });
+    }
 });

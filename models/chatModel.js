@@ -8,7 +8,7 @@ const chatSchema = mongoose.Schema({
         maxlength: 32,
         minlength: 1
     },
-    members: [Number], //save User.userID
+    members: [String], //save User.userID
     conversations: [{
         sender: {
             type: String //User.userID
