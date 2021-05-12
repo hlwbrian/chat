@@ -44,9 +44,8 @@ app.get('/', (req, res) => {
 
 //Create socket listener
 io.on('connection', (socket) => {
-    console.log('A user is connected');
-    socket.broadcast.emit('Broadcasting');
-    
+    console.log(`A user is connected:`);   
+    console.log(socket.request._query['username']);
     //When sending data
     socket.on('chat message', msg => {
         console.log(`message : ${msg}`);
