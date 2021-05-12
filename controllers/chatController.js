@@ -111,3 +111,20 @@ exports.addMember = catchAsync(async (req, res, next) => {
       });
     }
 });
+
+exports.changeChatName = catchAsync(async (req, res, next) => {
+    const newName = req.body.chatroomName;
+    const updateChat = await Chat.updateOne( {chatID: req.chat.currentChatID}, {$set : {chatroomName : newName}});
+    
+    if(updateChat){
+      res.status(201).json({
+        status: 'success',
+        message: 'Name changed'
+      });
+    }else{
+      res.status(404).json({
+        status: 'failed',
+        message: 'Chatroom not found'
+      });
+    } 
+});

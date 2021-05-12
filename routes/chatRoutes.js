@@ -25,5 +25,8 @@ router
     .route('/addMember')
     .post(chatController.addMember);
 
+router
+    .route('/changeChatName')
+    .patch(chatController.changeChatName);
 
 module.exports = router;

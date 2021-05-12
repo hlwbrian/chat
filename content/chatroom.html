@@ -27,11 +27,24 @@
                 </form>
             </div>
             <p class="goBack">Go Back</p>
+
+            <h3>Add member</h3>
             <form action="" id="addMemberForm">
                 <p>Add your friend's' ID: e.g. john#315</p>
                 <input type="text" placeholder="john#315" pattern="[a-z0-9]+#[0-9]+" required id="username">
                 <button type="submit">Add</button>
             </form>
+
+            <h3>Change chatroom name</h3>
+            <form action="" id="changeChatroom">
+                <input type="text" required id="chatroomName" minlength="1" maxlength="32">
+                <button type="submit">Change</button>
+            </form>
+
+            <h3>Leave Chat</h3>
+            <form action="" id="leaveChat">
+                <button type="submit">Leave</button>
+            </form>            
         </div>      
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -129,6 +142,60 @@
             });
         });
 
+        $('#changeChatroom').submit(function(event) {
+            event.preventDefault();
+
+            var data ={
+                chatroomName:  $('#chatroomName').val(),
+                currentChatID : urlParams.get('chatroom')
+            }
+
+            $.ajax
+            ({
+                type: "PATCH",
+                url: "/chat/changeChatName",
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                async: false,
+                data: JSON.stringify(data),
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                error:function(data){
+                    alert('failed');
+                },
+                success:function(data) {
+                    $('#header').text($('#chatroomName').val());
+                }
+            });
+        });
+
+        $('#leaveChat').submit(function(event) {
+            event.preventDefault();
+
+            var data ={
+                currentChatID : urlParams.get('chatroom')
+            }
+
+            $.ajax
+            ({
+                type: "PATCH",
+                url: "/chat/leaveChat",
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                async: false,
+                data: JSON.stringify(data),
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                error:function(data){
+                    alert('failed');
+                },
+                success:function(data) {
+                    console.log(data);
+                }
+            });
+        });
         /*const socket = io(); 
         var form = document.getElementById('form');
         var input = document.getElementById('input');
