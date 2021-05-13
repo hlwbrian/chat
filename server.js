@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const { Server } = require('socket.io');
+const axios = require('axios');
 
 //Unexpected error server starts
 process.on('uncaughtException', err => {
@@ -43,6 +44,7 @@ app.get('/', (req, res) => {
 });
 
 //Create socket listener
+//TODO create chat controller file
 io.on('connection', function(socket) {
     const roomName = `chatroom ${socket.request._query['chat']}`;
 
@@ -62,24 +64,16 @@ function sendToRoom(roomName, msg){
     io.in(roomName).emit('receive', msg);
 }
 
-/*io.on('connection', (socket) => {
-    console.log(`A user is connected:`);   
-
-    const roomName = `chatroom ${socket.request._query['chat']}`;
-
-    socket.join('roomName');
-    //When sending data
-    socket.on('chat message', msg => {
-        console.log(`${socket.request._query['username']} : ${msg}`);
-        //socket.broadcast.to(roomName).emit('receive', `${socket.request._query['username']} : ${msg}`);
-        socket.in('roomName').emit('receive', `${socket.request._query['username']} : ${msg}`);
-    });
-
-    //When user disconnected
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
-});*/
+//axios testing
+axios.get('http://localhost:3000/users/utest')
+  .then(function (response) {
+    // handle success
+    console.log(response.data.msg);
+  })
+  .catch(function (error) {
+    // handle error
+    console.log(error);
+  })
 
 //Handle unexpected error
 process.on('unhandledRejection', err => {

@@ -28,3 +28,10 @@ exports.update = catchAsync(async (req, res, next) => {
         }
     }
 });
+
+//TODO remove
+exports.utest = (req, res, next) => {
+    res.status(200).json({
+        msg: 'utest good'
+    });
+};
