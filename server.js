@@ -43,12 +43,13 @@ app.get('/', (req, res) => {
 });
 
 //Create socket listener
-io.on('connection', (socket) => {
-    console.log(`A user is connected:`);   
-    console.log(socket.request._query['username']);
-    //When sending data
+io.on('connection', function(socket) {
+    const roomName = `chatroom ${socket.request._query['chat']}`;
+
+    socket.join(roomName);
     socket.on('chat message', msg => {
-        console.log(`message : ${msg}`);
+        const resultMsg = `${socket.request._query['username']} : ${msg}`;
+        sendToRoom(roomName, resultMsg);
     });
 
     //When user disconnected
@@ -56,6 +57,29 @@ io.on('connection', (socket) => {
         console.log('User disconnected');
     });
 });
+
+function sendToRoom(roomName, msg){
+    io.in(roomName).emit('receive', msg);
+}
+
+/*io.on('connection', (socket) => {
+    console.log(`A user is connected:`);   
+
+    const roomName = `chatroom ${socket.request._query['chat']}`;
+
+    socket.join('roomName');
+    //When sending data
+    socket.on('chat message', msg => {
+        console.log(`${socket.request._query['username']} : ${msg}`);
+        //socket.broadcast.to(roomName).emit('receive', `${socket.request._query['username']} : ${msg}`);
+        socket.in('roomName').emit('receive', `${socket.request._query['username']} : ${msg}`);
+    });
+
+    //When user disconnected
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+});*/
 
 //Handle unexpected error
 process.on('unhandledRejection', err => {

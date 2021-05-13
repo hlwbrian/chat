@@ -44,7 +44,10 @@
             <h3>Leave Chat</h3>
             <form action="" id="leaveChat">
                 <button type="submit">Leave</button>
-            </form>            
+            </form>   
+            
+            <h3>Chat record</h3>
+            <ul id="chatRecord"></ul>
         </div>      
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -61,7 +64,7 @@
             var data = {
                 currentChatID : urlParams.get('chatroom')
             }
-            
+
             $.ajax
             ({
                 type: "POST",
@@ -198,7 +201,7 @@
         });
 
         var currentUser = urlParams.get('user');
-        const socket = io({query: "username=" + currentUser}); 
+        const socket = io({query: {"username" : currentUser , 'chat' : urlParams.get('chatroom')}}); 
         
         var form = document.getElementById('form');
         var input = document.getElementById('input');
@@ -210,44 +213,10 @@
             input.value = '';
             }
         });
-
-        /*const socket = io(); 
-        var form = document.getElementById('form');
-        var input = document.getElementById('input');
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (input.value) {
-            socket.emit('chat message', input.value);
-            input.value = '';
-            }
+        
+        socket.on('receive', msg => {
+            $('#chatRecord').append(`<li>${msg}</li>`);
+            $("html, body").animate({ scrollTop: $(document).height() }, 1000);
         });
-
-        function printChatList(dataArr) {
-            var html = '<p>No chatroom found</p>';
-            if(dataArr.records.length > 0){
-                html = '<ul>';
-                    
-                for(var [key, value] of dataArr.records.entries()){
-                    html += '<li data-id="'+value._id+'" class="chatItem">' + value.chatroomName + '</li>';
-                }
-                html += '</ul>';
-            }
-
-            $('.chatList').append(html);
-        }
-
-        function printChatContent(dataArr) {
-            var html = '';
-            if(dataArr.record[0].details.length > 0){
-                html = '<ul>';
-                    
-                for(var [key, value] of dataArr.record[0].details.entries()){
-                    html += '<li>' + value.content + '</li>';
-                }
-                html += '</ul>';
-            }
-            $('#messages').append(html);
-        }*/      
     </script>
 </html>

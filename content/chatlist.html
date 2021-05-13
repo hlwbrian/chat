@@ -148,7 +148,7 @@
         });
 
         $('#chatlist li').click(function(){
-            window.location = '/chatroom.html?user='+$('.userID').text()+'&chatroom=' + $(this).attr('data-id');
+            window.location = '/chatroom.html?user='+ encodeURIComponent($('.userID').text()) +'&chatroom=' + $(this).attr('data-id');
         });
     </script>
 </html>
