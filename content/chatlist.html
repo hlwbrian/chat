@@ -70,11 +70,18 @@
                         for(var i = 0; i < data.records.length; i++){                            
                             html += '<li data-id="'+data.records[i].chatID+'">' + 
                             'Chatroom name : ' + data.records[i]['chatroomName'] + '<br/>';
-                            
+
                             if(data.records[i].conversations.length > 0){
-                                datetime = new Date(data.records[i].conversations[i]['timestamp']);
-                                datetimeFormat = datetime.getFullYear() + '/' + datetime.getMonth() + '/' + datetime.getDate() + ' ' + datetime.getMinutes() + ':' + datetime.getSeconds();
-                                html += data.records[i].conversations[i]['message'] + ' ' + datetimeFormat;
+                                let message, timestamp;
+                                try{
+                                    message = data.records[i].conversations[i]['message'];
+                                    timestamp = data.records[i].conversations[i]['timestamp'];
+                                }catch{
+                                    message = '';
+                                    timestamp = '';
+                                }
+
+                                html += message + ' ' + timestamp;
                             }
                             
                             html += '</li>';
