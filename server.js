@@ -46,25 +46,40 @@ app.get('/', (req, res) => {
 //Create socket listener
 //TODO create chat controller file
 io.on('connection', function(socket) {
-    const roomName = `chatroom ${socket.request._query['chat']}`;
+    //If user is in chatroom list
+    if(socket.request._query['page'] === 'chatlist'){
+        let rooms = socket.request._query['chat'].split(',');
 
-    socket.join(roomName);
-    socket.on('chat message', msg => {
-        const resultMsg = msg;
-        let userID = socket.request._query['username'].split('#')[1];
-        sendToRoom(roomName, userID, resultMsg);
-    });
+        for(let value of rooms){
+            let roomName = `chatroom ${value}`;
+            socket.join(roomName);
+        }
+    }
+    //if user is in chatroom inner page
+    else{
+        const roomName = `chatroom ${socket.request._query['chat']}`;
+        socket.join(roomName);
 
+        socket.on('chat message', msg => {
+            const resultMsg = msg;
+            let userID = socket.request._query['username'].split('#')[1];
+            sendToRoom(roomName, userID, resultMsg);
+        });
+    }
+    
     //When user disconnected
     socket.on('disconnect', () => {
         console.log('User disconnected');
     });
 });
 
+//function sendToList()
+
 function sendToRoom(roomName, userID, msg){
     //save to db before save send
     //TODO update url path
     let roomID = roomName.split(' ')[1];
+    let timestamp = '';
 
     axios.post('http://localhost:3000/chat/save', {
         chatID : roomID,
@@ -75,17 +90,17 @@ function sendToRoom(roomName, userID, msg){
     .then(function (response) {
         // handle success
         console.log(response.data.msg);
+        timestamp = response.data.timestamp;
+
+        //send data
+        io.in(roomName).emit('receive', msg);
+        io.in(roomName).emit('chatroom list update', `${roomName}#${msg}#${timestamp}`);
     })
     .catch(function (error) {
         // handle error
         console.log(error);
     })
-
-    //send data
-    io.in(roomName).emit('receive', msg);
 }
-
-
 
 //Handle unexpected error
 process.on('unhandledRejection', err => {

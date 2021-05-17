@@ -18,6 +18,7 @@ const chatSchema = mongoose.Schema({
             minlength: 1,
             maxlength: 255
         },
+        read: [String], //User.userID
         timestamp: {
             type: Date,
             required: [true, 'A message must has a timestamp']           

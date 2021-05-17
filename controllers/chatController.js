@@ -56,7 +56,11 @@ exports.getConversation = catchAsync(async (req, res, next) => {
     chatID: req.chat.currentChatID
   };
 
+  //get conversation
   const conversations = await Chat.find(data).select({"conversations" : 1, 'chatroomName' : 1, 'members': 1});
+
+  //set all the conversation read
+  const updateRead = await Chat.updateMany({chatID: req.chat.currentChatID}, { $addToSet : {'conversations.$[].read' : req.user.userID }});
 
   if(conversations){
     res.status(200).json({
@@ -68,7 +72,6 @@ exports.getConversation = catchAsync(async (req, res, next) => {
       msg: 'failed'
     });
   }
-
 });
 
 exports.saveMessage = catchAsync(async (req, res, next) => {
@@ -80,15 +83,14 @@ exports.saveMessage = catchAsync(async (req, res, next) => {
       timestamp: timestamp
     }
     const chatData = await Chat.findOneAndUpdate({chatID: req.body.chatID}, {$push : {conversations : dataObj}});
-    console.log(chatData);
-
-    res.status(200).json({
-      status: 'success',
-      msg: 'added'
-    });
-    /*if(chatData){
-      
-    }*/
+    
+    if(chatData){
+        res.status(200).json({
+          status: 'success',
+          msg: 'added',
+          timestamp: timestamp
+        });
+    }
   }else{
     res.status(404).json({
       msg: 'failed'

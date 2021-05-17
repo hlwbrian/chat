@@ -5,7 +5,6 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Chat - Chatrooms list</title>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     </head>
     <body>
         <div id="chatlistPage">
@@ -39,8 +38,13 @@
             </form>
         </div>
     </body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         //common function
+        var currentUser;
+        var allChannel = [];
+
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
@@ -63,14 +67,18 @@
                     $('.phone').text(data.request.phone);
                     $('.email').text(data.request.email);
                     $('.userID').text(data.request.username + '#' + data.request.userID);
+                    currentUser = data.request.username + '#' + data.request.userID;
 
                     //insert chatlist data
                     if(data.records.length > 0){
                         var html = '', datetime, datetimeFormat;
                         for(var i = 0; i < data.records.length; i++){                            
-                            html += '<li data-id="'+data.records[i].chatID+'">' + 
+                            html += '<li data-id="'+data.records[i].chatID+'" id="chatroom'+data.records[i].chatID+'">' + 
                             'Chatroom name : ' + data.records[i]['chatroomName'] + '<br/>';
-
+                                
+                            //for socket
+                            allChannel.push(data.records[i].chatID);
+                           
                             if(data.records[i].conversations.length > 0){
                                 let message, timestamp;
                                 try{
@@ -81,7 +89,7 @@
                                     timestamp = '';
                                 }
 
-                                html += message + ' ' + timestamp;
+                                html += '<span>' + message + ' ' + timestamp + '</span>';
                             }
                             
                             html += '</li>';
@@ -157,5 +165,16 @@
         $('#chatlist li').click(function(){
             window.location = '/chatroom.html?user='+ encodeURIComponent($('.userID').text()) +'&chatroom=' + $(this).attr('data-id');
         });
+
+        const socket = io({query: {"username" : currentUser , 'chat' : allChannel, 'page' : 'chatlist'}}); 
+        socket.on('chatroom list update', msg => {
+            var roomName = msg.split('#')[0];
+            var message = msg.split('#')[1];
+            var timestamp = msg.split('#')[2];
+            
+            $('#chatroom47 span').text(message +　' ' + timestamp);
+            $('#chatroom47').addClass('unread');
+        });
     </script>
+    
 </html>

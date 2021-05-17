@@ -201,7 +201,7 @@
         });
 
         var currentUser = urlParams.get('user');
-        const socket = io({query: {"username" : currentUser , 'chat' : urlParams.get('chatroom')}}); 
+        const socket = io({query: {"username" : currentUser , 'chat' : urlParams.get('chatroom'), 'page' : 'chatroom'}}); 
         
         var form = document.getElementById('form');
         var input = document.getElementById('input');
