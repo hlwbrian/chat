@@ -50,8 +50,9 @@ io.on('connection', function(socket) {
 
     socket.join(roomName);
     socket.on('chat message', msg => {
-        const resultMsg = `${socket.request._query['username']} : ${msg}`;
-        sendToRoom(roomName, resultMsg);
+        const resultMsg = msg;
+        let userID = socket.request._query['username'].split('#')[1];
+        sendToRoom(roomName, userID, resultMsg);
     });
 
     //When user disconnected
@@ -60,20 +61,31 @@ io.on('connection', function(socket) {
     });
 });
 
-function sendToRoom(roomName, msg){
+function sendToRoom(roomName, userID, msg){
+    //save to db before save send
+    //TODO update url path
+    let roomID = roomName.split(' ')[1];
+
+    axios.post('http://localhost:3000/chat/save', {
+        chatID : roomID,
+        msg: msg,
+        userID: userID,
+        serverSecret: '5sa9gkj#7w'
+    })
+    .then(function (response) {
+        // handle success
+        console.log(response.data.msg);
+    })
+    .catch(function (error) {
+        // handle error
+        console.log(error);
+    })
+
+    //send data
     io.in(roomName).emit('receive', msg);
 }
 
-//axios testing
-axios.get('http://localhost:3000/users/utest')
-  .then(function (response) {
-    // handle success
-    console.log(response.data.msg);
-  })
-  .catch(function (error) {
-    // handle error
-    console.log(error);
-  })
+
 
 //Handle unexpected error
 process.on('unhandledRejection', err => {

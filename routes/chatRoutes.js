@@ -4,6 +4,11 @@ const authController = require('./../controllers/authController.js');
 
 const router = express.Router();
 
+//Only call by server
+router
+    .route('/save')
+    .post(chatController.saveMessage);
+
 //Protect all routes with authController.protec
 router.use(authController.protect);
 

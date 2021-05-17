@@ -12,11 +12,6 @@ router
     .route('/login')
     .post(authController.login);
 
-//TODO remove
-router
-    .route ('/utest')
-    .get(userController.utest);
-
 //Protect all routes with authController.protec
 router.use(authController.protect);
 

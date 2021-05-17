@@ -20,7 +20,7 @@ const chatSchema = mongoose.Schema({
         },
         timestamp: {
             type: Date,
-            default: Date.now()
+            required: [true, 'A message must has a timestamp']           
         }
     }],
     chatCreate: {

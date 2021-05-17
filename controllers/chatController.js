@@ -35,7 +35,8 @@ exports.createChat = catchAsync(async (req, res, next) => {
 
 exports.getChat = catchAsync(async (req, res, next) => {
   const chatID = req.user.chatrooms;
-  const records = await Chat.find({ 'chatID': { $in: chatID } }, {'conversations' : {$slice: 1} });
+  const records = await Chat.find({ 'chatID': { $in: chatID } }, {'conversations' : {$slice: -1} });
+  
   const userInfo = {
     username : req.user.username,
     email : req.user.email,
@@ -68,6 +69,31 @@ exports.getConversation = catchAsync(async (req, res, next) => {
     });
   }
 
+});
+
+exports.saveMessage = catchAsync(async (req, res, next) => {
+  if(req.body.serverSecret === '5sa9gkj#7w'){
+    let timestamp = new Date();
+    let dataObj = {
+      sender: req.body.userID,
+      message: req.body.msg,
+      timestamp: timestamp
+    }
+    const chatData = await Chat.findOneAndUpdate({chatID: req.body.chatID}, {$push : {conversations : dataObj}});
+    console.log(chatData);
+
+    res.status(200).json({
+      status: 'success',
+      msg: 'added'
+    });
+    /*if(chatData){
+      
+    }*/
+  }else{
+    res.status(404).json({
+      msg: 'failed'
+    });
+  }
 });
 
 exports.addMember = catchAsync(async (req, res, next) => {
