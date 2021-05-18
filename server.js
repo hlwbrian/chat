@@ -89,7 +89,6 @@ function sendToRoom(roomName, userID, msg){
     })
     .then(function (response) {
         // handle success
-        console.log(response.data.msg);
         timestamp = response.data.timestamp;
 
         //send data

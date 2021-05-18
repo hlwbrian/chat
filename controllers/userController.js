@@ -86,5 +86,21 @@ exports.addImage = catchAsync(async (req, res, next) => {
                 res.redirect(backURL + '&uploadImg=' + imageName);
             }     
         });
+    }else if(req.files.sendImage){
+        image = req.files.sendImage;
+        imageName = image.md5 + '.' + image.mimetype.split('/')[1];
+        uploadPath = appDir + '/content/imgDB/' + imageName;
+
+        //upload function
+        image.mv(uploadPath, err => {
+            if(err){
+                res.status(500).json({
+                    msg: 'something wrong'
+                });
+            }else{
+                backURL=req.header('Referer') || '/';
+                res.redirect(backURL + '&sendImage=' + imageName);
+            }     
+        });
     }
 });

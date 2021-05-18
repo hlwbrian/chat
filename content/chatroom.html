@@ -41,6 +41,19 @@
                 <input type="text" required id="chatroomName" minlength="1" maxlength="32">
                 <button type="submit">Change</button>
             </form>
+            
+            <h3>Chat record</h3>
+            <ul id="chatRecord"></ul>
+
+            <h3>Send image</h3>
+            <form id="sendImage" 
+                action='/users/addImage' 
+                method='post' 
+                encType="multipart/form-data">
+                <input name="sendImage" type="file" />
+                <button type="submit">Send</button>
+            </form>
+
 
             <h3>Change chatroom icon</h3>
             <form id="fileUpload" 
@@ -55,9 +68,6 @@
             <form action="" id="leaveChat">
                 <button type="submit">Leave</button>
             </form>   
-            
-            <h3>Chat record</h3>
-            <ul id="chatRecord"></ul>
         </div>      
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -99,11 +109,20 @@
                     $('#icon').attr('src', '/imgDB/' + icon);
                     if(content.length > 0){
                         for(var value of content){
-                            html += '<li>' +
-                                'sender' + value.sender + 
-                                'message' + value.message +
-                                'timestamp' + value.timestamp +
-                            '</li>';
+                            if( (/[a-z0-9].jpg|.png/).test(value.message) ){
+                                html += '<li>' +
+                                    'sender' + value.sender + 
+                                    'timestamp' + value.timestamp +
+                                    '<img src="/imgDB/'+value.message+'" alt="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();">' +
+                                    '<span style="display:none">' +value.message+ '</span>';
+                                '</li>';
+                            }else{
+                                html += '<li>' +
+                                    'sender' + value.sender + 
+                                    'timestamp' + value.timestamp +
+                                    'message' + value.message +                                   
+                                '</li>';
+                            } 
                         }
                         
                         $('#messages').append(html);
@@ -254,14 +273,29 @@
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             if (input.value) {
-            socket.emit('chat message', input.value);
-            input.value = '';
+                socket.emit('chat message', input.value);
+                input.value = '';
             }
         });
         
         socket.on('receive', msg => {
-            $('#chatRecord').append(`<li>${msg}</li>`);
+            if( (/[a-z0-9].jpg|.png/).test(msg) ){
+                $('#chatRecord').append(`<li><img src="/imgDB/${msg}" onError="$(this).hide(); $(this).parent().find(\'span\').show(); "><span style="display:none">${msg}</span></li>`);
+            }else{
+                $('#chatRecord').append(`<li>${msg}</li>`);
+            }
             $("html, body").animate({ scrollTop: $(document).height() }, 1000);
         });
+
+        var sendImg = urlParams.get('sendImage');
+        var chatroom = urlParams.get('chatroom');
+        
+        if(sendImg){
+            console.log(sendImg);
+            input.value = sendImg;
+
+            $('#form button').trigger('click');
+            history.pushState(null, '', '/chatroom.html?user=' + encodeURIComponent(currentUser) + '&chatroom=' + chatroom);
+        }
     </script>
 </html>

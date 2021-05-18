@@ -83,6 +83,9 @@ exports.saveMessage = catchAsync(async (req, res, next) => {
       message: req.body.msg,
       timestamp: timestamp
     }
+
+    if(req.body.isMessage) dataObj.isMessage = req.body.isMessage;
+    
     const chatData = await Chat.findOneAndUpdate({chatID: req.body.chatID}, {$push : {conversations : dataObj}});
     
     if(chatData){
