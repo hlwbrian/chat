@@ -58,7 +58,7 @@ exports.getConversation = catchAsync(async (req, res, next) => {
   };
 
   //get conversation
-  const conversations = await Chat.find(data).select({"conversations" : 1, 'chatroomName' : 1, 'members': 1});
+  const conversations = await Chat.find(data).select({"conversations" : 1, 'chatroomName' : 1, 'members': 1, 'icon' : 1});
 
   //set all the conversation read
   const updateRead = await Chat.updateMany({chatID: req.chat.currentChatID}, { $addToSet : {'conversations.$[].read' : req.user.userID }});
@@ -184,5 +184,20 @@ exports.leaveChat = catchAsync(async (req, res, next) => {
       status: 'success',
       msg: 'chat deleted'
     });
+  }
+});
+
+exports.changeIcon = catchAsync(async (req, res, next) => {
+  const updateChatIcon = await Chat.findOneAndUpdate({chatID : req.chat.currentChatID}, {icon: req.body.icon});
+
+  if(updateChatIcon){
+    res.status(200).json({
+      msg: 'success',
+      icon: req.body.icon
+    });
+  }else{
+    res.status(404).json({
+      msg : 'failed'
+    })
   }
 });

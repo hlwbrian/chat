@@ -27,6 +27,10 @@ const chatSchema = mongoose.Schema({
     chatCreate: {
         type: Date,
         default: Date.now()
+    },
+    icon: {
+        type: String,
+        default: 'default_chatroom.png'
     }
 });
 

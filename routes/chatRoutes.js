@@ -22,6 +22,7 @@ router
 
 //secureChat save current chat ID in req.currentChatID
 router.use(authController.secureChat);
+
 router
     .route('/getConversation')
     .post(chatController.getConversation);
@@ -37,5 +38,9 @@ router
 router
     .route('/leave')
     .patch(chatController.leaveChat);
+
+ router
+    .route('/changeIcon')
+    .post(chatController.changeIcon);
 
 module.exports = router;

@@ -22,6 +22,7 @@
                 <h3 id="header"></h3>
                 <ul id="members"></ul>
                 <ul id="messages"></ul>
+                <ul><img id="icon"/></ul>
                 <form id="form" action="">
                     <input id="input" autocomplete="off" /><button>Send</button>
                 </form>
@@ -39,6 +40,15 @@
             <form action="" id="changeChatroom">
                 <input type="text" required id="chatroomName" minlength="1" maxlength="32">
                 <button type="submit">Change</button>
+            </form>
+
+            <h3>Change chatroom icon</h3>
+            <form id="fileUpload" 
+                action='/users/addImage' 
+                method='post' 
+                encType="multipart/form-data">
+                <input name="chatroomImage" type="file" />
+                <button type="submit">Upload</button>
             </form>
 
             <h3>Leave Chat</h3>
@@ -82,9 +92,11 @@
                     let chatroomName = data.content[0].chatroomName;
                     let content = data.content[0].conversations;
                     let members = data.content[0].members;
+                    let icon = data.content[0].icon;
                     let html = '';
                     
                     $('#header').text(chatroomName);
+                    $('#icon').attr('src', '/imgDB/' + icon);
                     if(content.length > 0){
                         for(var value of content){
                             html += '<li>' +
@@ -107,6 +119,39 @@
                     $('#members').append(html);
                 }
             });
+
+            var urlParams = new URLSearchParams(window.location.search);
+            var uploadImg = urlParams.get('uploadImg');
+            var chatroom = urlParams.get('chatroom');
+            var user= urlParams.get('user');
+
+            if(uploadImg){      
+                var data = {
+                    currentChatID : urlParams.get('chatroom'),
+                    icon: uploadImg
+                }    
+
+                $.ajax
+                ({
+                    type: "POST",
+                    url: "/chat/changeIcon",
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    async: false,
+                    data: JSON.stringify(data),
+                    headers: {
+                        "authorization": "Bearer " + getCookie('chatJWT')
+                    },
+                    success:function(data) {
+                        $('#icon').attr('src', '/imgDB/' + data.icon);
+                    },
+                    error:function(data){
+                        console.log(data);
+                    }
+                });
+
+                history.pushState(null, '', '/chatroom.html?user=' + encodeURIComponent(user) + '&chatroom=' + chatroom);
+            }
         })();
 
         $('.goBack').click(function(){
