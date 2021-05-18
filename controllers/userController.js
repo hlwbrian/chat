@@ -1,5 +1,6 @@
 const User = require('./../models/userModel');
 const Chat = require('./../models/chatModel');
+const Image = require('./../models/imageModel');
 const path = require('path');
 const catchAsync = require('./../utils/catchAsync');
 
@@ -31,11 +32,12 @@ exports.update = catchAsync(async (req, res, next) => {
 });
 
 exports.changeIcon = catchAsync(async (req, res, next) => {
-    console.log(req.body.icon);
     //find users
     const updatedIcon = await User.updateOne({userID: req.user.userID}, {icon: req.body.icon});
+    //Add image name into Image collection
+    const addImage = await Image.create({name : req.body.icon});
 
-    if(updatedIcon){
+    if(updatedIcon && addImage){
         res.status(201).json({
             status: 'success',
             message: 'Icon updated',

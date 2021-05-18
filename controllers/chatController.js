@@ -34,7 +34,6 @@ exports.createChat = catchAsync(async (req, res, next) => {
 });
 
 exports.getChat = catchAsync(async (req, res, next) => {
-  console.log(req.user);
   const chatID = req.user.chatrooms;
   const records = await Chat.find({ 'chatID': { $in: chatID } }, {'conversations' : {$slice: -1} });
 
