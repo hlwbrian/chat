@@ -14,6 +14,7 @@
                 <p class="email"></p>
                 <p class="phone"></p>
                 <p class="userID"></p>
+                <img class="icon"/>
             </div>
 
             <!-- Chatroom list -->
@@ -35,6 +36,15 @@
                 <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-z0-9]+" id="update-username" placeholder="username: Eng small letter & number only (Characters: Max: 32, Min: 1)"></input>
                 <input required type="password" name="password" minlength="6" maxlength="16" id="password" placeholder="Password: (Characters: Max: 16, Min: 6)">
                 <button type="submit">confirm</button>
+            </form>
+
+
+            <form id="fileUpload" 
+                action='/users/addImage' 
+                method='post' 
+                encType="multipart/form-data">
+                <input name="profileImage" type="file" />
+                <button type="submit">Upload</button>
             </form>
         </div>
     </body>
@@ -67,6 +77,7 @@
                     $('.phone').text(data.request.phone);
                     $('.email').text(data.request.email);
                     $('.userID').text(data.request.username + '#' + data.request.userID);
+                    $('.icon').attr("src", '/imgDB/' + data.request.icon);
                     currentUser = data.request.username + '#' + data.request.userID;
 
                     //insert chatlist data
@@ -95,11 +106,39 @@
                             html += '</li>';
                         }
                         
-
                         $('#chatlist').append(html);
                     }
                 }
             });
+
+            var urlParams = new URLSearchParams(window.location.search);
+            var uploadImg = urlParams.get('uploadImg');
+
+            if(uploadImg){      
+                var data = {
+                    icon: uploadImg
+                }    
+                $.ajax
+                ({
+                    type: "POST",
+                    url: "/users/changeIcon",
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    async: false,
+                    data: JSON.stringify(data),
+                    headers: {
+                        "authorization": "Bearer " + getCookie('chatJWT')
+                    },
+                    success:function(data) {
+                        $('.img').attr('src', '/imgDB/' + data.img);
+                    },
+                    error:function(data){
+                        console.log(data);
+                    }
+                });
+
+                history.pushState(null, '', '/chatlist.html');
+            }
         })();
 
         //Create chat
@@ -172,9 +211,8 @@
             var message = msg.split('#')[1];
             var timestamp = msg.split('#')[2];
             
-            $('#chatroom47 span').text(message +　' ' + timestamp);
-            $('#chatroom47').addClass('unread');
+            $('#chatroom'+roomName+' span').text(message +　' ' + timestamp);
+            $('#chatroom'+roomName).addClass('unread');
         });
     </script>
-    
 </html>

@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'A user must have a user password']
     },
+    icon : {
+        type: String,
+        default: 'default.png'
+    },
     resetToken: String
 });
 

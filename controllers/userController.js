@@ -1,5 +1,6 @@
 const User = require('./../models/userModel');
 const Chat = require('./../models/chatModel');
+const path = require('path');
 const catchAsync = require('./../utils/catchAsync');
 
 exports.update = catchAsync(async (req, res, next) => {
@@ -26,5 +27,46 @@ exports.update = catchAsync(async (req, res, next) => {
                 message: 'information updated'
             });
         }
+    }
+});
+
+exports.changeIcon = catchAsync(async (req, res, next) => {
+    console.log(req.body.icon);
+    //find users
+    const updatedIcon = await User.updateOne({userID: req.user.userID}, {icon: req.body.icon});
+
+    if(updatedIcon){
+        res.status(201).json({
+            status: 'success',
+            message: 'Icon updated',
+            img: req.body.icon
+        });
+    }else{
+        res.status(404).json({
+            status: 'failed',
+            message: 'Update failed'
+        });
+    }
+});
+
+exports.addImage = catchAsync(async (req, res, next) => {
+    let image, uploadPath;
+    let appDir = path.dirname(require.main.filename);
+
+    if(req.files.profileImage){
+        image = req.files.profileImage;
+        imageName = image.md5 + '.' + image.mimetype.split('/')[1];
+        uploadPath = appDir + '/content/imgDB/' + imageName;
+
+        //upload function
+        image.mv(uploadPath, err => {
+            if(err){
+                res.status(500).json({
+                    msg: 'something wrong'
+                });
+            }else{
+                res.redirect('/chatlist.html?uploadImg=' + imageName);
+            }     
+        });
     }
 });

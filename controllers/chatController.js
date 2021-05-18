@@ -34,6 +34,7 @@ exports.createChat = catchAsync(async (req, res, next) => {
 });
 
 exports.getChat = catchAsync(async (req, res, next) => {
+  console.log(req.user);
   const chatID = req.user.chatrooms;
   const records = await Chat.find({ 'chatID': { $in: chatID } }, {'conversations' : {$slice: -1} });
 
@@ -41,7 +42,8 @@ exports.getChat = catchAsync(async (req, res, next) => {
     username : req.user.username,
     email : req.user.email,
     phone : req.user.phoneNo,
-    userID : req.user.userID
+    userID : req.user.userID,
+    icon : req.user.icon
   }
 
   res.status(200).json({

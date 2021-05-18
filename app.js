@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const xss = require('xss-clean');
 const rateLimiter = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
+const fileUpload = require('express-fileupload');
 
 const app = express();
 const userRoutes = require('./routes/userRoutes');
@@ -29,6 +30,10 @@ app.use(cookieParser());
 
 // Serving static files
 app.use(express.static(`${__dirname}/content`));
+app.use(express.static(`${__dirname}/imgDB`));
+
+// use fileupload
+app.use(fileUpload());
 
 //Include all routes
 app.use('/users/', userRoutes);

@@ -12,11 +12,19 @@ router
     .route('/login')
     .post(authController.login);
 
+router
+    .route('/addImage')
+    .post(userController.addImage);
+
 //Protect all routes with authController.protec
 router.use(authController.protect);
 
 router
     .route('/update')
     .patch(userController.update);
+
+ router
+    .route('/changeIcon')
+    .post(userController.changeIcon);
 
 module.exports = router;
