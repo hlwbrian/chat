@@ -24,7 +24,7 @@
                 100% { transform: translateX(0px); }
             }
 
-            @keyframes login {
+            @keyframes fadeInTop {
                 0% { transform: translateY(-15px); opacity: 0; }
                 100% { transform: translateY(0px);  opacity: 100; }
             }
@@ -46,15 +46,16 @@
             .pageContainer { max-width: 950px; margin: 0 auto; margin-top: -25px; padding: 55px 15px; background-color: #f6fafb; border-radius: 10px; }
             .pageContainer div { width: 420px; margin: 0 auto;}
             .loginPage input { width: 350px;}
+            .errorMsg {font-size: 12px; color:brown;}
 
             /* Login */
-            .loginContainer { margin-top: 25px; padding: 0px 120px; animation-name: login; animation-duration: 1s;}
+            .loginContainer { margin-top: 25px; padding: 0px 120px; animation-name: fadeInTop; animation-duration: 1s;}
             .loginPage .loginBtn { width: 350px; margin: 0px; padding: 5px 0px; height: 35px; position: relative; margin-top: 15px;}
             .loginBtn .button {width: calc(50% - 25px); margin-right: 15px; font-size: 14px; border-color: #1c98f7; border-radius: 10px; background-color: #1c98f7; color : white; line-height: 35px; cursor: pointer; box-shadow: 1px 1px 10px black;}
             .button:hover {animation-name: customBTN; animation-duration: 0.5s; animation-fill-mode: forwards;}
             
             /* Signup */
-            .singupContainer {display: none;}
+            .singupContainer {display: none; animation-name: fadeInTop; animation-duration: 1s;}
 
             /* footer */
             .footer {margin-top: 50px; background-color: #000b21; width: 100%; padding: 35px 0px;}
@@ -91,20 +92,29 @@
                     <div class="errorMsg"></div>
                     <div class="loginBtn">
                         <button type="submit" class="loginSubmit button">submit</button>
-                        <button type="button" class="button">Register</button>
+                        <button type="button" class="register button">Register</button>
                     </div>
                 </form>
             </div>
             <div class="singupContainer">
-                <h2>Signup First!</h2>
+                <h2>Sign up</h2>
                 <form id="signupForm" action="">
-                    <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-z0-9]+" id="signup-username" placeholder="username: Eng small letter & number only (Characters: Max: 32, Min: 1)"></input>
-                    <input required type="password" name="password" minlength="6" maxlength="16" id="signup-password" placeholder="Password: (Characters: Max: 16, Min: 6)"></input>
-                    <labal id="confirmText">The password must be match</labal>
-                    <input required type="password" name="passwordConfirm"  minlength="6" maxlength="16" id="passwordConfirm" oninput="confirmCheck(this)" placeholder="Confirm your password: ..."></input>
-                    <input required type="email" name="email" id="email" placeholder="Email: ..."></input>
-                    <input required type="phone" name="phoneNo" id="phoneNo" placeholder="Phone: ..."></input>
-                    <button type="submit" disabled="true" id="signupBtn">submit</button>
+                    <p>Username:</p>
+                    <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-z0-9]+" id="signup-username" placeholder="Enter username"></input>
+                    <p>Password:</p>
+                    <input required type="password" name="password" minlength="6" maxlength="16" id="signup-password" placeholder="Enter password"></input>
+                    <p>Password confirm:</p>
+                    <input required type="password" name="passwordConfirm"  minlength="6" maxlength="16" id="passwordConfirm" oninput="confirmCheck(this)" placeholder="Enter password again"></input>
+                    <p>Email:</p>
+                    <input required type="email" name="email" id="email" placeholder="Enter email"></input>
+                    <p>Phone:</p>
+                    <input required type="tel" name="phoneNo" id="phoneNo" pattern="[9|8|5|2]{1}[0-9]{7}" placeholder="Enter phone"></input>
+                    
+                    <div class="errorMsg"></div>
+                    <div class="loginBtn">
+                        <button type="submit" class="button" id="signupBtn">submit</button>
+                        <button type="button" class="register button">Log in</button>
+                    </div>
                 </form>
             </div>    
         </div>
@@ -188,7 +198,7 @@
                         var fieldName = err.responseJSON.message.substring(err.responseJSON.message.lastIndexOf(':') + 1).trim();
                         if(fieldName === 'phoneNo') fieldName = 'phone number';
                         var errMsg = 'Please use another value for ' + fieldName;
-                        alert(errMsg);
+                        $('.singupContainer .errorMsg').html(errMsg);
                     }
                 },
                 success: function(data){
@@ -214,8 +224,8 @@
                 error: function(err){
                     console.log(err);
                     if(err.status === 404){
-                        var errMsg = 'Incorrect password or username';
-                        alert(errMsg);
+                        var errMsg = '*Incorrect password or username, please check again.';
+                        $('.loginContainer .errorMsg').html(errMsg);
                     }
                 },
                 success: function(){
@@ -238,5 +248,10 @@
                 $('#confirmText').show();
             }
         }
+
+        $('.register').click(function(){
+            $('.loginContainer').toggle();
+            $('.singupContainer').toggle();
+        });
     </script>
 </html>
