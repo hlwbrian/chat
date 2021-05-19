@@ -5,9 +5,23 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Chat - Chatrooms list</title>
+        <style>
+            /* Common */
+            * {font-family: Inter, sans-serif; margin: 0px;}
+            body {background-color: #1c98f7; margin: 0px;}    
+            .clear {clear: both;}
+            input { height: 35px; border-radius: 10px; border-color: #d2d2d7; }
+            input:focus { outline: none; border-color: #1c98f7; box-shadow: 0 0 0 2px #1c98f7;}
+            form p {margin: 20px 0px 2px 0px; font-size: 14px;}
+            ul {padding: 0px; margin-right: 55px;}
+            li {list-style: none;}
+
+            /* Body */
+            .chatlistContainer {background-color: white; max-width: 1280px; margin: 0 auto;}
+        </style>
     </head>
-    <body>
-        <div id="chatlistPage">
+    <body class="chatlistPage">
+        <div class="chatlistContainer">
             <!-- show personal info -->
             <h3>Personal Info:</h3>
             <div class="userInfo">
