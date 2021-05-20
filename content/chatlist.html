@@ -6,6 +6,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Chat - Chatrooms list</title>
         <style>
+            /* keyframes */
+            @keyframes changeColorBlue {
+                0% { background-color: #1c98f7;}
+                100% {background-color: #187bc7;}
+            }
+
             /* Common */
             * {font-family: Inter, sans-serif; margin: 0px;}
             body {background-color: #1c98f7; margin: 0px;}    
@@ -18,48 +24,86 @@
 
             /* Body */
             .chatlistContainer {background-color: white; max-width: 1280px; margin: 0 auto;}
+            .button {margin-right: 15px; font-size: 14px; border-color: #bbbfc2; border-radius: 10px; background-color: #1c98f7; color : white; line-height: 35px; cursor: pointer; box-shadow: 1px 1px 2px black;}
+            
+            /* user info bar */
+            .userInfo {padding: 20px 10px 0px 10px; border-bottom: 1px solid #EFEFEF;}
+            .userInfo .icon {height: 35px; width: 35px; border-radius: 50%;}
+            .userInfo .userID { font-size: 22px; font-weight: 500; vertical-align: top;  line-height: 35px; width: calc(100% - 113px); text-align:center; display: inline-block;}
+            .userInfo .moreInfo {display: none; margin: 0 auto; width: 350px;}
+            .userInfo .moreInfo h3 {border-top: 1px solid #EFEFEF; margin-top: 10px; padding-top: 10px;}
+            .userInfo .logout { float: right; line-height: 35px; display: inline-block; padding: 0px 8px; background-color: #1c98f7; color: white; cursor: pointer; border-radius: 15px;}
+            .userInfo .logout:hover {animation-name: changeColorBlue; animation-duration: 2s;}
+            .userInfo .moreBtn {font-size: 12px; text-align: center; margin-bottom: 3px; cursor: pointer;}
+
+            /* create chat */
+            .createChatBtn {display: block; text-align: center; color: blue; cursor: pointer; padding: 5px 0px;}
+            .createChatContainer {display: none; text-align: center; padding: 10px 0px;}
+
+            /* chatroom */
+            #chatlist {padding: 0px 15px; background-color: #f5f5f5; margin: 0px;}
+            #chatlist li {cursor: pointer;}
+            #chatlist .chatroom {padding : 15px 0px; border-bottom: 1px solid #e0e0e0;}
+            #chatlist .chatroom .icon {height: 35px; width: 35px; border-radius: 50%; margin-right: 15px;}
+            #chatlist .chatroom div {float: left;}
+            #chatlist .chatroom .right {width: calc(100% - 50px);}
+            #chatlist .chatroom .message, #chatlist .chatroom .timestamp {font-size: 14px; color: #5a5a5a;}
+            #chatlist .chatroom .timestamp {float: right;}
+            #chatlist .chatroom::after {clear: both; display: table; content: "";}
+            #chatlist span {vertical-align: top;}
+            #chatlist .roomName {display: inline-block; font-size: 14px; font-weight: bold;}
+
+            #chatlist .unread {border-top: 5px solid rgba(0, 0, 255, 0.774);}
         </style>
     </head>
     <body class="chatlistPage">
         <div class="chatlistContainer">
             <!-- show personal info -->
-            <h3>Personal Info:</h3>
             <div class="userInfo">
-                <p class="email"></p>
-                <p class="phone"></p>
-                <p class="userID"></p>
-                <img class="icon"/>
+                <img class="icon"/>  
+                <span class="userID"></span>
+                <div class="logout">Log Out</div>
+                <div class="moreBtn">more</div>
+
+                <div class="moreInfo">
+                    <p class="email"></p>
+                    <p class="phone"></p>
+                    
+                    <h3>Update Personal info</h3>
+                    <form id="fileUpload" 
+                        action='/users/addImage' 
+                        method='post' 
+                        encType="multipart/form-data">
+                        <input name="profileImage" type="file" />
+                        <button type="submit" class="button">Upload</button>
+                    </form>
+
+                    <!-- Update personal info -->
+                    <h3>Update username</h3>
+                    <form id="updateName">
+                        <p>Username:</p>
+                        <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-z0-9]+" id="update-username" placeholder="Enter username"></input>
+                        <p>Password:</p>
+                        <input required type="password" name="password" minlength="6" maxlength="16" id="password" placeholder="Enter password">
+                        <button type="submit" class="button">confirm</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- create chatroom -->
+            <p class="createChatBtn">New Chat</p>
+            <div class="createChatContainer">
+                <form id="createChat">
+                    <p>Add your friend's' ID: e.g. john#315</p>
+                    <input type="text" placeholder="john#315" pattern="[a-z0-9]+#[0-9]+" required id="username">
+                    <input type="text" placeholder="chatroom name" required id="chatroomName" minlength="1" maxlength="32">
+                    <button type="submit" class="button">create</button>
+                </form>
+                <div class="errorMsg"></div>
             </div>
 
             <!-- Chatroom list -->
-            <h3>Chatroom list</h3>
             <ul id="chatlist"></ul>
-
-            <!-- create chatroom -->
-            <h3>Create chat</h3>
-            <form id="createChat">
-                <p>Add your friend's' ID: e.g. john#315</p>
-                <input type="text" placeholder="john#315" pattern="[a-z0-9]+#[0-9]+" required id="username">
-                <input type="text" placeholder="chatroom name" required id="chatroomName" minlength="1" maxlength="32">
-                <button type="submit">create</button>
-            </form>
-
-            <!-- Update personal info -->
-            <h3>Update username</h3>
-            <form id="updateName">
-                <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-z0-9]+" id="update-username" placeholder="username: Eng small letter & number only (Characters: Max: 32, Min: 1)"></input>
-                <input required type="password" name="password" minlength="6" maxlength="16" id="password" placeholder="Password: (Characters: Max: 16, Min: 6)">
-                <button type="submit">confirm</button>
-            </form>
-
-
-            <form id="fileUpload" 
-                action='/users/addImage' 
-                method='post' 
-                encType="multipart/form-data">
-                <input name="profileImage" type="file" />
-                <button type="submit">Upload</button>
-            </form>
         </div>
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -75,6 +119,23 @@
             if (parts.length === 2) return parts.pop().split(';').shift();
         }
 
+        function formatDate(date){
+            if(date === '') return '';
+            var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+            hour = d.getHours();
+            minute = d.getMinutes();
+
+            if (month.length < 2) 
+                month = '0' + month;
+            if (day.length < 2) 
+                day = '0' + day;
+
+            return [year, month, day].join('-') + ' ' + hour + ':' + minute;
+        }
+
         //Load chat list
         (function init(){
             $.ajax
@@ -87,9 +148,10 @@
                     "authorization": "Bearer " + getCookie('chatJWT')
                 },
                 success:function(data) {
+                    console.log(data);
                     //insert user data
-                    $('.phone').text(data.request.phone);
-                    $('.email').text(data.request.email);
+                    $('.phone').text( 'Phone: ' + data.request.phone);
+                    $('.email').text( 'Email: ' + data.request.email);
                     $('.userID').text(data.request.username + '#' + data.request.userID);
                     $('.icon').attr("src", '/imgDB/' + data.request.icon);
                     currentUser = data.request.username + '#' + data.request.userID;
@@ -98,28 +160,23 @@
                     if(data.records.length > 0){
                         var html = '', datetime, datetimeFormat;
                         for(var i = 0; i < data.records.length; i++){                            
-                            html += '<li data-id="'+data.records[i].chatID+'" id="chatroom'+data.records[i].chatID+'">' + 
-                            'Chatroom name : ' + data.records[i]['chatroomName'] + '<br/>';
+                            html += '<li data-id="'+data.records[i].chatID+'" class="chatroom" id="chatroom'+data.records[i].chatID+'">' + 
+                                    '<div class="left"><img src="/imgDB/'+ data.records[i]['icon'] +'" class="icon" /></div>' +
+                                    '<div class="right"><span class="roomName">' + data.records[i]['chatroomName'] + '</span><br/>';
                                 
                             //for socket
                             allChannel.push(data.records[i].chatID);
-                           
                             if(data.records[i].conversations.length > 0){
                                 let message, timestamp;
-                                try{
-                                    message = data.records[i].conversations[i]['message'];
-                                    timestamp = data.records[i].conversations[i]['timestamp'];
-                                }catch{
-                                    message = '';
-                                    timestamp = '';
-                                }
+                                message = (!data.records[i].conversations[0].hasOwnProperty('message'))? '' : data.records[i].conversations[0]['message'];
+                                timestamp = (!data.records[i].conversations[0].hasOwnProperty('timestamp'))? '' : data.records[i].conversations[0]['timestamp'];
 
-                                html += '<span>' + message + ' ' + timestamp + '</span>';
+                                html += '<span class="message">' + message + '</span><span class="timestamp">' + formatDate(timestamp) + '</span></div>';
                             }
                             
                             html += '</li>';
                         }
-                        
+
                         $('#chatlist').append(html);
                     }
                 }
@@ -217,6 +274,20 @@
 
         $('#chatlist li').click(function(){
             window.location = '/chatroom.html?user='+ encodeURIComponent($('.userID').text()) +'&chatroom=' + $(this).attr('data-id');
+        });
+
+        $('.createChatBtn').click(function() {
+            $('.createChatContainer').toggle();
+        });
+
+        $('.logout').click(function(){
+            document.cookie = "chatJWT=; expires = Thu, 01 Jan 1970 00:00:00 GMT"
+            window.location = '/login.html';
+        });
+
+        $('.moreBtn').click(function() {
+            ($('.moreBtn').text() === 'more')? $('.moreBtn').text('less') : $('.moreBtn').text('more');
+            $('.moreInfo').toggle();
         });
 
         const socket = io({query: {"username" : currentUser , 'chat' : allChannel, 'page' : 'chatlist'}}); 
