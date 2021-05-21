@@ -157,13 +157,11 @@
                     currentUser = data.request.username + '#' + data.request.userID;
 
                     data.records.sort( (a, b) => {
-                        if(!a.conversations[0] || !b.conversations[0]) 
-                            return -1;
-                        else{
-                            let timeA = new Date(a.conversations[0].timestamp);
-                            let timeB = new Date(b.conversations[0].timestamp);
-                            return timeB - timeA;
-                        }                   
+                        let timeA, timeB;
+                        timeA = (a.conversations[0])? new Date(a.conversations[0].timestamp) : new Date(a.chatCreate);
+                        timeB = (b.conversations[0])? new Date(b.conversations[0].timestamp) : new Date(b.chatCreate);
+
+                        return timeB - timeA;                 
                     });   
 
                     //insert chatlist data
@@ -180,8 +178,7 @@
                                 
                                 let message, timestamp;
                                 message = (!data.records[i].conversations[0].hasOwnProperty('message'))? '' : data.records[i].conversations[0]['message'];
-                                timestamp = (!data.records[i].conversations[0].hasOwnProperty('timestamp'))? '' : data.records[i].conversations[0]['timestamp'];
-
+                                timestamp = (!data.records[i].conversations[0].hasOwnProperty('timestamp'))? data.records[i].chatCreate : data.records[i].conversations[0]['timestamp'];
                                 html += '<span class="message">' + message + '</span><span class="timestamp">' + formatDate(timestamp) + '</span></div>';
                             }
                             
