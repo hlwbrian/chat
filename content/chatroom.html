@@ -4,8 +4,34 @@
         <meta charset="utf-8" />
         <title>Chat - Chatlist</title>
         <style>
+            /* Common */
             body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-      
+            * {font-family: Inter, sans-serif; margin: 0px;}
+            body {background-color: white; margin: 0px;}    
+            .clear {clear: both;}
+            input { height: 35px; border-radius: 10px; border-color: #d2d2d7; }
+            input:focus { outline: none; border-color: #1c98f7; box-shadow: 0 0 0 2px #1c98f7;}
+            form p {margin: 20px 0px 2px 0px; font-size: 14px;}
+            ul {padding: 0px; margin-right: 55px;}
+            li {list-style: none;}
+
+            /* Page */
+            .chatroomInfo { padding: 15px; border-bottom: 1px solid #EFEFEF}
+            .chatroomInfo div {float: left;}
+            .chatroomInfo::after {content: ''; display: table; clear: both;}
+            .chatroomInfo .goBack {padding: 0px 15px 0px 0px; border-right: 1px solid black; cursor: pointer;}
+            .chatroomInfo .goBack img{ height: 35px;}
+            .chatroomInfo #icon {height: 35px; width: 35px; border-radius: 50%; float: right;}
+            .chatroomInfo #header {font-size: 24px; text-align: center; width: calc(100% - 120px);}
+            .chatroomInfo .chatroomName {width: calc(100% - 51px);}
+            .chatroomInfo .chatroomName * {float: left; margin: 0 auto;}
+            .chatroomInfo .chatroomName::after {content: ''; display: table; clear: both;}
+            .chatroomInfo .moreOption {display: none;}
+
+            /* Chatroom body */
+            .chatroom {min-height: 80vh; background-image: url('/imgDB/55a44e59618507debb99d95fc16b659a.png');}
+
+            /* Chat form */
             #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
             #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
             #input:focus { outline: none; }
@@ -18,32 +44,48 @@
     </head>
     <body>
         <div class="pageContainer">
-            <div class="chatroom">               
-                <h3 id="header"></h3>
-                <ul id="members"></ul>
-                <ul id="messages"></ul>
-                <ul><img id="icon"/></ul>
+            <div class="chatroomInfo">
+                <div class="goBack"><img src="/imgDB/back.svg" /></div>
+                <div class="chatroomName"><img id="icon"/><span id="header"></span></div>
+            
+                <div class="moreOption">
+                    <ul id="members"></ul>
+
+                    <h3>Add member</h3>
+                    <form action="" id="addMemberForm">
+                        <p>Add your friend's' ID: e.g. john#315</p>
+                        <input type="text" placeholder="john#315" pattern="[a-z0-9]+#[0-9]+" required id="username">
+                        <button type="submit">Add</button>
+                    </form>
+
+                    <h3>Change chatroom name</h3>
+                    <form action="" id="changeChatroom">
+                        <input type="text" required id="chatroomName" minlength="1" maxlength="32">
+                        <button type="submit">Change</button>
+                    </form>
+
+                    <h3>Change chatroom icon</h3>
+                    <form id="fileUpload" 
+                        action='/users/addImage' 
+                        method='post' 
+                        encType="multipart/form-data">
+                        <input name="chatroomImage" type="file" />
+                        <button type="submit">Upload</button>
+                    </form>
+
+                    <h3>Leave Chat</h3>
+                    <form action="" id="leaveChat">
+                        <button type="submit">Leave</button>
+                    </form>  
+                </div>    
+            </div>
+
+            <div class="chatroom"> 
+                <ul id="messages chatRecord"></ul>
                 <form id="form" action="">
                     <input id="input" autocomplete="off" /><button>Send</button>
                 </form>
             </div>
-            <p class="goBack">Go Back</p>
-
-            <h3>Add member</h3>
-            <form action="" id="addMemberForm">
-                <p>Add your friend's' ID: e.g. john#315</p>
-                <input type="text" placeholder="john#315" pattern="[a-z0-9]+#[0-9]+" required id="username">
-                <button type="submit">Add</button>
-            </form>
-
-            <h3>Change chatroom name</h3>
-            <form action="" id="changeChatroom">
-                <input type="text" required id="chatroomName" minlength="1" maxlength="32">
-                <button type="submit">Change</button>
-            </form>
-            
-            <h3>Chat record</h3>
-            <ul id="chatRecord"></ul>
 
             <h3>Send image</h3>
             <form id="sendImage" 
@@ -52,22 +94,7 @@
                 encType="multipart/form-data">
                 <input name="sendImage" type="file" />
                 <button type="submit">Send</button>
-            </form>
-
-
-            <h3>Change chatroom icon</h3>
-            <form id="fileUpload" 
-                action='/users/addImage' 
-                method='post' 
-                encType="multipart/form-data">
-                <input name="chatroomImage" type="file" />
-                <button type="submit">Upload</button>
-            </form>
-
-            <h3>Leave Chat</h3>
-            <form action="" id="leaveChat">
-                <button type="submit">Leave</button>
-            </form>   
+            </form>          
         </div>      
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
