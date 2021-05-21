@@ -46,14 +46,15 @@
             #chatlist .chatroom {padding : 15px 0px; border-bottom: 1px solid #e0e0e0;}
             #chatlist .chatroom .icon {height: 35px; width: 35px; border-radius: 50%; margin-right: 15px;}
             #chatlist .chatroom div {float: left;}
-            #chatlist .chatroom .right {width: calc(100% - 50px);}
+            #chatlist .chatroom .right{width: calc(100% - 50px);}
+            #chatlist .chatroom .halfWidthRight {width: calc(100% - 75px);}
             #chatlist .chatroom .message, #chatlist .chatroom .timestamp {font-size: 14px; color: #5a5a5a;}
             #chatlist .chatroom .timestamp {float: right;}
             #chatlist .chatroom::after {clear: both; display: table; content: "";}
             #chatlist span {vertical-align: top;}
             #chatlist .roomName {display: inline-block; font-size: 14px; font-weight: bold;}
-
-            #chatlist .unread {border-top: 5px solid rgba(0, 0, 255, 0.774);}
+            
+            #chatlist .unreadIcon {height: 14px; margin: 11px 3px; display: inline-block; width: 15px; background-color: #1569aa; border-radius: 50%;}
         </style>
     </head>
     <body class="chatlistPage">
@@ -148,7 +149,6 @@
                     "authorization": "Bearer " + getCookie('chatJWT')
                 },
                 success:function(data) {
-                    console.log(data);
                     //insert user data
                     $('.phone').text( 'Phone: ' + data.request.phone);
                     $('.email').text( 'Email: ' + data.request.email);
@@ -156,17 +156,28 @@
                     $('.icon').attr("src", '/imgDB/' + data.request.icon);
                     currentUser = data.request.username + '#' + data.request.userID;
 
+                    data.records.sort( (a, b) => {
+                        if(!a.conversations[0] || !b.conversations[0]) 
+                            return -1;
+                        else{
+                            let timeA = new Date(a.conversations[0].timestamp);
+                            let timeB = new Date(b.conversations[0].timestamp);
+                            return timeB - timeA;
+                        }                   
+                    });   
+
                     //insert chatlist data
                     if(data.records.length > 0){
                         var html = '', datetime, datetimeFormat;
                         for(var i = 0; i < data.records.length; i++){                            
                             html += '<li data-id="'+data.records[i].chatID+'" class="chatroom" id="chatroom'+data.records[i].chatID+'">' + 
-                                    '<div class="left"><img src="/imgDB/'+ data.records[i]['icon'] +'" class="icon" /></div>' +
+                                    '<div class="left"><span></span><img src="/imgDB/'+ data.records[i]['icon'] +'" class="icon" /></div>' +
                                     '<div class="right"><span class="roomName">' + data.records[i]['chatroomName'] + '</span><br/>';
-                                
+                                                                    
                             //for socket
                             allChannel.push(data.records[i].chatID);
                             if(data.records[i].conversations.length > 0){
+                                
                                 let message, timestamp;
                                 message = (!data.records[i].conversations[0].hasOwnProperty('message'))? '' : data.records[i].conversations[0]['message'];
                                 timestamp = (!data.records[i].conversations[0].hasOwnProperty('timestamp'))? '' : data.records[i].conversations[0]['timestamp'];
@@ -178,6 +189,16 @@
                         }
 
                         $('#chatlist').append(html);
+
+                        //add unread icon if the last message is not read
+                        for(var i = 0; i < data.records.length; i++){
+                            if(data.records[i].conversations.length > 0){
+                                if(!data.records[i].conversations[0].read.includes('' + data.request.userID)){
+                                    $('#chatroom'+data.records[i].chatID + ' .left span').addClass('unreadIcon');
+                                    $('#chatroom'+data.records[i].chatID + ' .right').addClass('halfWidthRight');
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -234,9 +255,12 @@
                 success:function(data) {
                     //insert chatlist data
                     var html='', datetime, datetimeFormat;
-                    html += '<li data-id="'+data.records.chatID+'">' + 
-                         'Chatroom name : ' + data.records['chatroomName'] + '</li>';
-                    $('#chatlist').append(html);
+                    html += '<li data-id="'+data.records.chatID+'" class="chatroom" id="chatroom'+data.records.chatID+'">' + 
+                            '<div class="left"><img src="/imgDB/'+ data.records['icon'] +'" class="icon" /></div>' +
+                            '<div class="right"><span class="roomName">' + data.records['chatroomName'] + '</span><br/>' +
+                            '</li>';
+                            
+                    $('#chatlist').prepend(html);
                 }
             });
         });
@@ -292,12 +316,20 @@
 
         const socket = io({query: {"username" : currentUser , 'chat' : allChannel, 'page' : 'chatlist'}}); 
         socket.on('chatroom list update', msg => {
-            var roomName = msg.split('#')[0];
+            var roomName = msg.split('#')[0].split(' ')[1];
             var message = msg.split('#')[1];
             var timestamp = msg.split('#')[2];
+            console.log(roomName)
+            $('#chatroom'+roomName+' .message').text(message);
+            $('#chatroom'+roomName+' .timestamp').text( formatDate(timestamp) );
             
-            $('#chatroom'+roomName+' span').text(message +　' ' + timestamp);
-            $('#chatroom'+roomName).addClass('unread');
+            $('#chatroom'+roomName + ' .left span').addClass('unreadIcon');
+            $('#chatroom'+roomName + ' .right').addClass('halfWidthRight');
+            //move the chat to the top
+            var originalItem = $('#chatroom'+roomName);
+            console.log(originalItem);
+            $('#chatroom'+roomName).remove();
+            $('#chatlist').prepend(originalItem);
         });
     </script>
 </html>
