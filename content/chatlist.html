@@ -14,7 +14,7 @@
 
             /* Common */
             * {font-family: Inter, sans-serif; margin: 0px;}
-            body {background-color: #1c98f7; margin: 0px;}    
+            body {background-color: #1c98f7; margin: 0px; height: 100vh}    
             .clear {clear: both;}
             input { height: 35px; border-radius: 10px; border-color: #d2d2d7; }
             input:focus { outline: none; border-color: #1c98f7; box-shadow: 0 0 0 2px #1c98f7;}
@@ -23,7 +23,7 @@
             li {list-style: none;}
 
             /* Body */
-            .chatlistContainer {background-color: white; max-width: 1280px; margin: 0 auto;}
+            .chatlistContainer {background-color: white; max-width: 1280px; margin: 0 auto; height: 100%;}
             .button {margin-right: 15px; font-size: 14px; border-color: #bbbfc2; border-radius: 10px; background-color: #1c98f7; color : white; line-height: 35px; cursor: pointer; box-shadow: 1px 1px 2px black;}
             
             /* user info bar */
@@ -293,7 +293,7 @@
             });
         });
 
-        $('#chatlist li').click(function(){
+        $('#chatlist').delegate( 'li', 'click', function(){
             window.location = '/chatroom.html?user='+ encodeURIComponent($('.userID').text()) +'&chatroom=' + $(this).attr('data-id');
         });
 
@@ -316,7 +316,7 @@
             var roomName = msg.split('#')[0].split(' ')[1];
             var message = msg.split('#')[1];
             var timestamp = msg.split('#')[2];
-            console.log(roomName)
+
             $('#chatroom'+roomName+' .message').text(message);
             $('#chatroom'+roomName+' .timestamp').text( formatDate(timestamp) );
             
@@ -324,7 +324,6 @@
             $('#chatroom'+roomName + ' .right').addClass('halfWidthRight');
             //move the chat to the top
             var originalItem = $('#chatroom'+roomName);
-            console.log(originalItem);
             $('#chatroom'+roomName).remove();
             $('#chatlist').prepend(originalItem);
         });

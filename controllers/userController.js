@@ -54,6 +54,8 @@ exports.changeIcon = catchAsync(async (req, res, next) => {
 exports.addImage = catchAsync(async (req, res, next) => {
     let image, uploadPath;
     let appDir = path.dirname(require.main.filename);
+    /*console.log('some testing');
+    console.log(req.body.file['name']);*/
 
     if(req.files.profileImage){
         image = req.files.profileImage;

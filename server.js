@@ -90,9 +90,9 @@ function sendToRoom(roomName, userID, msg){
     .then(function (response) {
         // handle success
         timestamp = response.data.timestamp;
-
+        
         //send data
-        io.in(roomName).emit('receive', msg);
+        io.in(roomName).emit('receive', `${msg}#${response.data.timestamp}#${userID}`);
         io.in(roomName).emit('chatroom list update', `${roomName}#${msg}#${timestamp}`);
     })
     .catch(function (error) {

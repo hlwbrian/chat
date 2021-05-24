@@ -16,6 +16,8 @@
             li {list-style: none;}
 
             /* Page */
+            .pageContainer {max-width: 950px; margin: 0 auto;}
+            .chatroom #form {max-width: 950px; margin: 0 auto;}
             .chatroomInfo { padding: 15px; border-bottom: 1px solid #EFEFEF}
             .chatroomInfo div {float: left;}
             .chatroomInfo::after {content: ''; display: table; clear: both;}
@@ -31,6 +33,12 @@
             /* Chatroom body */
             .chatroom {min-height: 80vh; background-image: url('/imgDB/55a44e59618507debb99d95fc16b659a.png');}
 
+            /* Message */
+            #messages .message { background: white; padding:20px; border-radius: 10px; display: inline-block; max-width: 42%;}
+            #messages li::after {clear: both; display: table; content: '';}
+            #messages .message .content {word-break: break-word;}
+            #messages .right {background: greenyellow; float: right;}
+
             /* Chat form */
             #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
             #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
@@ -39,10 +47,26 @@
       
             #messages { list-style-type: none; margin: 0; padding: 0; }
             #messages > li { padding: 0.5rem 1rem; }
-            #messages > li:nth-child(odd) { background: #efefef; }
         </style>
+        <script>
+            /*function allowDrop(ev) {
+                ev.preventDefault();
+            }
+
+            function drop(ev) {
+              ev.preventDefault();
+              var data = ev.dataTransfer.files;
+              var formData = new FormData()
+              fetch('/users/addImage', {
+                    method: 'POST',
+                    body: data
+              })
+                .then(() => console.log("file uploaded"))
+                .catch(reason => console.error(reason));
+            }*/
+        </script>
     </head>
-    <body>
+    <body ondrop="drop(event)" ondragover="allowDrop(event)">
         <div class="pageContainer">
             <div class="chatroomInfo">
                 <div class="goBack"><img src="/imgDB/back.svg" /></div>
@@ -81,7 +105,7 @@
             </div>
 
             <div class="chatroom"> 
-                <ul id="messages chatRecord"></ul>
+                <ul id="messages"></ul>
                 <form id="form" action="">
                     <input id="input" autocomplete="off" /><button>Send</button>
                 </form>
@@ -136,22 +160,23 @@
                     $('#icon').attr('src', '/imgDB/' + icon);
                     if(content.length > 0){
                         for(var value of content){
+                            var senderStyle = (urlParams.get('user').split('#')[1] === value.sender)? 'right' : 'left';
+
                             if( (/[a-z0-9].jpg|.png/).test(value.message) ){
                                 html += '<li>' +
-                                    'sender' + value.sender + 
-                                    'timestamp' + value.timestamp +
-                                    '<img src="/imgDB/'+value.message+'" alt="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();">' +
-                                    '<span style="display:none">' +value.message+ '</span>';
+                                    '<div class="sender">' + value.sender + '</div>' +
+                                    '<div class="timestamp">' + value.timestamp + '</div>' +
+                                    '<div class="img"><img src="/imgDB/'+value.message+'" alt="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                                    '<div class="hiddenMsg"><span style="display:none">' +value.message+ '</span></div>';
                                 '</li>';
                             }else{
-                                html += '<li>' +
-                                    'sender' + value.sender + 
-                                    'timestamp' + value.timestamp +
-                                    'message' + value.message +                                   
+                                html += '<li><div class="message '+senderStyle+'">' +
+                                    '<div class="sender">' + value.sender + '</div>' +
+                                    '<div class="timestamp">' + value.timestamp + '</div>' + 
+                                    '<div class="content">' + value.message + '</div>' +                                   
                                 '</li>';
                             } 
                         }
-                        
                         $('#messages').append(html);
                     }
 
@@ -306,10 +331,19 @@
         });
         
         socket.on('receive', msg => {
+            var message = msg.split('#')[0];
+            var timestamp = msg.split('#')[1];
+            var sender = msg.split('#')[2];
+            var senderStyle = (urlParams.get('user').split('#')[1] === sender)? 'right' : 'left';
+
             if( (/[a-z0-9].jpg|.png/).test(msg) ){
-                $('#chatRecord').append(`<li><img src="/imgDB/${msg}" onError="$(this).hide(); $(this).parent().find(\'span\').show(); "><span style="display:none">${msg}</span></li>`);
+                $('#message').append(`<li><img src="/imgDB/${msg}" onError="$(this).hide(); $(this).parent().find(\'span\').show(); "><span style="display:none">${msg}</span></li>`);
             }else{
-                $('#chatRecord').append(`<li>${msg}</li>`);
+                $('#messages').append('<li><div class="message '+senderStyle+'">' +
+                                    '<div class="sender">' + sender + '</div>' +
+                                    '<div class="timestamp">' + timestamp + '</div>' + 
+                                    '<div class="content">' + message + '</div>' +                                   
+                                '</li>');
             }
             $("html, body").animate({ scrollTop: $(document).height() }, 1000);
         });
@@ -318,7 +352,6 @@
         var chatroom = urlParams.get('chatroom');
         
         if(sendImg){
-            console.log(sendImg);
             input.value = sendImg;
 
             $('#form button').trigger('click');
