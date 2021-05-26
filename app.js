@@ -1,3 +1,4 @@
+/* IMPORT all library packages for the app */
 const express = require('express');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
@@ -7,16 +8,23 @@ const rateLimiter = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const fileUpload = require('express-fileupload');
 
+/* INIT express app */
 const app = express();
+
+/* IMPORT all routes */
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const errorControl = require('./controllers/errorController');
 
+/* PROTECT express app by setting various HTTP headers */
 //app.use(helmet());
+
+/* SHOW access info if it is developing environment */
 if(process.env.ENVIRONMENT === 'dev'){
     app.use(morgan('dev'));
 }
 
+/* LIMIT request number and times within a time range */
 const limit = rateLimiter({
     max: 100,
     windowMs: 60 * 60 * 1000,

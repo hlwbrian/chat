@@ -1,49 +1,54 @@
-const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const { Server } = require('socket.io');
 const axios = require('axios');
 
-//Unexpected error server starts
+/* HANDLE for unexpected error on server starts */
 process.on('uncaughtException', err => {
     console.log('Unexpected error on server starts');
     console.log(err.name, err.message);
     process.exit(1);
 });
 
-//import setting
+/* IMPORT config file for server */
 dotenv.config({path: './config.env'});
+//Set the port number for the server
 const port = process.env.PORT || 3000;
+
+/* IMPORT express app into the server */
 const app = require('./app');
 
-//connect to MongoDB Atlas
+/* CONNECT to MongoDB */
+//replace the connecting command password string with real password
 const DB = process.env.DB.replace(
     '<password>',
     process.env.DB_PASSWORD
 );
+//Connect to MongoDB
 mongoose
     .connect(DB, {
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useFindAndModify: false
+        useNewUrlParser: true, //Remove DeprecationWarning message on mongoose.connect()
+        useCreateIndex: true, //Remove DeprecationWarning: collection.ensureIndex is deprecated
+        useUnifiedTopology: true, //Remove Warning: Current Server Discovery and Monitoring engine is deprecated, and will be removed in a future version
+        useFindAndModify: false // Make Mongoose use findOneAndUpdate()
     })
     .then( () => {
         console.log('MongoDB connected');
     });
 
+/* START node.js server */    
 const server = app.listen(port, () => {
     console.log(`The server is running on port ${port}`);
 });
 
-//Create socket on server
-const io = new Server(server);
-
-//Return page
+/* SEND login page as default page */
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/content/login.html'); 
 });
 
 //Create socket listener
+const io = new Server(server);
+
 //TODO create chat controller file
 io.on('connection', function(socket) {
     //If user is in chatroom list
@@ -74,7 +79,6 @@ io.on('connection', function(socket) {
 });
 
 //function sendToList()
-
 function sendToRoom(roomName, userID, msg){
     //save to db before save send
     //TODO update url path
@@ -101,7 +105,7 @@ function sendToRoom(roomName, userID, msg){
     })
 }
 
-//Handle unexpected error
+/* HANDLE unexpected error on server runs */
 process.on('unhandledRejection', err => {
     console.log('unexpected error on run time');
     console.log(err.name, err.message);
