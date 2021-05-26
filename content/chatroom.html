@@ -35,6 +35,8 @@
 
             /* Message */
             #messages .message { background: white; padding:20px; border-radius: 10px; display: inline-block; max-width: 42%;}
+            #messages .messageImg {max-width: 100%;}
+            #messages .messageImg img{max-height: 240px;}
             #messages li::after {clear: both; display: table; content: '';}
             #messages .message .content {word-break: break-word;}
             #messages .right {background: greenyellow; float: right;}
@@ -49,21 +51,16 @@
             #messages > li { padding: 0.5rem 1rem; }
         </style>
         <script>
-            /*function allowDrop(ev) {
+            function allowDrop(ev) {
                 ev.preventDefault();
             }
 
             function drop(ev) {
-              ev.preventDefault();
-              var data = ev.dataTransfer.files;
-              var formData = new FormData()
-              fetch('/users/addImage', {
-                    method: 'POST',
-                    body: data
-              })
-                .then(() => console.log("file uploaded"))
-                .catch(reason => console.error(reason));
-            }*/
+                ev.preventDefault();
+                var data = ev.dataTransfer.files;
+                $('.sendImageInput')[0].files = data;
+                $('#sendImage button').trigger('click');
+            }
         </script>
     </head>
     <body ondrop="drop(event)" ondragover="allowDrop(event)">
@@ -116,7 +113,7 @@
                 action='/users/addImage' 
                 method='post' 
                 encType="multipart/form-data">
-                <input name="sendImage" type="file" />
+                <input name="sendImage" class="sendImageInput" type="file" />
                 <button type="submit">Send</button>
             </form>          
         </div>      
@@ -128,6 +125,23 @@
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        function formatDate(date){
+            if(date === '') return '';
+            var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+            hour = d.getHours();
+            minute = d.getMinutes();
+
+            if (month.length < 2) 
+                month = '0' + month;
+            if (day.length < 2) 
+                day = '0' + day;
+
+            return [year, month, day].join('-') + ' ' + hour + ':' + minute;
         }
 
         (function init() {
@@ -163,18 +177,18 @@
                             var senderStyle = (urlParams.get('user').split('#')[1] === value.sender)? 'right' : 'left';
 
                             if( (/[a-z0-9].jpg|.png/).test(value.message) ){
-                                html += '<li>' +
+                                html += '<li><div class="messageImg message  '+senderStyle+'">' +
                                     '<div class="sender">' + value.sender + '</div>' +
-                                    '<div class="timestamp">' + value.timestamp + '</div>' +
+                                    '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
                                     '<div class="img"><img src="/imgDB/'+value.message+'" alt="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
-                                    '<div class="hiddenMsg"><span style="display:none">' +value.message+ '</span></div>';
-                                '</li>';
+                                    '<div class="hiddenMsg"><span style="display:none">' +value.message+ '</span></div>' +
+                                '</div></li>';
                             }else{
                                 html += '<li><div class="message '+senderStyle+'">' +
                                     '<div class="sender">' + value.sender + '</div>' +
-                                    '<div class="timestamp">' + value.timestamp + '</div>' + 
+                                    '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' + 
                                     '<div class="content">' + value.message + '</div>' +                                   
-                                '</li>';
+                                '</div></li>';
                             } 
                         }
                         $('#messages').append(html);
@@ -329,7 +343,7 @@
                 input.value = '';
             }
         });
-        
+
         socket.on('receive', msg => {
             var message = msg.split('#')[0];
             var timestamp = msg.split('#')[1];
@@ -337,7 +351,12 @@
             var senderStyle = (urlParams.get('user').split('#')[1] === sender)? 'right' : 'left';
 
             if( (/[a-z0-9].jpg|.png/).test(msg) ){
-                $('#message').append(`<li><img src="/imgDB/${msg}" onError="$(this).hide(); $(this).parent().find(\'span\').show(); "><span style="display:none">${msg}</span></li>`);
+                $('#message').append('<li><div class="message '+senderStyle+'">' +
+                                    '<div class="sender">' + value.sender + '</div>' +
+                                    '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
+                                    '<div class="img"><img src="/imgDB/'+value.message+'" alt="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                                    '<div class="hiddenMsg"><span style="display:none">' +value.message+ '</span></div>' +
+                                    '</div></li>');
             }else{
                 $('#messages').append('<li><div class="message '+senderStyle+'">' +
                                     '<div class="sender">' + sender + '</div>' +
