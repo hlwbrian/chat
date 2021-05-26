@@ -153,7 +153,7 @@
                     $('.phone').text( 'Phone: ' + data.request.phone);
                     $('.email').text( 'Email: ' + data.request.email);
                     $('.userID').text(data.request.username + '#' + data.request.userID);
-                    $('.icon').attr("src", '/imgDB/' + data.request.icon);
+                    $('.icon').attr("src", '/content/imgDB/' + data.request.icon);
                     currentUser = data.request.username + '#' + data.request.userID;
 
                     data.records.sort( (a, b) => {
@@ -169,7 +169,7 @@
                         var html = '', datetime, datetimeFormat;
                         for(var i = 0; i < data.records.length; i++){                            
                             html += '<li data-id="'+data.records[i].chatID+'" class="chatroom" id="chatroom'+data.records[i].chatID+'">' + 
-                                    '<div class="left"><span></span><img src="/imgDB/'+ data.records[i]['icon'] +'" class="icon" /></div>' +
+                                    '<div class="left"><span></span><img src="/content/imgDB/'+ data.records[i]['icon'] +'" class="icon" /></div>' +
                                     '<div class="right"><span class="roomName">' + data.records[i]['chatroomName'] + '</span><br/>';
                                                                     
                             //for socket
@@ -219,7 +219,7 @@
                         "authorization": "Bearer " + getCookie('chatJWT')
                     },
                     success:function(data) {
-                        $('.img').attr('src', '/imgDB/' + data.img);
+                        $('.img').attr('src', '/content/imgDB/' + data.img);
                     },
                     error:function(data){
                         console.log(data);
@@ -253,7 +253,7 @@
                     //insert chatlist data
                     var html='', datetime, datetimeFormat;
                     html += '<li data-id="'+data.records.chatID+'" class="chatroom" id="chatroom'+data.records.chatID+'">' + 
-                            '<div class="left"><img src="/imgDB/'+ data.records['icon'] +'" class="icon" /></div>' +
+                            '<div class="left"><img src="/content/imgDB/'+ data.records['icon'] +'" class="icon" /></div>' +
                             '<div class="right"><span class="roomName">' + data.records['chatroomName'] + '</span><br/>' +
                             '</li>';
                             
@@ -294,7 +294,7 @@
         });
 
         $('#chatlist').delegate( 'li', 'click', function(){
-            window.location = '/chatroom.html?user='+ encodeURIComponent($('.userID').text()) +'&chatroom=' + $(this).attr('data-id');
+            window.location = '/content/chatroom.html?user='+ encodeURIComponent($('.userID').text()) +'&chatroom=' + $(this).attr('data-id');
         });
 
         $('.createChatBtn').click(function() {

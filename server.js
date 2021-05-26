@@ -40,7 +40,7 @@ const io = new Server(server);
 
 //Return page
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/content/login.html'); 
+    res.sendFile(__dirname + '/public/content/login.html'); 
 });
 
 //Create socket listener

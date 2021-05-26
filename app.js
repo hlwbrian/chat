@@ -29,7 +29,7 @@ app.use(mongoSanitize());
 app.use(cookieParser());
 
 // Serving static files
-app.use(express.static(`${__dirname}/content`));
+app.use(express.static(`${__dirname}/public`));
 app.use(express.static(`${__dirname}/imgDB`));
 
 // use fileupload
