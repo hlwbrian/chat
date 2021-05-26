@@ -31,7 +31,7 @@
             .chatroomInfo .moreOption {display: none;}
 
             /* Chatroom body */
-            .chatroom {min-height: 80vh; background-image: url('/content/imgDB/55a44e59618507debb99d95fc16b659a.png');}
+            .chatroom {min-height: 80vh; background-image: url('/content/images/55a44e59618507debb99d95fc16b659a.png');}
 
             /* Message */
             #messages .message { background: white; padding:20px; border-radius: 10px; display: inline-block; max-width: 42%;}
@@ -66,7 +66,7 @@
     <body ondrop="drop(event)" ondragover="allowDrop(event)">
         <div class="pageContainer">
             <div class="chatroomInfo">
-                <div class="goBack"><img src="/content/imgDB/back.svg" /></div>
+                <div class="goBack"><img src="/content/images/back.svg" /></div>
                 <div class="chatroomName"><img id="icon"/><span id="header"></span></div>
             
                 <div class="moreOption">
@@ -171,7 +171,7 @@
                     let html = '';
                     
                     $('#header').text(chatroomName);
-                    $('#icon').attr('src', '/content/imgDB/' + icon);
+                    $('#icon').attr('src', '/content/images/' + icon);
                     if(content.length > 0){
                         for(var value of content){
                             var senderStyle = (urlParams.get('user').split('#')[1] === value.sender)? 'right' : 'left';
@@ -180,7 +180,7 @@
                                 html += '<li><div class="messageImg message  '+senderStyle+'">' +
                                     '<div class="sender">' + value.sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
-                                    '<div class="img"><img src="/content/imgDB/'+value.message+'" alt="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                                    '<div class="img"><img src="/content/images/'+value.message+'" alt="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
                                     '<div class="hiddenMsg"><span style="display:none">' +value.message+ '</span></div>' +
                                 '</div></li>';
                             }else{
@@ -228,7 +228,7 @@
                         "authorization": "Bearer " + getCookie('chatJWT')
                     },
                     success:function(data) {
-                        $('#icon').attr('src', '/content/imgDB/' + data.icon);
+                        $('#icon').attr('src', '/content/images/' + data.icon);
                     },
                     error:function(data){
                         console.log(data);
@@ -354,7 +354,7 @@
                 $('#message').append('<li><div class="message '+senderStyle+'">' +
                                     '<div class="sender">' + value.sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
-                                    '<div class="img"><img src="/content/imgDB/'+value.message+'" alt="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                                    '<div class="img"><img src="/content/images/'+value.message+'" alt="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
                                     '<div class="hiddenMsg"><span style="display:none">' +value.message+ '</span></div>' +
                                     '</div></li>');
             }else{
