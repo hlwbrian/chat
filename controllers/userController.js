@@ -3,40 +3,48 @@ const Chat = require('./../models/chatModel');
 const Image = require('./../models/imageModel');
 const path = require('path');
 const catchAsync = require('./../utils/catchAsync');
+const AppError = require('../utils/appError');
 
-exports.update = catchAsync(async (req, res, next) => {
+//Update personal information for user
+exports.updateUserName = catchAsync(async (req, res, next) => {
     let username = req.body.username;
     let password = req.body.password;
     
-    //find users
+    //find current user
     const user = await User.findOne({userID : req.user.userID});
 
+    //check if the input password is corrected
     if(!user || !(await user.correctPassword(password, user.password))){
-        res.status(404).json({
-            status: 'failed',
-            message: 'Incorrect Username or Password'
-        })
+        return next(
+            new AppError('Incorrect password', 401)
+        );
     }else{
+        //update the username in user collection
         const updatedUser = await User.updateOne({userID: req.user.userID}, {username: username});
+
+        //update all the related chat to show new username
         const updateChatroom = await Chat.updateMany({members: req.user.username + '#' + req.user.userID}, 
                                                         {$set : { "members.$[element]" :  username + '#' + req.user.userID}},
                                                         {arrayFilters : [{ "element" : req.user.username + '#' + req.user.userID}]}
-                                                    )
+                                                    );
         if(updatedUser && updateChatroom){
             res.status(201).json({
                 status: 'success',
-                message: 'information updated'
+                message: 'user information updated'
             });
         }
     }
 });
 
-exports.changeIcon = catchAsync(async (req, res, next) => {
-    //find users
-    const updatedIcon = await User.updateOne({userID: req.user.userID}, {icon: req.body.icon});
+//Update user icon
+exports.changeUserIcon = catchAsync(async (req, res, next) => {
+
     //Add image name into Image collection
     const addImage = await Image.create({name : req.body.icon});
 
+    //find users and update the icon name
+    const updatedIcon = await User.updateOne({userID: req.user.userID}, {icon: req.body.icon});
+    
     if(updatedIcon && addImage){
         res.status(201).json({
             status: 'success',
@@ -44,63 +52,8 @@ exports.changeIcon = catchAsync(async (req, res, next) => {
             img: req.body.icon
         });
     }else{
-        res.status(404).json({
-            status: 'failed',
-            message: 'Update failed'
-        });
-    }
-});
-
-exports.addImage = catchAsync(async (req, res, next) => {
-    let image, uploadPath;
-    let appDir = path.dirname(require.main.filename);
-    
-    if(req.files.profileImage){
-        image = req.files.profileImage;
-        imageName = image.md5 + '.' + image.mimetype.split('/')[1];
-        uploadPath = appDir + '/public/content/images/' + imageName;
-
-        //upload function
-        image.mv(uploadPath, err => {
-            if(err){
-                res.status(500).json({
-                    msg: 'something wrong'
-                });
-            }else{
-                res.redirect('/chatlist.html?uploadImg=' + imageName);
-            }     
-        });
-    }else if(req.files.chatroomImage){
-        image = req.files.chatroomImage;
-        imageName = image.md5 + '.' + image.mimetype.split('/')[1];
-        uploadPath = appDir + '/public/content/images/' + imageName;
-
-        //upload function
-        image.mv(uploadPath, err => {
-            if(err){
-                res.status(500).json({
-                    msg: 'something wrong'
-                });
-            }else{
-                backURL=req.header('Referer') || '/';
-                res.redirect(backURL + '&uploadImg=' + imageName);
-            }     
-        });
-    }else if(req.files.sendImage){
-        image = req.files.sendImage;
-        imageName = image.md5 + '.' + image.mimetype.split('/')[1];
-        uploadPath = appDir + '/public/content/images/' + imageName;
-
-        //upload function
-        image.mv(uploadPath, err => {
-            if(err){
-                res.status(500).json({
-                    msg: 'something wrong'
-                });
-            }else{
-                backURL=req.header('Referer') || '/';
-                res.redirect(backURL + '&sendImage=' + imageName);
-            }     
-        });
+        return next(
+            new AppError('Update failed', 401)
+        );
     }
 });

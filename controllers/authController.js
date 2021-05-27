@@ -82,7 +82,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     }
     
     //If token is undefined then generate error message and status code
-    if(!!token){
+    if(!token || token === 'undefined'){
         return next(
             new AppError('You are not logged in! Please log in to get access.', 401)
         );
@@ -92,7 +92,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     
     const currentUser = await User.findById(decoded.id);
     //If user is undefined then generate error message and status code
-    if(!!currentUser) {
+    if(!currentUser) {
         return next(
             new AppError(
               'The user does not exist',

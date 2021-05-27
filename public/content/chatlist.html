@@ -209,8 +209,8 @@
                 }    
                 $.ajax
                 ({
-                    type: "POST",
-                    url: "/users/changeIcon",
+                    type: "PATCH",
+                    url: "/users/changeUserIcon",
                     contentType: 'application/json; charset=utf-8',
                     dataType: 'json',
                     async: false,
@@ -226,7 +226,7 @@
                     }
                 });
 
-                history.pushState(null, '', '/chatlist.html');
+                history.pushState(null, '', '/content/chatlist.html');
             }
         })();
 
@@ -272,7 +272,7 @@
             $.ajax
             ({
                 type: "PATCH",
-                url: "/users/update",
+                url: "/users/updateUserName",
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 async: false,
@@ -288,7 +288,7 @@
                     }
                 },
                 success:function(data) {
-                    window.location = '/chatlist.html';
+                    window.location = '/content/chatlist.html';
                 }
             });
         });
