@@ -58,7 +58,7 @@ exports.addImage = catchAsync(async (req, res, next) => {
     if(req.files.profileImage){
         image = req.files.profileImage;
         imageName = image.md5 + '.' + image.mimetype.split('/')[1];
-        uploadPath = appDir + '/content/imgDB/' + imageName;
+        uploadPath = appDir + '/public/content/images/' + imageName;
 
         //upload function
         image.mv(uploadPath, err => {
@@ -73,7 +73,7 @@ exports.addImage = catchAsync(async (req, res, next) => {
     }else if(req.files.chatroomImage){
         image = req.files.chatroomImage;
         imageName = image.md5 + '.' + image.mimetype.split('/')[1];
-        uploadPath = appDir + '/content/imgDB/' + imageName;
+        uploadPath = appDir + '/public/content/images/' + imageName;
 
         //upload function
         image.mv(uploadPath, err => {
@@ -89,7 +89,7 @@ exports.addImage = catchAsync(async (req, res, next) => {
     }else if(req.files.sendImage){
         image = req.files.sendImage;
         imageName = image.md5 + '.' + image.mimetype.split('/')[1];
-        uploadPath = appDir + '/content/imgDB/' + imageName;
+        uploadPath = appDir + '/public/content/images/' + imageName;
 
         //upload function
         image.mv(uploadPath, err => {

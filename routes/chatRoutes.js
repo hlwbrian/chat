@@ -9,7 +9,7 @@ router
     .route('/save')
     .post(chatController.saveMessage);
 
-//Protect all routes with authController.protec
+//Protect all routes with authController.protect
 router.use(authController.protect);
 
 router
