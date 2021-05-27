@@ -1,0 +1,108 @@
+/* Common */
+* {font-family: Inter, sans-serif; margin: 0px;}
+body {background-color: #1c98f7; margin: 0 auto; max-width: 1280px; }    
+.clear {clear: both;}
+input { height: 35px; border-radius: 10px; border-color: #d2d2d7; }
+input:focus { outline: none; border-color: #1c98f7; box-shadow: 0 0 0 2px #1c98f7;}
+form p {margin: 20px 0px 2px 0px; font-size: 14px;}
+ul {padding: 0px; margin-right: 55px;}
+li {list-style: none;}
+
+/* keyframes */
+@keyframes icon {
+    0% { transform: translateX(-10px); }
+    80% { transform: translateX(2px); }
+    100% { transform: translateX(0px); }
+}
+
+@keyframes fadeInTop {
+    0% { transform: translateY(-15px); opacity: 0; }
+    100% { transform: translateY(0px);  opacity: 100; }
+}
+
+@keyframes customBTN {
+    0% { transform: scale(1);}
+    100% { transform: scale(1.05); box-shadow: 3px 3px 10px black;}
+}
+
+/* Header */
+.loginHeader { background-color: white; padding : 30px 0px 55px 20px;  }
+.loginHeader div {animation-name: icon; animation-duration: 1.5s;}
+.loginHeader * {float: left;}
+.loginHeader::after {  content: ""; clear: both; display: table; }
+.loginHeader h1 { margin : 0 0 0 15px; line-height: 55px;}
+.chatIcon {height: 55px; }
+
+/* content container */
+.pageContainer { max-width: 950px; margin: 0 auto; margin-top: -25px; padding: 55px 15px; background-color: #f6fafb; border-radius: 10px; }
+.pageContainer div { width: 420px; margin: 0 auto;}
+.loginPage input { width: 350px;}
+.errorMsg {font-size: 12px; color:brown;}
+
+/* Login */
+.loginContainer { margin-top: 25px; padding: 0px 120px; animation-name: fadeInTop; animation-duration: 1s;}
+.loginPage .loginBtn { width: 350px; margin: 0px; padding: 5px 0px; height: 35px; position: relative; margin-top: 15px;}
+.loginBtn .button {width: calc(50% - 25px); margin-right: 15px; font-size: 14px; border-color: #1c98f7; border-radius: 10px; background-color: #1c98f7; color : white; line-height: 35px; cursor: pointer; box-shadow: 1px 1px 10px black;}
+.button:hover {animation-name: customBTN; animation-duration: 0.5s; animation-fill-mode: forwards;}
+
+/* Signup */
+.singupContainer {display: none; animation-name: fadeInTop; animation-duration: 1s;}
+
+/* footer */
+.footer {margin-top: 50px; background-color: #000b21; width: 100%; padding: 35px 0px;}
+.footer .container {width: 82%; margin: 0 auto;}
+.footer .container * {color: white;}
+.footer .container div{float: left;}
+.footer .container::after {content: ''; clear: both; display: table;}
+.footer .left {width: 40%;}
+.footer .right {width: 60%;}
+
+@media only screen and (max-width: 700px){
+    .pageContainer div { margin: 0px; padding: 0px;}
+}
+
+            /* Common */
+            body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+            * {font-family: Inter, sans-serif; margin: 0px;}
+            body {background-color: white; margin: 0px;}    
+            .clear {clear: both;}
+            input { height: 35px; border-radius: 10px; border-color: #d2d2d7; }
+            input:focus { outline: none; border-color: #1c98f7; box-shadow: 0 0 0 2px #1c98f7;}
+            form p {margin: 20px 0px 2px 0px; font-size: 14px;}
+            ul {padding: 0px; margin-right: 55px;}
+            li {list-style: none;}
+
+            /* Page */
+            .pageContainer {max-width: 950px; margin: 0 auto;}
+            .chatroom #form {max-width: 950px; margin: 0 auto;}
+            .chatroomInfo { padding: 15px; border-bottom: 1px solid #EFEFEF}
+            .chatroomInfo div {float: left;}
+            .chatroomInfo::after {content: ''; display: table; clear: both;}
+            .chatroomInfo .goBack {padding: 0px 15px 0px 0px; border-right: 1px solid black; cursor: pointer;}
+            .chatroomInfo .goBack img{ height: 35px;}
+            .chatroomInfo #icon {height: 35px; width: 35px; border-radius: 50%; float: right;}
+            .chatroomInfo #header {font-size: 24px; text-align: center; width: calc(100% - 120px);}
+            .chatroomInfo .chatroomName {width: calc(100% - 51px);}
+            .chatroomInfo .chatroomName * {float: left; margin: 0 auto;}
+            .chatroomInfo .chatroomName::after {content: ''; display: table; clear: both;}
+            .chatroomInfo .moreOption {display: none;}
+
+            /* Chatroom body */
+            .chatroom {min-height: 80vh; background-image: url('/content/images/55a44e59618507debb99d95fc16b659a.png');}
+
+            /* Message */
+            #messages .message { background: white; padding:20px; border-radius: 10px; display: inline-block; max-width: 42%;}
+            #messages .messageImg {max-width: 100%;}
+            #messages .messageImg img{max-height: 240px;}
+            #messages li::after {clear: both; display: table; content: '';}
+            #messages .message .content {word-break: break-word;}
+            #messages .right {background: greenyellow; float: right;}
+
+            /* Chat form */
+            #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+            #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+            #input:focus { outline: none; }
+            #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+      
+            #messages { list-style-type: none; margin: 0; padding: 0; }
+            #messages > li { padding: 0.5rem 1rem; }
