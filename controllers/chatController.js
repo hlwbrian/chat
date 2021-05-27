@@ -1,18 +1,23 @@
 const Chat = require('./../models/chatModel');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
+const AppError = require('../utils/appError');
 
+/* Create new chat */
 exports.createChat = catchAsync(async (req, res, next) => {
+    //Target user's info, this data is not the info for the user who created the user
     const userData = req.body.username.split('#');
     
+    //Target user is not the user who create the chatroom
     if(userData[1] != req.user.userID){
       const user = await User.find({username: userData[0], userID: userData[1]});
       let newChat;
 
+      //if target user found
       if(user.length > 0){
         //create new chat
         newChat = await Chat.create({chatroomName : req.body.chatroom, members : [user[0].username + '#' + user[0].userID, req.user.username + '#' + req.user.userID]});
-        //create two user's chatrooms
+        //push chatroom number into user's chatroom list
         updatedUsers = await User.updateMany({userID : {$in : [user[0].userID, req.user.userID]}}, {$push : {chatrooms : newChat.chatID}});
         
         res.status(201).json({
@@ -20,20 +25,19 @@ exports.createChat = catchAsync(async (req, res, next) => {
           records: newChat
         }); 
       } else{
-        res.status(404).json({
-          status: 'failed',
-          message: 'User not found'
-        });
+        return next(
+          new AppError('Target not found', 404)
+        );
       }
     }else{
-      res.status(401).json({
-        status: 'failed',
-        message: 'Cannot create a chatroom yourself'
-      });
+      return next(
+        new AppError('Cannot create a chatroom yourself', 401)
+      );
     }    
 });
 
-exports.getChat = catchAsync(async (req, res, next) => {
+/* Get chatlist */
+exports.getChatList = catchAsync(async (req, res, next) => {
   const chatID = req.user.chatrooms;
   const records = await Chat.find({ 'chatID': { $in: chatID } }, {'conversations' : {$slice: -1} });
 
@@ -52,7 +56,8 @@ exports.getChat = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getConversation = catchAsync(async (req, res, next) => {
+/* Get conversation for specific chatroom and update read status */
+exports.initConversation = catchAsync(async (req, res, next) => {
   var data = {
     chatID: req.chat.currentChatID
   };
@@ -69,17 +74,19 @@ exports.getConversation = catchAsync(async (req, res, next) => {
       content: conversations
     });
   }else{
-    res.status(404).json({
-      msg: 'failed'
-    });
+    return next(
+      new AppError('No chat history', 404)
+    );
   }
 });
 
+/* Save message should only call by server */
 exports.saveMessage = catchAsync(async (req, res, next) => {
+  //if match hardcode secret
   if(req.body.serverSecret === '5sa9gkj#7w'){
     let timestamp = new Date();
     let dataObj = {
-      sender: req.body.userID,
+      sender: req.body.username,
       message: req.body.msg,
       timestamp: timestamp
     }
@@ -96,12 +103,13 @@ exports.saveMessage = catchAsync(async (req, res, next) => {
         });
     }
   }else{
-    res.status(404).json({
-      msg: 'failed'
-    });
+    return next(
+      new AppError('Failed to save message', 404)
+    );
   }
 });
 
+/* Add member function */
 exports.addMember = catchAsync(async (req, res, next) => {
     const userData = req.body.username.split('#');
 
@@ -125,25 +133,23 @@ exports.addMember = catchAsync(async (req, res, next) => {
             member : userData.join('#')
           });
         }else{
-          res.status(404).json({
-            status: 'failed',
-            message: 'user is already in the chatroom'
-          });
+          return next(
+            new AppError('User is already in the chatroom', 401)
+          );
         }
       }else{
-        res.status(404).json({
-          status: 'failed',
-          message: 'user not found'
-        });
+        return next(
+          new AppError('User not found', 404)
+        );
       }
     }else{
-      res.status(401).json({
-        status: 'failed',
-        message: 'cannot add yourself to the group'
-      });
+      return next(
+        new AppError('Same user', 401)
+      );
     }
 });
 
+/* Update chatroom name */
 exports.changeChatName = catchAsync(async (req, res, next) => {
     const newName = req.body.chatroomName;
     const updateChat = await Chat.updateOne( {chatID: req.chat.currentChatID}, {$set : {chatroomName : newName}});
@@ -154,13 +160,13 @@ exports.changeChatName = catchAsync(async (req, res, next) => {
         message: 'Name changed'
       });
     }else{
-      res.status(404).json({
-        status: 'failed',
-        message: 'Chatroom not found'
-      });
+      return next(
+        new AppError('Chatroom not found', 404)
+      );
     } 
 });
 
+/* Update Chatroom member list, remove target user */
 exports.leaveChat = catchAsync(async (req, res, next) => {
   const userData = `${req.user.username}#${req.user.userID}`;
   
@@ -176,9 +182,9 @@ exports.leaveChat = catchAsync(async (req, res, next) => {
         status: 'success'
       });
     }else{
-      res.status(404).json({
-        status: 'failed'
-      });
+      return next(
+        new AppError('Failed to leave group', 404)
+      );
     }
   }else{
     const delChat = await Chat.deleteOne({chatID: req.chat.currentChatID});
@@ -199,8 +205,8 @@ exports.changeIcon = catchAsync(async (req, res, next) => {
       icon: req.body.icon
     });
   }else{
-    res.status(404).json({
-      msg : 'failed'
-    })
+    return next(
+      new AppError('Failed to change icon', 401)
+    );
   }
 });

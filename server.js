@@ -67,8 +67,8 @@ io.on('connection', function(socket) {
 
         socket.on('chat message', msg => {
             const resultMsg = msg;
-            let userID = socket.request._query['username'].split('#')[1];
-            sendToRoom(roomName, userID, resultMsg);
+            let username = socket.request._query['username'];
+            sendToRoom(roomName, username, resultMsg);
         });
     }
     
@@ -79,7 +79,7 @@ io.on('connection', function(socket) {
 });
 
 //function sendToList()
-function sendToRoom(roomName, userID, msg){
+function sendToRoom(roomName, username, msg){
     //save to db before save send
     //TODO update url path
     let roomID = roomName.split(' ')[1];
@@ -88,7 +88,7 @@ function sendToRoom(roomName, userID, msg){
     axios.post('http://localhost:3000/chat/save', {
         chatID : roomID,
         msg: msg,
-        userID: userID,
+        username: username,
         serverSecret: '5sa9gkj#7w'
     })
     .then(function (response) {
@@ -96,7 +96,7 @@ function sendToRoom(roomName, userID, msg){
         timestamp = response.data.timestamp;
         
         //send data
-        io.in(roomName).emit('receive', `${msg}#${response.data.timestamp}#${userID}`);
+        io.in(roomName).emit('receive', `${msg}#${response.data.timestamp}#${username}`);
         io.in(roomName).emit('chatroom list update', `${roomName}#${msg}#${timestamp}`);
     })
     .catch(function (error) {

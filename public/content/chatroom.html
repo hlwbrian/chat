@@ -153,7 +153,7 @@
             $.ajax
             ({
                 type: "POST",
-                url: "/chat/getConversation",
+                url: "/chat/initConversation",
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 async: false,
@@ -174,7 +174,7 @@
                     $('#icon').attr('src', '/content/images/' + icon);
                     if(content.length > 0){
                         for(var value of content){
-                            var senderStyle = (urlParams.get('user').split('#')[1] === value.sender)? 'right' : 'left';
+                            var senderStyle = (urlParams.get('user') === value.sender)? 'right' : 'left';
 
                             if( (/[a-z0-9].jpg|.png/).test(value.message) ){
                                 html += '<li><div class="messageImg message  '+senderStyle+'">' +
@@ -347,8 +347,8 @@
         socket.on('receive', msg => {
             var message = msg.split('#')[0];
             var timestamp = msg.split('#')[1];
-            var sender = msg.split('#')[2];
-            var senderStyle = (urlParams.get('user').split('#')[1] === sender)? 'right' : 'left';
+            var sender = msg.split('#')[2] + '#' + msg.split('#')[3];
+            var senderStyle = (urlParams.get('user') === sender)? 'right' : 'left';
 
             if( (/[a-z0-9].jpg|.png/).test(msg) ){
                 $('#message').append('<li><div class="message '+senderStyle+'">' +
@@ -360,7 +360,7 @@
             }else{
                 $('#messages').append('<li><div class="message '+senderStyle+'">' +
                                     '<div class="sender">' + sender + '</div>' +
-                                    '<div class="timestamp">' + timestamp + '</div>' + 
+                                    '<div class="timestamp">' + formatDate(timestamp) + '</div>' + 
                                     '<div class="content">' + message + '</div>' +                                   
                                 '</li>');
             }
@@ -374,7 +374,7 @@
             input.value = sendImg;
 
             $('#form button').trigger('click');
-            history.pushState(null, '', '/chatroom.html?user=' + encodeURIComponent(currentUser) + '&chatroom=' + chatroom);
+            history.pushState(null, '', '/content/chatroom.html?user=' + encodeURIComponent(currentUser) + '&chatroom=' + chatroom);
         }
     </script>
 </html>

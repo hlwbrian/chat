@@ -111,7 +111,7 @@ Secure chat: get the current chat ID for later usage
 */
 exports.secureChat = catchAsync(async (req, res, next) => {
     let data;
-    if(!!req.body.currentChatID){
+    if(!req.body.currentChatID){
         return next(
             new AppError(
               'Chatroom ID does not exist',
