@@ -6,82 +6,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Beacon - Login</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <style>
-            /* Common */
-            * {font-family: Inter, sans-serif; margin: 0px;}
-            body {background-color: #1c98f7; margin: 0 auto; max-width: 1280px; }    
-            .clear {clear: both;}
-            input { height: 35px; border-radius: 10px; border-color: #d2d2d7; }
-            input:focus { outline: none; border-color: #1c98f7; box-shadow: 0 0 0 2px #1c98f7;}
-            form p {margin: 20px 0px 2px 0px; font-size: 14px;}
-            ul {padding: 0px; margin-right: 55px;}
-            li {list-style: none;}
-
-            /* keyframes */
-            @keyframes icon {
-                0% { transform: translateX(-10px); }
-                80% { transform: translateX(2px); }
-                100% { transform: translateX(0px); }
-            }
-
-            @keyframes fadeInTop {
-                0% { transform: translateY(-15px); opacity: 0; }
-                100% { transform: translateY(0px);  opacity: 100; }
-            }
-
-            @keyframes customBTN {
-                0% { transform: scale(1);}
-                100% { transform: scale(1.05); box-shadow: 3px 3px 10px black;}
-            }
-
-            /* Header */
-            .loginHeader { background-color: white; padding : 30px 0px 55px 20px;  }
-            .loginHeader div {animation-name: icon; animation-duration: 1.5s;}
-            .loginHeader * {float: left;}
-            .loginHeader::after {  content: ""; clear: both; display: table; }
-            .loginHeader h1 { margin : 0 0 0 15px; line-height: 55px;}
-            .chatIcon {height: 55px; }
-
-            /* content container */
-            .pageContainer { max-width: 950px; margin: 0 auto; margin-top: -25px; padding: 55px 15px; background-color: #f6fafb; border-radius: 10px; }
-            .pageContainer div { width: 420px; margin: 0 auto;}
-            .loginPage input { width: 350px;}
-            .errorMsg {font-size: 12px; color:brown;}
-
-            /* Login */
-            .loginContainer { margin-top: 25px; padding: 0px 120px; animation-name: fadeInTop; animation-duration: 1s;}
-            .loginPage .loginBtn { width: 350px; margin: 0px; padding: 5px 0px; height: 35px; position: relative; margin-top: 15px;}
-            .loginBtn .button {width: calc(50% - 25px); margin-right: 15px; font-size: 14px; border-color: #1c98f7; border-radius: 10px; background-color: #1c98f7; color : white; line-height: 35px; cursor: pointer; box-shadow: 1px 1px 10px black;}
-            .button:hover {animation-name: customBTN; animation-duration: 0.5s; animation-fill-mode: forwards;}
-            
-            /* Signup */
-            .singupContainer {display: none; animation-name: fadeInTop; animation-duration: 1s;}
-
-            /* footer */
-            .footer {margin-top: 50px; background-color: #000b21; width: 100%; padding: 35px 0px;}
-            .footer .container {width: 82%; margin: 0 auto;}
-            .footer .container * {color: white;}
-            .footer .container div{float: left;}
-            .footer .container::after {content: ''; clear: both; display: table;}
-            .footer .left {width: 40%;}
-            .footer .right {width: 60%;}
-
-            @media only screen and (max-width: 700px){
-                .pageContainer div { margin: 0px; padding: 0px;}
-            }
-        </style>
+        <link href="/content/styles/main.css" rel="stylesheet" />
     </head>
     <body class="loginPage">
-        <div class="loginHeader">
+        <div class="loginPage__header">
             <div>
-                <img class="chatIcon" src="/content/images/chat_icon.png" />
+                <img class="chatIcon" src="/content/images/chat_icon.png" alt="app icon" />
                 <h1>Beacon</h1>
             </div>
         </div>
 
-        <div class="main">
-            <div class="pageContainer">
-                <div class="loginContainer">
+        <div class="loginPage__main">
+            <div class="loginPage__form">
+                <div class="loginPage__form-login">
                     <h2>Log In</h2>
                     <form id="loginForm" action="">
                         <p>Username:</p>
@@ -97,7 +34,7 @@
                         </div>
                     </form>
                 </div>
-                <div class="singupContainer">
+                <div class="loginPage__form-signup">
                     <h2>Sign up</h2>
                     <form id="signupForm" action="">
                         <p>Username:</p>
@@ -121,18 +58,18 @@
             </div>
         </div>
 
-        <div class="footer">
+        <div class="loginPage__footer">
             <div class="container">
-            <div class="left">
-                <div> 
-                    <span class="copyright">© 2013–2021 Beacon, a 501c3 nonprofit.</span><br> 
-                    Beacon is a registered trademark in the United States and other countries. <br> <br> 
-                    For media inquiries, contact <a href="#">info@beacon.org</a></div>
-            </div>
+                <div class="left">
+                    <div> 
+                        <span class="copyright">© 2013–2021 Beacon, a 501c3 nonprofit.</span><br> 
+                        Beacon is a registered trademark in the United States and other countries. <br> <br> 
+                        For media inquiries, contact <a href="#">info@beacon.org</a></div>
+                </div>
 
-            <div class="right">
-                <div class="container">
-                    <div class="columns">
+                <div class="right">
+                    <div class="container">
+                        <div class="columns">
                             <div class="column"> 
                                 <strong>Company</strong>
                                 <ul>
@@ -160,23 +97,14 @@
                                     <li> <a href="#" target="_blank">Instagram</a></li>
                                 </ul>
                             </div>
+                        </div>
                     </div>
                 </div>
-            </div>
             </div>
         </div>
     </body>
     <script>
-        var register = function(){
-            $.ajax({
-                type: 'POST',
-                url: '/users/signup',
-                dataType: 'json',
-                contentType: 'application/json',
-                data: {}
-            })
-        }
-
+        //FROM login page
         $('#signupForm').submit( function(event) {
             event.preventDefault();
 
@@ -200,10 +128,11 @@
                         var fieldName = err.responseJSON.message.substring(err.responseJSON.message.lastIndexOf(':') + 1).trim();
                         if(fieldName === 'phoneNo') fieldName = 'phone number';
                         var errMsg = 'Please use another value for ' + fieldName;
-                        $('.singupContainer .errorMsg').html(errMsg);
+                        $('.loginPage__form-signup .errorMsg').html(errMsg);
                     }
                 },
                 success: function(data){
+                    //if signup successful, then go to chatlist page
                     window.location = '/content/chatlist.html';
                 }                
             });
@@ -224,10 +153,9 @@
                 async: false,
                 data: JSON.stringify(data),
                 error: function(err){
-                    console.log(err);
                     if(err.status === 404){
                         var errMsg = '*Incorrect password or username, please check again.';
-                        $('.loginContainer .errorMsg').html(errMsg);
+                        $('.loginPage__form-login .errorMsg').html(errMsg);
                     }
                 },
                 success: function(){
@@ -241,7 +169,7 @@
             login();
         });
 
-        //function to check if password confirm are matched
+        //function that check if password confirm are matched
         function confirmCheck(input) {
             if (input.value === $('#signup-password').val()) {
                 $('#confirmText').hide();
@@ -252,8 +180,8 @@
         }
 
         $('.register').click(function(){
-            $('.loginContainer').toggle();
-            $('.singupContainer').toggle();
+            $('.loginPage__form-login').toggle();
+            $('.loginPage__form-signup').toggle();
         });
     </script>
 </html>

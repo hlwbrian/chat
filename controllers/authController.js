@@ -59,10 +59,12 @@ exports.login = catchAsync( async (req, res, next) => {
     
     //user.correctPassword is a model method, may refer to models/userModel
     if(!user || !(await user.correctPassword(password, user.password))){
-        res.status(404).json({
-            status: 'failed',
-            message: 'Incorrect Username or Password'
-        })
+        return next(
+            new AppError(
+              'Incorrect Username or Password',
+              404
+            )
+        );
     }else{
         createSendToken(user, 200, res);
     }

@@ -5,62 +5,12 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Chat - Chatrooms list</title>
-        <style>
-            /* keyframes */
-            @keyframes changeColorBlue {
-                0% { background-color: #1c98f7;}
-                100% {background-color: #187bc7;}
-            }
-
-            /* Common */
-            * {font-family: Inter, sans-serif; margin: 0px;}
-            body {background-color: #1c98f7; margin: 0px; height: 100vh}    
-            .clear {clear: both;}
-            input { height: 35px; border-radius: 10px; border-color: #d2d2d7; }
-            input:focus { outline: none; border-color: #1c98f7; box-shadow: 0 0 0 2px #1c98f7;}
-            form p {margin: 20px 0px 2px 0px; font-size: 14px;}
-            ul {padding: 0px; margin-right: 55px;}
-            li {list-style: none;}
-
-            /* Body */
-            .chatlistContainer {background-color: white; max-width: 1280px; margin: 0 auto; height: 100%;}
-            .button {margin-right: 15px; font-size: 14px; border-color: #bbbfc2; border-radius: 10px; background-color: #1c98f7; color : white; line-height: 35px; cursor: pointer; box-shadow: 1px 1px 2px black;}
-            
-            /* user info bar */
-            .userInfo {padding: 20px 10px 0px 10px; border-bottom: 1px solid #EFEFEF;}
-            .userInfo .icon {height: 35px; width: 35px; border-radius: 50%;}
-            .userInfo .userID { font-size: 22px; font-weight: 500; vertical-align: top;  line-height: 35px; width: calc(100% - 113px); text-align:center; display: inline-block;}
-            .userInfo .moreInfo {display: none; margin: 0 auto; width: 350px;}
-            .userInfo .moreInfo h3 {border-top: 1px solid #EFEFEF; margin-top: 10px; padding-top: 10px;}
-            .userInfo .logout {line-height: 35px; padding: 0px 8px; float: right; background-color: #1c98f7; color: white; cursor: pointer; border-radius: 15px;}
-            .userInfo .logout:hover {animation-name: changeColorBlue; animation-duration: 2s;}
-            .userInfo .moreBtn {font-size: 12px; text-align: center; margin-bottom: 3px; cursor: pointer;}
-
-            /* create chat */
-            .createChatBtn {display: block; text-align: center; color: blue; cursor: pointer; padding: 5px 0px; margin-top: 5px;}
-            .createChatContainer {display: none; text-align: center; padding: 10px 0px;}
-
-            /* chatroom */
-            #chatlist {padding: 0px 15px; background-color: #f5f5f5; margin: 0px;}
-            #chatlist li {cursor: pointer;}
-            #chatlist .chatroom {padding : 15px 0px; border-bottom: 1px solid #e0e0e0;}
-            #chatlist .chatroom .icon {height: 35px; width: 35px; border-radius: 50%; margin-right: 15px;}
-            #chatlist .chatroom div {float: left;}
-            #chatlist .chatroom .right{width: calc(100% - 50px);}
-            #chatlist .chatroom .halfWidthRight {width: calc(100% - 75px);}
-            #chatlist .chatroom .message, #chatlist .chatroom .timestamp {font-size: 14px; color: #5a5a5a;}
-            #chatlist .chatroom .timestamp {float: right;}
-            #chatlist .chatroom::after {clear: both; display: table; content: "";}
-            #chatlist span {vertical-align: top;}
-            #chatlist .roomName {display: inline-block; font-size: 14px; font-weight: bold;}
-            
-            #chatlist .unreadIcon {height: 14px; margin: 11px 3px; display: inline-block; width: 15px; background-color: #1569aa; border-radius: 50%;}
-        </style>
+        <link rel="stylesheet" src="/content/styles/main.css" />
     </head>
     <body class="chatlistPage">
-        <div class="chatlistContainer">
+        <div class="chatlistPage__main">
             <!-- show personal info -->
-            <div class="userInfo">
+            <div class="chatlistPage__userInfo">
                 <img class="icon"/>  
                 <span class="userID"></span>
                 <div class="logout">Log Out</div>
@@ -93,7 +43,7 @@
 
             <!-- create chatroom -->
             <p class="createChatBtn">New Chat</p>
-            <div class="createChatContainer">
+            <div class="chatlistPage__createChat">
                 <form id="createChat">
                     <p>Add your friend's' ID: e.g. john#315</p>
                     <input type="text" placeholder="john#315" pattern="[a-z0-9]+#[0-9]+" required id="username">
