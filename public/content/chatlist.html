@@ -5,12 +5,12 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Chat - Chatrooms list</title>
-        <link rel="stylesheet" src="/content/styles/main.css" />
+        <link href="/content/styles/main.css" rel="stylesheet" />
     </head>
     <body class="chatlistPage">
         <div class="chatlistPage__main">
             <!-- show personal info -->
-            <div class="chatlistPage__userInfo">
+            <div class="userInfo">
                 <img class="icon"/>  
                 <span class="userID"></span>
                 <div class="logout">Log Out</div>
@@ -169,7 +169,7 @@
                         "authorization": "Bearer " + getCookie('chatJWT')
                     },
                     success:function(data) {
-                        $('.img').attr('src', '/content/images/' + data.img);
+                        $('.userInfo .icon').attr('src', '/content/images/' + data.img);
                     },
                     error:function(data){
                         console.log(data);
@@ -248,12 +248,12 @@
         });
 
         $('.createChatBtn').click(function() {
-            $('.createChatContainer').toggle();
+            $('.chatlistPage__createChat').toggle();
         });
 
         $('.logout').click(function(){
             document.cookie = "chatJWT=; expires = Thu, 01 Jan 1970 00:00:00 GMT"
-            window.location = '/login.html';
+            window.location = '/content/login.html';
         });
 
         $('.moreBtn').click(function() {

@@ -3,53 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <title>Chat - Chatlist</title>
-        <style>
-            /* Common */
-            body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-            * {font-family: Inter, sans-serif; margin: 0px;}
-            body {background-color: white; margin: 0px;}    
-            .clear {clear: both;}
-            input { height: 35px; border-radius: 10px; border-color: #d2d2d7; }
-            input:focus { outline: none; border-color: #1c98f7; box-shadow: 0 0 0 2px #1c98f7;}
-            form p {margin: 20px 0px 2px 0px; font-size: 14px;}
-            ul {padding: 0px; margin-right: 55px;}
-            li {list-style: none;}
-
-            /* Page */
-            .pageContainer {max-width: 950px; margin: 0 auto;}
-            .chatroom #form {max-width: 950px; margin: 0 auto;}
-            .chatroomInfo { padding: 15px; border-bottom: 1px solid #EFEFEF}
-            .chatroomInfo div {float: left;}
-            .chatroomInfo::after {content: ''; display: table; clear: both;}
-            .chatroomInfo .goBack {padding: 0px 15px 0px 0px; border-right: 1px solid black; cursor: pointer;}
-            .chatroomInfo .goBack img{ height: 35px;}
-            .chatroomInfo #icon {height: 35px; width: 35px; border-radius: 50%; float: right;}
-            .chatroomInfo #header {font-size: 24px; text-align: center; width: calc(100% - 120px);}
-            .chatroomInfo .chatroomName {width: calc(100% - 51px);}
-            .chatroomInfo .chatroomName * {float: left; margin: 0 auto;}
-            .chatroomInfo .chatroomName::after {content: ''; display: table; clear: both;}
-            .chatroomInfo .moreOption {display: none;}
-
-            /* Chatroom body */
-            .chatroom {min-height: 80vh; background-image: url('/content/images/55a44e59618507debb99d95fc16b659a.png');}
-
-            /* Message */
-            #messages .message { background: white; padding:20px; border-radius: 10px; display: inline-block; max-width: 42%;}
-            #messages .messageImg {max-width: 100%;}
-            #messages .messageImg img{max-height: 240px;}
-            #messages li::after {clear: both; display: table; content: '';}
-            #messages .message .content {word-break: break-word;}
-            #messages .right {background: greenyellow; float: right;}
-
-            /* Chat form */
-            #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-            #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-            #input:focus { outline: none; }
-            #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
-      
-            #messages { list-style-type: none; margin: 0; padding: 0; }
-            #messages > li { padding: 0.5rem 1rem; }
-        </style>
+        <link rel="stylesheet" href="/content/styles/main.css" />
         <script>
             function allowDrop(ev) {
                 ev.preventDefault();
@@ -59,17 +13,24 @@
                 ev.preventDefault();
                 var data = ev.dataTransfer.files;
                 $('.sendImageInput')[0].files = data;
-                $('#sendImage button').trigger('click');
+               
+                
+                $('#imagePreview').show();
+                var data = $('.sendImageInput')[0].files[0];
+                if (data) {
+                    $('#previewImg').attr('src',  URL.createObjectURL(data));
+                }
             }
         </script>
     </head>
-    <body ondrop="drop(event)" ondragover="allowDrop(event)">
-        <div class="pageContainer">
+    <body class="chatroomPage" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <div class="chatroomPage__main">
             <div class="chatroomInfo">
                 <div class="goBack"><img src="/content/images/back.svg" /></div>
                 <div class="chatroomName"><img id="icon"/><span id="header"></span></div>
-            
+                <div class="moreBtn"><span>More</span></div>
                 <div class="moreOption">
+                    <h3>Members: </h3>
                     <ul id="members"></ul>
 
                     <h3>Add member</h3>
@@ -104,18 +65,27 @@
             <div class="chatroom"> 
                 <ul id="messages"></ul>
                 <form id="form" action="">
-                    <input id="input" autocomplete="off" /><button>Send</button>
+                    <input id="input" autocomplete="off" /><button type="button" onclick="previewImage();">Image</button><button type="submit">Send</button>
                 </form>
             </div>
 
-            <h3>Send image</h3>
+            <div id="imagePreview">
+                <div class="imagePreview__content">
+                    <span onclick="$('#imagePreview').hide();" class="previewClose">Close</span>
+                    <h3>Image Preview</h3>
+                    <img src="#" id="previewImg" alt="preview image" />
+                    <button>Confirm</button>
+                </div>
+            </div>
+
             <form id="sendImage" 
                 action='/users/addImage' 
                 method='post' 
-                encType="multipart/form-data">
+                encType="multipart/form-data"
+                style="display: none;">
                 <input name="sendImage" class="sendImageInput" type="file" />
                 <button type="submit">Send</button>
-            </form>          
+            </form>
         </div>      
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -143,6 +113,22 @@
 
             return [year, month, day].join('-') + ' ' + hour + ':' + minute;
         }
+
+        function previewImage() {
+            $('.sendImageInput').trigger('click');
+        }
+
+        $(".sendImageInput:file").change(function (){
+            $('#imagePreview').show();
+            var data = $('.sendImageInput')[0].files[0];
+            if (data) {
+                $('#previewImg').attr('src',  URL.createObjectURL(data));
+            }
+        });
+
+        $('#imagePreview button').click(function(){
+            $('#sendImage button').trigger('click');
+        });
 
         (function init() {
             var urlParams = new URLSearchParams(window.location.search);
@@ -235,7 +221,7 @@
                     }
                 });
 
-                history.pushState(null, '', '/chatroom.html?user=' + encodeURIComponent(user) + '&chatroom=' + chatroom);
+                history.pushState(null, '', '/content/chatroom.html?user=' + encodeURIComponent(user) + '&chatroom=' + chatroom);
             }
         })();
 
@@ -328,6 +314,12 @@
                     window.location = '/content/chatlist.html';
                 }
             });
+        });
+
+        $('.moreBtn span').click(function(e) {
+            var moreBtnText = $('.moreBtn span').text();
+            $('.moreBtn span').text( moreBtnText === 'More'? 'Less' : 'More');
+            $('.moreOption').toggle();
         });
 
         var currentUser = urlParams.get('user');
