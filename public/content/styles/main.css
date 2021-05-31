@@ -103,9 +103,8 @@ li {list-style: none;}
 .chatroomPage {background-color: white; margin: 0px;}   
 .chatroomPage .moreBtn {width: 100%; text-align: center;} 
 .chatroomPage .moreBtn span {cursor: pointer;}
-.chatroomPage__main {max-width: 950px; margin: 0 auto; position: relative;}
 .chatroomPage h3 {margin-top: 15px;}
-.chatroom #form {max-width: 950px; margin: 0 auto;}
+.chatroom #form, .chatroomPage {max-width: 950px; margin: 0 auto;}
 .chatroomInfo { padding: 15px; border-bottom: 1px solid #EFEFEF}
 .chatroomInfo div {float: left;}
 .chatroomInfo::after {content: ''; display: table; clear: both;}
@@ -117,7 +116,7 @@ li {list-style: none;}
 .chatroomInfo .chatroomName * {float: left; margin: 0 auto;}
 .chatroomInfo .chatroomName::after {content: ''; display: table; clear: both;}
 .chatroomInfo .moreOption {display: none;}
-.chatroom {min-height: 80vh; background-image: url('/content/images/55a44e59618507debb99d95fc16b659a.png');}
+.chatroomPage .chatroom {overflow-y: scroll; max-height: 90vh; background-image: url('/content/images/55a44e59618507debb99d95fc16b659a.png');}
 
 /* Message */
 #messages .message { background: white; padding:20px; border-radius: 10px; display: inline-block; max-width: 42%;}

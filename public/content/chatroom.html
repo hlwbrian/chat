@@ -343,11 +343,11 @@
             var senderStyle = (urlParams.get('user') === sender)? 'right' : 'left';
 
             if( (/[a-z0-9].jpg|.png/).test(msg) ){
-                $('#message').append('<li><div class="message '+senderStyle+'">' +
-                                    '<div class="sender">' + value.sender + '</div>' +
-                                    '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
-                                    '<div class="img"><img src="/content/images/'+value.message+'" alt="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
-                                    '<div class="hiddenMsg"><span style="display:none">' +value.message+ '</span></div>' +
+                $('#messages').append('<li><div class="messageImg message '+senderStyle+'">' +
+                                    '<div class="sender">' + sender + '</div>' +
+                                    '<div class="timestamp">' + formatDate(timestamp) + '</div>' +
+                                    '<div class="img"><img src="/content/images/'+message+'" alt="'+message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                                    '<div class="hiddenMsg"><span style="display:none">' +message+ '</span></div>' +
                                     '</div></li>');
             }else{
                 $('#messages').append('<li><div class="message '+senderStyle+'">' +
