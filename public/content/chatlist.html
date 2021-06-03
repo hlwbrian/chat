@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Chat - Chatrooms list</title>
+        <title>SENAL - Chatrooms list</title>
         <link href="/content/styles/main.css" rel="stylesheet" />
     </head>
     <body class="chatlistPage">
@@ -59,35 +59,12 @@
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/content/scripts/common_functions.js"></script>
     <script>
-        //common function
         var currentUser;
         var allChannel = [];
 
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
-
-        function formatDate(date){
-            if(date === '') return '';
-            var d = new Date(date),
-            month = '' + (d.getMonth() + 1),
-            day = '' + d.getDate(),
-            year = d.getFullYear();
-            hour = d.getHours();
-            minute = d.getMinutes();
-
-            if (month.length < 2) 
-                month = '0' + month;
-            if (day.length < 2) 
-                day = '0' + day;
-
-            return [year, month, day].join('-') + ' ' + hour + ':' + minute;
-        }
-
-        //Load chat list
+        /* Initial page function, load all the chatroom detail for the user */
         (function init(){
             $.ajax
             ({
@@ -95,17 +72,19 @@
                 url: "/chat/getChatList",
                 dataType: 'json',
                 async: false,
+                //get the token from cookie and send to server in request's header
                 headers: {
                     "authorization": "Bearer " + getCookie('chatJWT')
                 },
                 success:function(data) {
-                    //insert user data
-                    $('.phone').text( 'Phone: ' + data.request.phone);
-                    $('.email').text( 'Email: ' + data.request.email);
-                    $('.userID').text(data.request.username + '#' + data.request.userID);
-                    $('.icon').attr("src", '/content/images/' + data.request.icon);
-                    currentUser = data.request.username + '#' + data.request.userID;
+                    //Display user information from server
+                    $('.phone').text( 'Phone: ' + data.user.phone);
+                    $('.email').text( 'Email: ' + data.user.email);
+                    $('.userID').text(data.user.username + '#' + data.user.userID);
+                    $('.icon').attr("src", '/content/images/' + data.user.icon);
+                    currentUser = data.user.username + '#' + data.user.userID;
 
+                    //Sort the chatroom by time, the chatroom with latest message on top
                     data.records.sort( (a, b) => {
                         let timeA, timeB;
                         timeA = (a.conversations[0])? new Date(a.conversations[0].timestamp) : new Date(a.chatCreate);
@@ -114,7 +93,7 @@
                         return timeB - timeA;                 
                     });   
 
-                    //insert chatlist data
+                    //Display the chatroom details
                     if(data.records.length > 0){
                         var html = '', datetime, datetimeFormat;
                         for(var i = 0; i < data.records.length; i++){                            
@@ -122,7 +101,7 @@
                                     '<div class="left"><span></span><img src="/content/images/'+ data.records[i]['icon'] +'" class="icon" /></div>' +
                                     '<div class="right"><span class="roomName">' + data.records[i]['chatroomName'] + '</span><br/>';
                                                                     
-                            //for socket
+                            //Join related chatroom, to listen if any message are send to this user
                             allChannel.push(data.records[i].chatID);
                             if(data.records[i].conversations.length > 0){
                                 
@@ -137,10 +116,10 @@
 
                         $('#chatlist').append(html);
 
-                        //add unread icon if the last message is not read
+                        //Add unread remark for the channel that this user have not read yet
                         for(var i = 0; i < data.records.length; i++){
                             if(data.records[i].conversations.length > 0){
-                                if(!data.records[i].conversations[0].read.includes('' + data.request.userID)){
+                                if(!data.records[i].conversations[0].read.includes('' + data.user.userID)){
                                     $('#chatroom'+data.records[i].chatID + ' .left span').addClass('unreadIcon');
                                     $('#chatroom'+data.records[i].chatID + ' .right').addClass('halfWidthRight');
                                 }
@@ -150,10 +129,19 @@
                 }
             });
 
+            //get all the params
             var urlParams = new URLSearchParams(window.location.search);
+            /*
+            When upload an image,
+            server side will first create a copy in /contnet/images,
+            if success, server will send a uploadImg param with image name value to user,
+            then user will use this info to make the below request
+            */
             var uploadImg = urlParams.get('uploadImg');
 
+            //if successfully create a copy in db
             if(uploadImg){      
+                //prepare data
                 var data = {
                     icon: uploadImg
                 }    
@@ -169,20 +157,24 @@
                         "authorization": "Bearer " + getCookie('chatJWT')
                     },
                     success:function(data) {
+                        //if image update success, change the icon
                         $('.userInfo .icon').attr('src', '/content/images/' + data.img);
                     },
                     error:function(data){
-                        console.log(data);
                     }
                 });
 
+                //hide the params
                 history.pushState(null, '', '/content/chatlist.html');
             }
         })();
 
-        //Create chat
+        /* Create Chatroom */
         $('#createChat').submit(function(event){
+            //prevent reload
             event.preventDefault();
+
+            //prepare data
             var data ={
                 username:  $('#username').val(),
                 chatroom: $('#chatroomName').val()
@@ -212,8 +204,12 @@
             });
         });
 
+        /* Update personal information */
         $('#updateName').submit(function (event){
+            //prevent reload
             event.preventDefault();
+
+            //prepare data
             var data = {
                 username: $('#update-username').val(),
                 password: $('#password').val(),
@@ -243,6 +239,7 @@
             });
         });
 
+        /* Event listeners */
         $('#chatlist').delegate( 'li', 'click', function(){
             window.location = '/content/chatroom.html?user='+ encodeURIComponent($('.userID').text()) +'&chatroom=' + $(this).attr('data-id');
         });
@@ -262,6 +259,8 @@
         });
 
         const socket = io({query: {"username" : currentUser , 'chat' : allChannel, 'page' : 'chatlist'}}); 
+
+        //socket listen to the chatroom that has message sent out
         socket.on('chatroom list update', msg => {
             var roomName = msg.split('#')[0].split(' ')[1];
             var message = msg.split('#')[1];

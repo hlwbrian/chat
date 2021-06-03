@@ -30,6 +30,11 @@ router
     .route('/initConversation')
     .post(chatController.initConversation);
 
+//update unread status to read
+ router
+    .route('/updateRead')
+    .patch(chatController.updateUnread);
+    
 //Add new member into the chatroom
 router
     .route('/addMember')

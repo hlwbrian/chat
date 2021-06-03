@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const { Server } = require('socket.io');
 const axios = require('axios');
+const url = require('url');
 
 /* HANDLE for unexpected error on server starts */
 process.on('uncaughtException', err => {
@@ -49,7 +50,6 @@ app.get('/', (req, res) => {
 //Create socket listener
 const io = new Server(server);
 
-//TODO create chat controller file
 io.on('connection', function(socket) {
     //If user is in chatroom list
     if(socket.request._query['page'] === 'chatlist'){
@@ -81,10 +81,9 @@ io.on('connection', function(socket) {
 //function sendToList()
 function sendToRoom(roomName, username, msg){
     //save to db before save send
-    //TODO update url path
     let roomID = roomName.split(' ')[1];
     let timestamp = '';
-
+    
     axios.post('http://localhost:3000/chat/save', {
         chatID : roomID,
         msg: msg,

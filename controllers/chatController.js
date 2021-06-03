@@ -52,7 +52,7 @@ exports.getChatList = catchAsync(async (req, res, next) => {
   res.status(200).json({
       msg: 'success',
       records,
-      request: userInfo
+      user: userInfo
   });
 });
 
@@ -78,6 +78,23 @@ exports.initConversation = catchAsync(async (req, res, next) => {
       new AppError('No chat history', 404)
     );
   }
+});
+
+/* update read status for user in chat */
+exports.updateUnread = catchAsync(async (req, res, next) => {
+    //set all the conversation read
+    const updateRead = await Chat.updateMany({chatID: req.chat.currentChatID}, { $addToSet : {'conversations.$[].read' : req.user.userID }});
+  
+    if(updateRead){
+      res.status(201).json({
+        status: 'success',
+        message: 'read status updated'
+      })
+    }else{
+      return next(
+        new AppError('Failed to update read status', 404)
+      );
+    } 
 });
 
 /* Save message should only call by server */

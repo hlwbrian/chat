@@ -4,7 +4,8 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Beacon - Login</title>
+        <title>SENAL - Login</title>
+        <!-- jquery should download & save in project level -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <link href="/content/styles/main.css" rel="stylesheet" />
     </head>
@@ -12,7 +13,7 @@
         <div class="loginPage__header">
             <div>
                 <img class="chatIcon" src="/content/images/chat_icon.png" alt="app icon" />
-                <h1>Beacon</h1>
+                <h1>SENAL</h1>
             </div>
         </div>
 
@@ -30,7 +31,7 @@
                         <div class="errorMsg"></div>
                         <div class="loginBtn">
                             <button type="submit" class="loginSubmit button">submit</button>
-                            <button type="button" class="register button">Register</button>
+                            <button type="button" class="registerToggle button">Register</button>
                         </div>
                     </form>
                 </div>
@@ -51,7 +52,7 @@
                         <div class="errorMsg"></div>
                         <div class="loginBtn">
                             <button type="submit" class="button" id="signupBtn">submit</button>
-                            <button type="button" class="register button">Log in</button>
+                            <button type="button" class="registerToggle button">Log in</button>
                         </div>
                     </form>
                 </div>    
@@ -104,10 +105,12 @@
         </div>
     </body>
     <script>
-        //FROM login page
+        /* Sign up function: pass related information to create an account */
         $('#signupForm').submit( function(event) {
+            //prevent refresh the page when submit and wait for server response
             event.preventDefault();
 
+            //prepare related data to be passed to server side
             var data = {
                 username : $('#signup-username').val(),
                 password : $('#signup-password').val(),
@@ -115,7 +118,8 @@
                 email : $('#email').val(),
                 phoneNo : $('#phoneNo').val()
             }
-
+            
+            //making request to server side
             $.ajax({
                 type: 'POST',
                 url: '/users/signup',
@@ -123,7 +127,8 @@
                 contentType: 'application/json; charset=utf-8',
                 async: false,
                 data: JSON.stringify(data),
-                error: function(err){              
+                error: function(err){       
+                    //handle mongoDB duplicated error       
                     if(err.responseJSON.error.statusCode === 400){
                         var fieldName = err.responseJSON.message.substring(err.responseJSON.message.lastIndexOf(':') + 1).trim();
                         if(fieldName === 'phoneNo') fieldName = 'phone number';
@@ -138,13 +143,15 @@
             });
         });
 
-        //Common function
+        /* Login function: pass username & password to login */
         function login(){
+            //prepare related data to be passed to server side
             var data = {
                 username : $('#login-username').val(),
                 password : $('#login-password').val()
             }
             
+            //making request to server side
             $.ajax({
                 type: 'POST',
                 url: '/users/login',
@@ -153,23 +160,27 @@
                 async: false,
                 data: JSON.stringify(data),
                 error: function(err){
+                    //if server does not find related user informaiton
                     if(err.status === 404){
                         var errMsg = '*Incorrect password or username, please check again.';
                         $('.loginPage__form-login .errorMsg').html(errMsg);
                     }
                 },
                 success: function(){
+                    //go to chat list page
                     window.location = '/content/chatlist.html';
                 }
             });
         }
 
+        /* Element listener */
+        //Submit login form when user try to login
         $('#loginForm').submit( function(event) {
             event.preventDefault();
             login();
         });
 
-        //function that check if password confirm are matched
+        //check if the password & the confirm password fields are the same 
         function confirmCheck(input) {
             if (input.value === $('#signup-password').val()) {
                 $('#confirmText').hide();
@@ -179,7 +190,8 @@
             }
         }
 
-        $('.register').click(function(){
+        //when user try to register/login an account, change to respective section
+        $('.registerToggle').click(function(){
             $('.loginPage__form-login').toggle();
             $('.loginPage__form-signup').toggle();
         });
