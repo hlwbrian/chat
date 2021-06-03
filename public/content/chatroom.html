@@ -133,7 +133,7 @@
                             var senderStyle = (urlParams.get('user') === value.sender)? 'right' : 'left';
 
                             //if image message
-                            if( (/[a-z0-9].jpg|.png/).test(value.message) ){
+                            if( (/[a-z0-9].jpg|.png|.jpeg/).test(value.message) ){
                                 html += '<li><div class="messageImg message  '+senderStyle+'">' +
                                     '<div class="sender">' + value.sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
@@ -226,7 +226,7 @@
             var senderStyle = (urlParams.get('user') === sender)? 'right' : 'left';
 
             //display message
-            if( (/[a-z0-9].jpg|.png/).test(msg) ){
+            if( (/[a-z0-9].jpg|.png|.jpeg/).test(msg) ){
                 $('#messages').append('<li><div class="messageImg message '+senderStyle+'">' +
                                     '<div class="sender">' + sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(timestamp) + '</div>' +
