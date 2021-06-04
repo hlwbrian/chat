@@ -16,7 +16,7 @@
                 <div class="logout">Log Out</div>
                 <div class="moreBtn">more</div>
 
-                <div class="moreInfo">
+                <!--<div class="moreInfo">
                     <p class="email"></p>
                     <p class="phone"></p>
                     
@@ -29,7 +29,6 @@
                         <button type="submit" class="button">Upload</button>
                     </form>
 
-                    <!-- Update personal info -->
                     <h3>Update username</h3>
                     <form id="updateName">
                         <p>Username:</p>
@@ -38,7 +37,7 @@
                         <input required type="password" name="password" minlength="6" maxlength="16" id="password" placeholder="Enter password">
                         <button type="submit" class="button">confirm</button>
                     </form>
-                </div>
+                </div>-->
             </div>
 
             <!-- create chatroom -->
@@ -55,6 +54,21 @@
 
             <!-- Chatroom list -->
             <ul id="chatlist"></ul>
+
+            <!-- More options -->
+            <style>
+                .moreInfo {display: none; position: absolute; left: 0; top: 0; height: 100vh; width: 100%; background-color: rgba(0, 0, 0, 0.35);}
+                .moreInfo h3 {width: 100%; text-align: center; background-color: #1c98f7;}
+                .moreInfo .details { width: 90%; background-color: white;}
+                .moreInfo__icon {margin: 0 auto; width: fit-content;}
+            </style>
+            <div class="moreInfo">
+                <div class="details">
+                    <h3>Profile</h3>
+                    <div class="moreInfo__icon"><img class="icon"/><div>
+                    <div class="moreInfo__username"></div>
+                </div>
+            </div>
         </div>
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
