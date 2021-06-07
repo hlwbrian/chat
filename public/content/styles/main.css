@@ -106,7 +106,7 @@ li {list-style: none;}
  .moreInfo__icon img {padding: 15px 0; width: 225px; height: 225px; border-radius: 50%}
  .moreInfo__icon .overlay {cursor: pointer; position: absolute; transition: .5s ease; top: 0; left: 0; height: 86%; opacity: 0; width: 100%; border-radius: 50%; margin: 15px 0px; background-color: rgba(0, 0, 0, 0.35); text-align: center;}
  .moreInfo__icon .overlay:hover {opacity: 1;}
- #fileUpload {display: none;}
+ .moreInfo #fileUpload {display: none;}
 
  .moreInfo__username {padding: 10px; border-top: 1px solid #DCDCDC;}
  .moreInfo__username p {padding: 10px;}
@@ -117,7 +117,7 @@ li {list-style: none;}
  .closeBtn {cursor: pointer;}
  
 /* Chatroom Page */
-.chatroomPage {background-color: white; margin: 0px;}   
+.chatroomPage {background-color: white; margin: 0px; overflow: hidden;}   
 .chatroomPage .moreBtn {width: 100%; text-align: center;} 
 .chatroomPage .moreBtn span {cursor: pointer;}
 .chatroomPage h3 {margin-top: 15px;}
@@ -133,7 +133,7 @@ li {list-style: none;}
 .chatroomInfo .chatroomName * {float: left; margin: 0 auto;}
 .chatroomInfo .chatroomName::after {content: ''; display: table; clear: both;}
 .chatroomInfo .moreOption {display: none;}
-.chatroomPage .chatroom {overflow-y: scroll; max-height: 90vh; background-image: url('/content/images/55a44e59618507debb99d95fc16b659a.png');}
+.chatroomPage .chatroom {overflow-y: scroll; height: 100vh; background-image: url('/content/images/55a44e59618507debb99d95fc16b659a.png');}
 
 /* Message */
 #messages .message { background: white; padding:20px; border-radius: 10px; display: inline-block; max-width: 42%;}
@@ -155,7 +155,7 @@ li {list-style: none;}
 .imagePreview__content img { max-height: 50%; max-width: 100%; }
 .previewClose {cursor: pointer;}
 
-#messages { list-style-type: none; margin: 0; margin-bottom: 48px; padding: 0; }
+#messages { list-style-type: none; margin: 0; margin-bottom: 150px; padding: 0; }
 #messages > li { padding: 0.5rem 1rem; }
 
 @media only screen and (max-width: 700px){
