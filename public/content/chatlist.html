@@ -15,29 +15,6 @@
                 <span class="userID"></span>
                 <div class="logout">Log Out</div>
                 <div class="moreBtn">more</div>
-
-                <!--<div class="moreInfo">
-                    <p class="email"></p>
-                    <p class="phone"></p>
-                    
-                    <h3>Update Personal info</h3>
-                    <form id="fileUpload" 
-                        action='/users/addImage' 
-                        method='post' 
-                        encType="multipart/form-data">
-                        <input name="profileImage" type="file" />
-                        <button type="submit" class="button">Upload</button>
-                    </form>
-
-                    <h3>Update username</h3>
-                    <form id="updateName">
-                        <p>Username:</p>
-                        <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-z0-9]+" id="update-username" placeholder="Enter username"></input>
-                        <p>Password:</p>
-                        <input required type="password" name="password" minlength="6" maxlength="16" id="password" placeholder="Enter password">
-                        <button type="submit" class="button">confirm</button>
-                    </form>
-                </div>-->
             </div>
 
             <!-- create chatroom -->
@@ -56,18 +33,35 @@
             <ul id="chatlist"></ul>
 
             <!-- More options -->
-            <style>
-                .moreInfo {display: none; position: absolute; left: 0; top: 0; height: 100vh; width: 100%; background-color: rgba(0, 0, 0, 0.35);}
-                .moreInfo h3 {width: 100%; text-align: center; background-color: #1c98f7;}
-                .moreInfo .details { width: 90%; background-color: white;}
-                .moreInfo__icon {margin: 0 auto; width: fit-content;}
-            </style>
             <div class="moreInfo">
                 <div class="details">
                     <h3>Profile</h3>
-                    <div class="moreInfo__icon"><img class="icon"/><div>
-                    <div class="moreInfo__username"></div>
+                    <div class="moreInfo__icon">
+                        <img class="icon"/>
+                        <div class="overlay">Upload</div>
+                    </div>
+                    <div class="moreInfo__username">
+                        <p>Your name:</p>
+                        <textarea class="userID"></textarea>
+                        <button class="updateNameBtn" disabled>Update</button>
+                    </div>
+
+                    <div class="close"><button class="closeBtn">close</button></div>
                 </div>
+
+                <form id="fileUpload" 
+                        action='/users/addImage' 
+                        method='post' 
+                        encType="multipart/form-data">
+                    <input name="profileImage" id="profileImageBtn" type="file" />
+                    <button type="submit" class="button">Upload</button>
+                </form>
+
+                <form id="updateName">
+                    <p>Username:</p>
+                    <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-z0-9]+" id="update-username" placeholder="Enter username"></input>
+                    <button type="submit" class="button">confirm</button>
+                </form>
             </div>
         </div>
     </body>
@@ -77,7 +71,7 @@
     <script>
         var currentUser;
         var allChannel = [];
-
+        
         /* Initial page function, load all the chatroom detail for the user */
         (function init(){
             $.ajax
@@ -95,6 +89,8 @@
                     $('.phone').text( 'Phone: ' + data.user.phone);
                     $('.email').text( 'Email: ' + data.user.email);
                     $('.userID').text(data.user.username + '#' + data.user.userID);
+                    $('.moreInfo__username .userID').text(data.user.username);
+                    $('.moreInfo__username .userID').addClass(data.user.username);
                     $('.icon').attr("src", '/content/images/' + data.user.icon);
                     currentUser = data.user.username + '#' + data.user.userID;
 
@@ -172,7 +168,7 @@
                     },
                     success:function(data) {
                         //if image update success, change the icon
-                        $('.userInfo .icon').attr('src', '/content/images/' + data.img);
+                        $('.moreInfo__icon .icon').attr('src', '/content/images/' + data.img);
                     },
                     error:function(data){
                     }
@@ -270,6 +266,31 @@
         $('.moreBtn').click(function() {
             ($('.moreBtn').text() === 'more')? $('.moreBtn').text('less') : $('.moreBtn').text('more');
             $('.moreInfo').toggle();
+        });
+
+        $('.moreInfo__icon .overlay').click(function() {
+            $('#profileImageBtn').trigger('click');
+       });
+
+       $('#profileImageBtn:file').change(function (){
+           $('#fileUpload .button').trigger('click');
+        });
+
+        $('.moreInfo__username textarea').on('input', function(){
+            if( !$('.moreInfo__username textarea').hasClass($('.moreInfo__username textarea').val()) ){
+                $('.updateNameBtn').prop('disabled', false);
+            }else{
+                $('.updateNameBtn').prop('disabled', true);
+            }
+        });
+
+        $('.moreInfo .closeBtn').click(function(){
+            $('.moreInfo').css('display', 'none');
+        })
+
+        $('.updateNameBtn').click(function() {
+            $('#update-username').val($('.moreInfo__username .userID').val().toLowerCase());
+            $('#updateName .button').trigger('click');
         });
 
         const socket = io({query: {"username" : currentUser , 'chat' : allChannel, 'page' : 'chatlist'}}); 

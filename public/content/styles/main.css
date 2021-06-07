@@ -99,6 +99,23 @@ li {list-style: none;}
  
  #chatlist .unreadIcon {height: 14px; margin: 11px 3px; display: inline-block; width: 15px; background-color: #1569aa; border-radius: 50%;}
 
+ .moreInfo {display: none; position: absolute; left: 0; top: 0; height: 100vh; width: 100%; background-color: rgba(0, 0, 0, 0.35);}
+ .moreInfo h3 {width: 100%; text-align: center; padding: 15px 0; font-size: 22px; color: white; background-color: #1c98f7;}
+ .moreInfo .details { width: 90%; margin: 0 auto;  margin-top: 50%; transform: translateY(-50%); background-color: white;}
+ .moreInfo__icon {margin: 0 auto; width: fit-content; position: relative;}
+ .moreInfo__icon img {padding: 15px 0; width: 225px; height: 225px; border-radius: 50%}
+ .moreInfo__icon .overlay {cursor: pointer; position: absolute; transition: .5s ease; top: 0; left: 0; height: 86%; opacity: 0; width: 100%; border-radius: 50%; margin: 15px 0px; background-color: rgba(0, 0, 0, 0.35); text-align: center;}
+ .moreInfo__icon .overlay:hover {opacity: 1;}
+ #fileUpload {display: none;}
+
+ .moreInfo__username {padding: 10px; border-top: 1px solid #DCDCDC;}
+ .moreInfo__username p {padding: 10px;}
+ .moreInfo__username .userID {border: none; font-size: 16px; margin: 15px;}
+ .moreInfo__username .userID:focus {outline: none;}
+ #updateName {display: none;}
+ .moreInfo .close{width: 100%; text-align: center; padding: 10px 0px; border-top: 1px solid #DCDCDC;}
+ .closeBtn {cursor: pointer;}
+ 
 /* Chatroom Page */
 .chatroomPage {background-color: white; margin: 0px;}   
 .chatroomPage .moreBtn {width: 100%; text-align: center;} 
