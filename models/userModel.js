@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
         maxlength: 32,
         minlength: 1
     },
-    email: {
+    /*email: {
         type: String,
         required: [true, 'A user must have an email address'],
         unique: true,
@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'A user must have a phone number'],
         unique: true,
-    },
+    },*/
     password: {
         type: String,
         required: [true, 'A user must have a user password']
@@ -37,6 +37,8 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', async function(next) {
+    this.username = this.username.toLowerCase();
+
     //Encrypt the password before save
     this.password = await bcrypt.hash(this.password, 12);
     

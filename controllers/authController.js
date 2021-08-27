@@ -41,9 +41,9 @@ const createSendToken = (user, statusCode, res) => {
 /* Signup function  */
 exports.signup = catchAsync(async (req, res, next) => {
     //destruct and get all the required data
-    const {username, password, passwordConfirm, email, phoneNo} = req.body;
+    const {username, password, passwordConfirm} = req.body;
 
-    const newUser = await User.create({username, password, passwordConfirm, email, phoneNo});
+    const newUser = await User.create({username, password, passwordConfirm});
 
     //auto login after signup
     createSendToken(newUser, 200, res);

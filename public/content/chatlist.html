@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>SENAL - Chatrooms list</title>
-        <link href="/content/styles/main.css" rel="stylesheet" />
+        <link href="/styles/main.css" rel="stylesheet" />
     </head>
     <body class="chatlistPage">
         <div class="chatlistPage__main">
@@ -65,9 +65,9 @@
             </div>
         </div>
     </body>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/scripts/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="/content/scripts/common_functions.js"></script>
+    <script type="text/javascript" src="/scripts/common_functions.js"></script>
     <script>
         var currentUser;
         var allChannel = [];
@@ -91,7 +91,7 @@
                     $('.userID').text(data.user.username + '#' + data.user.userID);
                     $('.moreInfo__username .userID').text(data.user.username);
                     $('.moreInfo__username .userID').addClass(data.user.username);
-                    $('.icon').attr("src", '/content/images/' + data.user.icon);
+                    $('.icon').attr("src", '/images/' + data.user.icon);
                     currentUser = data.user.username + '#' + data.user.userID;
 
                     //Sort the chatroom by time, the chatroom with latest message on top
@@ -108,7 +108,7 @@
                         var html = '', datetime, datetimeFormat;
                         for(var i = 0; i < data.records.length; i++){                            
                             html += '<li data-id="'+data.records[i].chatID+'" class="chatroom" id="chatroom'+data.records[i].chatID+'">' + 
-                                    '<div class="left"><span></span><img src="/content/images/'+ data.records[i]['icon'] +'" class="icon" /></div>' +
+                                    '<div class="left"><span></span><img src="/images/'+ data.records[i]['icon'] +'" class="icon" /></div>' +
                                     '<div class="right"><span class="roomName">' + data.records[i]['chatroomName'] + '</span><br/>';
                                                                     
                             //Join related chatroom, to listen if any message are send to this user
@@ -168,7 +168,7 @@
                     },
                     success:function(data) {
                         //if image update success, change the icon
-                        $('.moreInfo__icon .icon').attr('src', '/content/images/' + data.img);
+                        $('.moreInfo__icon .icon').attr('src', '/images/' + data.img);
                     },
                     error:function(data){
                     }
@@ -205,7 +205,7 @@
                     //insert chatlist data
                     var html='', datetime, datetimeFormat;
                     html += '<li data-id="'+data.records.chatID+'" class="chatroom" id="chatroom'+data.records.chatID+'">' + 
-                            '<div class="left"><img src="/content/images/'+ data.records['icon'] +'" class="icon" /></div>' +
+                            '<div class="left"><img src="/images/'+ data.records['icon'] +'" class="icon" /></div>' +
                             '<div class="right"><span class="roomName">' + data.records['chatroomName'] + '</span><br/>' +
                             '</li>';
                             

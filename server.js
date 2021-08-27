@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const { Server } = require('socket.io');
 const axios = require('axios');
-const url = require('url');
 
 /* HANDLE for unexpected error on server starts */
 process.on('uncaughtException', err => {

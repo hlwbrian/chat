@@ -5,14 +5,13 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>SENAL - Login</title>
-        <!-- jquery should download & save in project level -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <link href="/content/styles/main.css" rel="stylesheet" />
+        <script src="/scripts/jquery.min.js"></script>
+        <link href="/styles/main.css" rel="stylesheet" />
     </head>
     <body class="loginPage">
         <div class="loginPage__header">
             <div>
-                <img class="chatIcon" src="/content/images/chat_icon.png" alt="app icon" />
+                <img class="chatIcon" src="/images/chat_icon.png" alt="app icon" />
                 <h1>SENAL</h1>
             </div>
         </div>
@@ -39,17 +38,15 @@
                     <h2>Sign up</h2>
                     <form id="signupForm" action="">
                         <p>Username:</p>
-                        <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-z0-9]+" id="signup-username" placeholder="Enter username"></input>
+                        <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-zA-Z0-9]+" id="signup-username" placeholder="Enter username"></input>
                         <p>Password:</p>
                         <input required type="password" name="password" minlength="6" maxlength="16" id="signup-password" placeholder="Enter password"></input>
                         <p>Password confirm:</p>
                         <input required type="password" name="passwordConfirm"  minlength="6" maxlength="16" id="passwordConfirm" oninput="confirmCheck(this)" placeholder="Enter password again"></input>
-                        <p>Email:</p>
-                        <input required type="email" name="email" id="email" placeholder="Enter email"></input>
-                        <p>Phone:</p>
-                        <input required type="tel" name="phoneNo" id="phoneNo" pattern="[9|8|5|2]{1}[0-9]{7}" placeholder="Enter phone"></input>
                         
-                        <div class="errorMsg"></div>
+                        <div class="errorMsg">
+                            <div id="confirmText" style="display: none;">*Confirm password & password are not matched</div>
+                        </div>
                         <div class="loginBtn">
                             <button type="submit" class="button" id="signupBtn">submit</button>
                             <button type="button" class="registerToggle button">Log in</button>
@@ -109,14 +106,12 @@
         $('#signupForm').submit( function(event) {
             //prevent refresh the page when submit and wait for server response
             event.preventDefault();
-
+            
             //prepare related data to be passed to server side
             var data = {
                 username : $('#signup-username').val(),
                 password : $('#signup-password').val(),
-                passwordConfirm : $('#passwordConfirm').val(),
-                email : $('#email').val(),
-                phoneNo : $('#phoneNo').val()
+                passwordConfirm : $('#passwordConfirm').val()
             }
             
             //making request to server side
@@ -131,9 +126,8 @@
                     //handle mongoDB duplicated error       
                     if(err.responseJSON.error.statusCode === 400){
                         var fieldName = err.responseJSON.message.substring(err.responseJSON.message.lastIndexOf(':') + 1).trim();
-                        if(fieldName === 'phoneNo') fieldName = 'phone number';
                         var errMsg = 'Please use another value for ' + fieldName;
-                        $('.loginPage__form-signup .errorMsg').html(errMsg);
+                        $('.loginPage__form-signup .errorMsg').html(errMsg);          
                     }
                 },
                 success: function(data){
@@ -182,11 +176,12 @@
 
         //check if the password & the confirm password fields are the same 
         function confirmCheck(input) {
-            if (input.value === $('#signup-password').val()) {
+            if (input.value === $('#signup-password').val() || input.value.length < $('#signup-password').val().length) {
                 $('#confirmText').hide();
                 $('#signupBtn').prop('disabled', false);
             }else{
                 $('#confirmText').show();
+                $('#signupBtn').prop('disabled', true);
             }
         }
 

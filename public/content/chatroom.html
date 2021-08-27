@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <title>SENAL - Chatlist</title>
-        <link rel="stylesheet" href="/content/styles/main.css" />
+        <link rel="stylesheet" href="/styles/main.css" />
         <script>
             //Drop and Add image functions
             function allowDrop(ev) {
@@ -28,7 +28,7 @@
     <body class="chatroomPage" ondrop="drop(event)" ondragover="allowDrop(event)">
         <div class="chatroomPage__main">
             <div class="chatroomInfo">
-                <div class="goBack"><img src="/content/images/back.svg" /></div>
+                <div class="goBack"><img src="/images/back.svg" /></div>
                 <div class="chatroomName"><img id="icon"/><span id="header"></span></div>
                 <div class="moreBtn"><span>More</span></div>
                 <div class="moreOption">
@@ -90,9 +90,9 @@
             </form>
         </div>      
     </body>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/scripts/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="/content/scripts/common_functions.js"></script>
+    <script type="text/javascript" src="/scripts/common_functions.js"></script>
     <script>
         /* Page init funcction */
         (function init() {
@@ -127,7 +127,7 @@
                     let html = '';
                     
                     $('#header').text(chatroomName);
-                    $('#icon').attr('src', '/content/images/' + icon);
+                    $('#icon').attr('src', '/images/' + icon);
                     if(content.length > 0){
                         for(var value of content){
                             var senderStyle = (urlParams.get('user') === value.sender)? 'right' : 'left';
@@ -137,7 +137,7 @@
                                 html += '<li><div class="messageImg message  '+senderStyle+'">' +
                                     '<div class="sender">' + value.sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
-                                    '<div class="img"><img src="/content/images/'+value.message+'" data-src="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                                    '<div class="img"><img src="/images/'+value.message+'" data-src="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
                                     '<div class="hiddenMsg"><span style="display:none">' +value.message+ '</span></div>' +
                                 '</div></li>';
                             }
@@ -190,7 +190,7 @@
                         "authorization": "Bearer " + getCookie('chatJWT')
                     },
                     success:function(data) {
-                        $('#icon').attr('src', '/content/images/' + data.icon);
+                        $('#icon').attr('src', '/images/' + data.icon);
                     },
                     error:function(data){
                         console.log(data);
@@ -230,7 +230,7 @@
                 $('#messages').append('<li><div class="messageImg message '+senderStyle+'">' +
                                     '<div class="sender">' + sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(timestamp) + '</div>' +
-                                    '<div class="img"><img src="/content/images/'+message+'" data-img="'+message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                                    '<div class="img"><img src="/images/'+message+'" data-img="'+message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
                                     '<div class="hiddenMsg"><span style="display:none">' +message+ '</span></div>' +
                                     '</div></li>');
             }else{
