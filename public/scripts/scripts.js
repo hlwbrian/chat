@@ -274,7 +274,7 @@ if( curPage === 'chatlist.html' ){
 
     /* Event listeners */
     $('#chatlist').delegate( 'li', 'click', function(){
-        window.location = '/content/chatroom.html?user='+ encodeURIComponent($('.userID').text()) +'&chatroom=' + $(this).attr('data-id');
+        window.location = '/content/chatroom.html?user='+ encodeURIComponent($('.userIDwUsername').text()) +'&chatroom=' + $(this).attr('data-id');
     });
 
     $('.createChatBtn').click(function() {
@@ -317,7 +317,7 @@ if( curPage === 'chatlist.html' ){
     });
 
     const socket = io({query: {"username" : currentUser , 'chat' : allChannel, 'page' : 'chatlist'}}); 
-
+    
     //socket listen to the chatroom that has message sent out
     socket.on('chatroom list update', msg => {
         var roomName = msg.split('#')[0].split(' ')[1];
@@ -385,7 +385,8 @@ if( curPage === 'chatlist.html' ){
                     let members = data.content[0].members;
                     let icon = data.content[0].icon;
                     let html = '';
-                    
+                    let loginStatus = data.loginStatus;
+
                     $('#header').text(chatroomName);
                     $('#icon').attr('src', '/images/' + icon);
                     if(content.length > 0){
@@ -414,9 +415,12 @@ if( curPage === 'chatlist.html' ){
                     }
 
                     html = '';
-                    for(var value of members){
+                    for(var i = 0; i < members.length; i++){
+                        loginStatus[i].lastSeen = new Date(loginStatus[i].lastSeen);
+                        let timestampFormat = loginStatus[i].isLoggedIn? 'online' : `${loginStatus[i].lastSeen.getFullYear()}/${loginStatus[i].lastSeen.getMonth()}/${loginStatus[i].lastSeen.getDate()} ${loginStatus[i].lastSeen.getHours()}:${loginStatus[i].lastSeen.getMinutes()}`;
+
                         html += '<li>' +
-                            value +
+                            members[i] + '<span class="lastSeen"> ' + timestampFormat + '</span>';
                             '</li>';
                     }
 
@@ -476,6 +480,15 @@ if( curPage === 'chatlist.html' ){
                 socket.emit('chat message', input.value);
                 input.value = '';
             }
+        });
+
+        //user's frd online msg
+        socket.on('onlineMsg', msg => {
+            console.log('online#' + msg);
+        });
+        //user's frd offline msg
+        socket.on('offlineMsg', msg => {
+            console.log('offline#' + msg);
         });
 
         //when user receive message

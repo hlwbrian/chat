@@ -50,3 +50,30 @@ exports.changeUserIcon = catchAsync(async (req, res, next) => {
         );
     }
 });
+
+//Update user icon
+exports.updateLogin = catchAsync(async (req, res, next) => {
+    //find users and update the icon name
+    if(req.body.serverSecret !== '5sa9gkj#7w') {
+        return next(
+            new AppError('Update failed', 401)
+        );
+    }
+
+    const updateStatus = await User.updateOne({userID: req.body.userID}, {isLoggedIn: req.body.isLoggedIn});
+    if(req.body.isLoggedIn === false){
+        const updateLastSeenTime = await User.updateOne({userID: req.body.userID}, {lastSeen: new Date()});
+    }
+
+    if(updateStatus){
+        res.status(201).json({
+            status: 'success',
+            message: 'Login status Updated',
+            img: req.body.icon
+        });
+    }else{
+        return next(
+            new AppError('Update failed', 401)
+        );
+    }
+});

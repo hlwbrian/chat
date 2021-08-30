@@ -19,6 +19,11 @@ router
     .route('/addImage')
     .post(imageController.addImage);
 
+//update current login status
+router
+    .route('/updateLogin')
+    .patch(userController.updateLogin);
+    
 //Other routes that below this will need logged-in user to access
 router.use(authController.protect);
 

@@ -25,6 +25,14 @@ const userSchema = new mongoose.Schema({
         required: [true, 'A user must have a phone number'],
         unique: true,
     },*/
+    isLoggedIn: {
+        type: Boolean,
+        default: false
+    },
+    lastSeen: {
+        type: Date,
+        default: Date.now()
+    },
     password: {
         type: String,
         required: [true, 'A user must have a user password']

@@ -68,9 +68,16 @@ exports.initConversation = catchAsync(async (req, res, next) => {
   //set all the conversation read
   const updateRead = await Chat.updateMany({chatID: req.chat.currentChatID}, { $addToSet : {'conversations.$[].read' : req.user.userID }});
 
+  //Find all members login status
+  let memberList = conversations[0].members.map((curVal) => {
+    return curVal.split('#')[1];
+  });
+  const loginStatus = await User.find({userID : {$in: memberList}}).select({"lastSeen": 1, "isLoggedIn" : 1});
+
   if(conversations){
     res.status(200).json({
       msg: 'success',
+      loginStatus,
       content: conversations
     });
   }else{

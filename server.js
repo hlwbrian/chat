@@ -48,15 +48,39 @@ app.get('/', (req, res) => {
 
 //Create socket listener
 const io = new Server(server);
+let onlineUsers = [];
 
-io.on('connection', function(socket) {
+io.on('connection', function(socket) {    
+    //Push username to check online users
+    let userID = socket.request._query['username'].split('#')[1];
+
+    if(onlineUsers.indexOf(socket.request._query['username']) < 0){
+        onlineUsers.push(socket.request._query['username']);
+        
+        //Update logged-in status in MongoDB
+        axios.patch('http://localhost:3000/users/updateLogin', {
+            userID: userID,
+            serverSecret: '5sa9gkj#7w',
+            isLoggedIn: true
+        })
+        .then(function (response) {
+        })
+        .catch(function (error) {
+            // handle error
+            console.log(error);
+        });
+    }
+
     //If user is in chatroom list
     if(socket.request._query['page'] === 'chatlist'){
         let rooms = socket.request._query['chat'].split(',');
+        let username = socket.request._query['username'];
 
         for(let value of rooms){
             let roomName = `chatroom ${value}`;
             socket.join(roomName);
+
+            io.in(roomName).emit('onlineMsg', `${username}`);
         }
     }
     //if user is in chatroom inner page
@@ -73,6 +97,32 @@ io.on('connection', function(socket) {
     
     //When user disconnected
     socket.on('disconnect', () => {
+        onlineUsers = onlineUsers.filter((curVal) => {
+            return (curVal != socket.request._query['username']);
+        });
+
+        let rooms = socket.request._query['chat'].split(',');
+        let username = socket.request._query['username'];
+        let lastSeenTime = new Date();
+        lastSeenTimeFormat = `${lastSeenTime.getFullYear()}/${lastSeenTime.getMonth()}/${lastSeenTime.getDate()} ${lastSeenTime.getHours()}:${lastSeenTime.getMinutes()}`;
+        for(let value of rooms){
+            let roomName = `chatroom ${value}`;
+            io.in(roomName).emit('offlineMsg', `${username}#${lastSeenTimeFormat}`);
+        }
+
+        //Update logged-out status in MongoDB
+        axios.patch('http://localhost:3000/users/updateLogin', {
+            userID: userID,
+            serverSecret: '5sa9gkj#7w',
+            isLoggedIn: false
+        })
+        .then(function (response) {
+        })
+        .catch(function (error) {
+            // handle error
+            console.log(error);
+        });
+
         console.log('User disconnected');
     });
 });
