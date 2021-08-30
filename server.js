@@ -93,6 +93,16 @@ io.on('connection', function(socket) {
             let username = socket.request._query['username'];
             sendToRoom(roomName, username, resultMsg);
         });
+
+        //Get any users is typing now
+        socket.on('userTyping', msg => {
+            io.in(roomName).emit('showTyping', msg);
+        });
+
+        //Remove user who is done typing
+        socket.on('userDoneTyping', msg => {
+            io.in(roomName).emit('showDoneTyping', msg);
+        });
     }
     
     //When user disconnected

@@ -482,6 +482,34 @@ if( curPage === 'chatlist.html' ){
             }
         });
 
+        //Show which username typing
+        var typeTimer;                //timer identifier
+        var doneTypingInterval = 1000;  //time in ms, 5 second for example
+        var timerInput = $('#input');
+
+        //on keyup, start the countdown
+        timerInput.on('keyup', function () {
+            clearTimeout(typeTimer);
+            typeTimer = setTimeout(doneTyping, doneTypingInterval);
+        });
+
+        //on keydown, clear the countdown 
+        timerInput.on('keydown', function () {
+            socket.emit('userTyping', currentUser);
+            clearTimeout(typeTimer);
+        });
+
+        //Typing is ended
+        function doneTyping () {
+            socket.emit('userDoneTyping', currentUser);
+        }
+        socket.on('showTyping', msg => {
+            console.log('typing|' + msg);
+        });
+        socket.on('showDoneTyping', msg => {
+            console.log('doneTyping|' + msg);
+        });
+
         //user's frd online msg
         socket.on('onlineMsg', msg => {
             console.log('online#' + msg);
