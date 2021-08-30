@@ -121,8 +121,9 @@ li {list-style: none;}
 .chatroomPage .moreBtn {width: 100%; text-align: center;} 
 .chatroomPage .moreBtn span {cursor: pointer;}
 .chatroomPage h3 {margin-top: 15px;}
+.chatroom #messages {position: relative;}
 .chatroom #form, .chatroomPage {max-width: 950px; margin: 0 auto;}
-.chatroomInfo { padding: 15px; border-bottom: 1px solid #EFEFEF}
+.chatroomInfo { padding: 15px; border-bottom: 1px solid #EFEFEF;}
 .chatroomInfo div {float: left;}
 .chatroomInfo::after {content: ''; display: table; clear: both;}
 .chatroomInfo .goBack {padding: 0px 15px 0px 0px; border-right: 1px solid black; cursor: pointer;}
@@ -134,6 +135,8 @@ li {list-style: none;}
 .chatroomInfo .chatroomName::after {content: ''; display: table; clear: both;}
 .chatroomInfo .moreOption {display: none;}
 .chatroomPage .chatroom {overflow-y: scroll; height: 100vh; background-image: url('/content/images/55a44e59618507debb99d95fc16b659a.png');}
+.chatroomPage #emojiPicker{position: absolute; bottom: 15px; width: 100%}
+.chatroomPage #emojiPicker emoji-picker {margin: 0 auto;}
 
 /* Message */
 #messages .message { background: white; padding:20px; border-radius: 10px; display: inline-block; max-width: 42%;}

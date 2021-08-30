@@ -8,10 +8,12 @@
         <script src="/scripts/common_functions.js"></script>
         <script src="/socket.io/socket.io.js" defer></script>
         <script src="/scripts/scripts.js" defer></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
     </head>
     <body class="chatroomPage" ondrop="drop(event)" ondragover="allowDrop(event)">
+       
         <div class="chatroomPage__main">
-            <div class="chatroomInfo">
+            <div class="chatroomInfo">            
                 <div class="goBack"><img src="/images/back.svg" /></div>
                 <div class="chatroomName"><img id="icon"/><span id="header"></span></div>
                 <div class="moreBtn"><span>More</span></div>
@@ -49,9 +51,13 @@
             </div>
 
             <div class="chatroom"> 
-                <ul id="messages"></ul>
+                <ul id="messages">
+                    <div id="emojiPicker" style="display:none">
+                        <emoji-picker></emoji-picker>
+                    </div>
+                </ul>      
                 <form id="form" action="">
-                    <input id="input" autocomplete="off" /><button type="button" onclick="previewImage();">Image</button><button type="submit">Send</button>
+                    <input id="input" autocomplete="off"/><button type="button" onclick="$('#emojiPicker').toggle();">Emoji</button><button type="button" onclick="previewImage();">Image</button><button type="submit">Send</button>
                 </form>
             </div>
 
@@ -74,4 +80,7 @@
             </form>
         </div>      
     </body>
+    <script>
+        document.querySelector('emoji-picker').addEventListener('emoji-click', event => $('#input').val($('#input').val() + event.detail.unicode));
+    </script>
 </html>
