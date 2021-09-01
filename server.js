@@ -143,7 +143,7 @@ function sendToRoom(roomName, username, msg){
     let roomID = roomName.split(' ')[1];
     let timestamp = '';
     
-    axios.post('https://chatmain-2137.herokuapp.com/chat/save', {
+    axios.post('http://localhost:3000/chat/save', {
         chatID : roomID,
         msg: msg,
         username: username,

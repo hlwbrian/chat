@@ -399,7 +399,7 @@ if( curPage === 'chatlist.html' ){
                                     '<div class="sender">' + value.sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
                                     '<div class="img"><img src="/images/'+value.message+'" data-src="'+value.message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
-                                    '<div class="hiddenMsg"><span style="display:none">' +value.message+ '</span></div>' +
+                                    '<div class="hiddenMsg" data-src="'+value._id+'"><span style="display:none">' +value.message+ '</span></div>' +
                                 '</div></li>';
                             }
                             //if text message
@@ -407,7 +407,7 @@ if( curPage === 'chatlist.html' ){
                                 html += '<li><div class="message '+senderStyle+'">' +
                                     '<div class="sender">' + value.sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' + 
-                                    '<div class="content">' + value.message + '</div>' +                                   
+                                    '<div class="content"  data-src="'+value._id+'">' + value.message + '</div>' +                                   
                                 '</div></li>';
                             } 
                         }
