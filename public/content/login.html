@@ -39,13 +39,8 @@
             .header h1 { margin : 0 0 0 15px; line-height: 55px;}
             .header .appIcon {height: 55px; }
 
-            /* Login page hero banner */
-            .heroVideoContainer { position: relative; }
-            .heroVideoContainer p { position: absolute; left: 0.5em; top: 1.5em; font-size: 1.4em; font-weight: 100; color: white; }
-            .heroVideo { height: auto; width: 100%; }
-
             /* Login page main content */
-            .loginForm { margin: 0 auto; max-width: 500px; border-radius: 10px; box-shadow: 0px 3px 5px 6px #ddd;}
+            .loginForm { margin: 45px auto; max-width: 500px; border-radius: 10px; box-shadow: 0px 3px 5px 6px #ddd;}
             .loginForm__form { max-width: 950px; margin: 0 auto; background-color: #f6fafb; }
             .loginForm__form .form { width: fit-content; margin: 0 auto; padding: 35px 0 35px 0;}
             .loginForm__form input { width: 350px;}
@@ -58,18 +53,17 @@
             .loginForm__changeForm .active { background-color: #f6fafb; border-bottom: 3px solid #0478d1; }
             .loginForm__changeForm .tab:first-child {width: calc(50% - 1px); border-right: 1px solid #ddd}
 
-            /* Common Form Styles */
-            /*.inputContainer { position: relative; }
-            .formInput { height: 45px; font-size: 22px; }
-            .upperDes, .lowerDes { position: absolute; margin: 0px; }
-            .upperDes {left: 15px; top: 5px; font-size: 18px; }
-            .lowerDes {left: 15px; bottom: 5px; font-size: 12px; }*/
-            
             /* Login page login form */
             .loginForm__form-login { animation-name: fadeInBottom; animation-duration: 1s;}
 
             /* Login page signup form */
             .loginForm__form-signup {display: none; animation-name: fadeInBottom; animation-duration: 1s;}
+
+            /* Forget password form */        
+            .forgetPwd { padding: 30px 0px 0px 0px; text-align: right; }
+            .forgetPwd span { font-size: 14px; text-decoration: underline; cursor: pointer; }
+            #resetForm { display: none; animation-name: fadeInTop; animation-duration: 1s; }
+            #resetForm .msg {font-size: 12px; }
 
             /* Login page footer */
             .loginForm__footer {margin-top: 50px; background-color: #000b21; width: 100%; padding: 35px 0px;}
@@ -80,78 +74,76 @@
             .loginForm__footer .left {width: 40%;}
             .loginForm__footer .right {width: 60%;}
         </style>
-        <script>
-            function changeTab(showClassName){
-                $('.main').find('.active').removeClass('active');
-                $('.'+showClassName).addClass('active');
-                $('.toggleDiv').toggle();
-            }
-        </script>
     </head>
     <body class="loginPage">
-            <header class="header">
-                <div>
-                    <img class="appIcon" src="/images/app_icon.png" alt="app icon" />
-                    <h1>TELECHAT</h1>
-                </div>
-            </header>
+        <header class="header">
+            <div>
+                <img class="appIcon" src="/images/app_icon.png" alt="app icon" />
+                <h1>TELECHAT</h1>
+            </div>
+        </header>
 
-            <main class="main">
-                <div class="heroVideoContainer">
-                    <p>Best Way To Chat.</p>
-                    <video autoplay muted loop class="heroVideo">
-                        <source src="/images/hero_video.mp4" type="video/mp4">
-                    </video>
-                </div>
+        <main class="main">
+            <div class="loginForm">                   
+                <div class="loginForm__form">      
+                    <div class="loginForm__changeForm">
+                        <div class="tab active loginForm__changeForm-login showLogin" onclick="changeTab('showLogin')">LOGIN</div>
+                        <div class="tab loginForm__changeForm—register showRegister" onclick="changeTab('showRegister')">REGISTER</div>
+                    </div>                             
+                    <div class="loginForm__form-login form toggleDiv">
+                        <form id="loginForm" action="">
+                            <p>Username:</p>
+                            <input type="text" required maxlength="32" minlength="1" name="username" id="login-username" class="formInput" placeholder="Enter username:"></input>
 
-                <div class="loginForm">                   
-                    <div class="loginForm__form">      
-                        <div class="loginForm__changeForm">
-                            <div class="tab active loginForm__changeForm-login showLogin" onclick="changeTab('showLogin')">LOGIN</div>
-                            <div class="tab loginForm__changeForm—register showRegister" onclick="changeTab('showRegister')">REGISTER</div>
-                        </div>                             
-                        <div class="loginForm__form-login form toggleDiv">
-                             <form id="loginForm" action="">
-                                    <p>Username:</p>
-                                    <input type="text" required maxlength="32" minlength="1" name="username" id="login-username" class="formInput" placeholder="Enter username:"></input>
-
-                                    <p>Password:</p>
-                                    <input type="password" required minlength="6" maxlength="16" name="password" id="login-password" placeholder="Enter your password:"></input>
+                            <p>Password:</p>
+                            <input type="password" required minlength="6" maxlength="16" name="password" id="login-password" placeholder="Enter your password:"></input>
                                     
-                                    <div class="errorMsg"></div>
-                                    <div class="loginBtn">
-                                        <button type="submit" class="loginSubmit button">LOG IN</button>
-                                    </div>
-                            </form>
-                        </div>
-                        <div class="loginForm__form-signup form toggleDiv">
-                             <form id="signupForm" action="">
-                                    <p>Username:</p>
-                                    <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-zA-Z0-9]+" id="signup-username" placeholder="Enter username"></input>
-                                    <p>Password:</p>
-                                    <input required type="password" name="password" minlength="6" maxlength="16" id="signup-password" placeholder="Enter password"></input>
-                                    <p>Password confirm:</p>
-                                    <input required type="password" name="passwordConfirm"  minlength="6" maxlength="16" id="passwordConfirm" oninput="confirmCheck(this)" placeholder="Enter password again"></input>
-                                    
-                                    <div class="errorMsg">
-                                        <div id="confirmText" style="display: none;">*Confirm password & password are not matched</div>
-                                    </div>
-                                    <div class="loginBtn">
-                                        <button type="submit" class="button" id="signupBtn">REGISTER</button>
-                                    </div>
-                            </form>
-                        </div>    
+                            <div class="errorMsg"></div>
+                            <div class="loginBtn">
+                                <button type="submit" class="loginSubmit button">LOG IN</button>
+                            </div>
+                        </form>
+                        <div class="forgetPwd"><span>Forget Password?</span></div>
+                        <form id="resetForm" action="">
+                            <p>Email:</p>
+                            <input required type="email" name="email" id="reset-email" placeholder="Enter email"></input>
+
+                            <div class="msg"></div>
+                            <div class="loginBtn">
+                                <button type="submit" class="button" id="resetBtn">Send recovery email</button>
+                            </div>
+                        </form>
                     </div>
+                    <div class="loginForm__form-signup form toggleDiv">
+                        <form id="signupForm" action="">
+                            <p>Username:</p>
+                            <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-zA-Z0-9]+" id="signup-username" placeholder="Enter username"></input>
+                            <p>Email:</p>
+                            <input required type="email" name="email" id="signup-email" placeholder="Enter email"></input>                            
+                            <p>Password:</p>
+                            <input required type="password" name="password" minlength="6" maxlength="16" id="signup-password" placeholder="Enter password"></input>
+                            <p>Password confirm:</p>
+                            <input required type="password" name="passwordConfirm"  minlength="6" maxlength="16" id="passwordConfirm" oninput="confirmCheck(this)" placeholder="Enter password again"></input>
+                                    
+                            <div class="errorMsg">
+                                <div id="confirmText" style="display: none;">*Confirm password & password are not matched</div>
+                            </div>
+                            <div class="loginBtn">
+                                <button type="submit" class="button" id="signupBtn">REGISTER</button>
+                            </div>
+                        </form>
+                    </div>    
                 </div>
-            </main>
+            </div>
+        </main>
 
-            <footer class="loginForm__footer">
-                <div class="container">
-                    <div class="left">
-                        <div> 
-                            <span class="copyright">© 2013–2021 Beacon, a 501c3 nonprofit.</span><br> 
-                            TeleChat is a registered trademark in the United States and other countries. <br> <br> 
-                            For media inquiries, contact <a href="#">info@beacon.org</a></div>
+        <footer class="loginForm__footer">
+            <div class="container">
+                <div class="left">
+                    <div> 
+                        <span class="copyright">© 2013–2021 TeleChat, a 501c3 nonprofit.</span><br> 
+                        TeleChat is a registered trademark in the United States and other countries. <br> <br> 
+                        For media inquiries, contact <a href="#">info@telechat.org</a></div>
                     </div>
 
                     <div class="right">
@@ -188,6 +180,142 @@
                         </div>
                     </div>
                 </div>
-            </footer>
+            </div>
+        </footer>
+        <script>
+                //Common function to change tab menu
+                function changeTab(showClassName){
+                    if( !$('.'+showClassName).hasClass('active') ){
+                        $('.main').find('.active').removeClass('active');
+                        $('.'+showClassName).addClass('active');
+                        $('.toggleDiv').toggle();
+                    }     
+                }
+
+                //Check if the password & the confirm password fields are the same 
+                function confirmCheck(input) {
+                    if (input.value === $('#signup-password').val() || input.value.length < $('#signup-password').val().length) {
+                        $('#confirmText').hide();
+                        $('#signupBtn').prop('disabled', false);
+                    }else{
+                        $('#confirmText').show();
+                        $('#signupBtn').prop('disabled', true);
+                    }
+                }
+
+                 /* LOGIN Page functions */
+                 /* Login function: pass username & password to login */
+                 function login(){
+                    //prepare related data to be passed to server side
+                    var data = {
+                        username : $('#login-username').val(),
+                        password : $('#login-password').val()
+                    }
+                    
+                    //making request to server side
+                    $.ajax({
+                        type: 'POST',
+                        url: '/users/login',
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        async: false,
+                        data: JSON.stringify(data),
+                        error: function(err){
+                            //if server does not find related user informaiton
+                            if(err.status === 404){
+                                $('.loginForm__form-login .errorMsg').html('*Incorrect password or username, please check again.');
+                            }
+                        },
+                        success: function(){
+                            //go to chat list page
+                            window.location = '/content/chatlist.html';
+                        }
+                    });
+                }
+                
+                /* Sign up function: pass related information to create an account */
+                function signup() {
+                    //prepare related data to be passed to server side
+                    var data = {
+                        username : $('#signup-username').val(),
+                        email : $('#signup-email').val(),
+                        password : $('#signup-password').val(),
+                        passwordConfirm : $('#passwordConfirm').val()
+                    }
+                    
+                    //making request to server side
+                    $.ajax({
+                        type: 'POST',
+                        url: '/users/signup',
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        async: false,
+                        data: JSON.stringify(data),
+                        error: function(err){       
+                            //handle mongoDB duplicated error       
+                            if(err.responseJSON.error.statusCode === 400){
+                                var fieldName = err.responseJSON.message.substring(err.responseJSON.message.lastIndexOf(':') + 1).trim();
+                                var errMsg = 'Please use another value for ' + fieldName;
+                                $('.loginPage__form-signup .errorMsg').html(errMsg);          
+                            }
+                        },
+                        success: function(data){
+                            //if signup successful, then go to chatlist page
+                            window.location = '/content/chatlist.html';
+                        }                
+                    });
+                };
+
+                /* Reset Password function */
+                function resetPwd(){
+                    //prepare related data to be passed to server side
+                    var data = {
+                        email : $('#reset-email').val()
+                    }
+
+                    //making request to server side
+                    $.ajax({
+                        type: 'POST',
+                        url: '/users/createResetToken',
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        async: false,
+                        data: JSON.stringify(data),
+                        error: function(err){         
+                            if(err.responseJSON.error.statusCode === 404){
+                                $('#resetForm .msg').html('Email not found!');          
+                            }
+                        },
+                        success: function(data){
+                            $('#resetForm .msg').html('Email sent!');
+                        }                
+                    });
+                }
+                             
+                /* Event listener */
+                //Submit login
+                $('#loginForm').submit( function(event) {
+                    event.preventDefault();
+                    login();
+                });
+                
+                //Submit sign up form
+                $('#signupForm').submit( function(event) {
+                    event.preventDefault();
+                    signup();
+                });
+
+                //Submit reset form
+                $('#resetForm').submit( function(event) {
+                    event.preventDefault();
+                    resetPwd();
+                });
+                
+                //Show Reset Password form
+                $('.forgetPwd span').click( function() {
+                    $('#resetForm').toggle();
+                });
+
+        </script>
     </body>
 </html>

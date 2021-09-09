@@ -41,9 +41,9 @@ const createSendToken = (user, statusCode, res) => {
 /* Signup function  */
 exports.signup = catchAsync(async (req, res, next) => {
     //destruct and get all the required data
-    const {username, password, passwordConfirm} = req.body;
+    const {username, email, password, passwordConfirm} = req.body;
 
-    const newUser = await User.create({username, password, passwordConfirm});
+    const newUser = await User.create({username, email, password, passwordConfirm});
 
     //auto login after signup
     createSendToken(newUser, 200, res);
@@ -56,7 +56,7 @@ exports.login = catchAsync( async (req, res, next) => {
 
     //find users
     const user = await User.findOne({username : username});
-    
+
     //user.correctPassword is a model method, may refer to models/userModel
     if(!user || !(await user.correctPassword(password, user.password))){
         return next(

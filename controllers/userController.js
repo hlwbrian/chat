@@ -4,6 +4,7 @@ const Image = require('./../models/imageModel');
 const path = require('path');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('../utils/appError');
+const nodemailer = require('nodemailer');
 
 //Update personal information for user
 exports.updateUserName = catchAsync(async (req, res, next) => {
@@ -74,6 +75,44 @@ exports.updateLogin = catchAsync(async (req, res, next) => {
     }else{
         return next(
             new AppError('Update failed', 401)
+        );
+    }
+});
+
+//Gen Reset token and send email
+exports.createResetToken = catchAsync(async (req, res, next) => {  
+    const user = await User.findOne({email: req.body.email});
+
+    if(user){
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            secure: true,
+            auth: {
+                user: 'hlwbriantesting@gmail.com', //sender email address
+                pass: 'ETHK#2525' //sender email password
+            }
+        });
+      
+        // send mail with defined transport object
+        //let info = await transporter.sendMail({
+        let info = await transporter.sendMail({
+            from: 'hlwbriantesting@gmail.com', // sender address
+            to: req.body.email, // list of receivers
+            subject: "Testing reset token", // Subject line
+            text: "Hello world?", // plain text body
+            html: "<b>Hello world1241?</b>", // html body
+        }, (error, info) => {
+            if(error){
+                console.log('something is wrong');
+            }
+        });
+        
+        res.status(201).json({
+            message: 'Email sent'
+        });
+    }else{
+        return next(
+            new AppError('Email not found', 404)
         );
     }
 });

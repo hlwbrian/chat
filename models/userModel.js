@@ -13,14 +13,20 @@ const userSchema = new mongoose.Schema({
         maxlength: 32,
         minlength: 1
     },
-    /*email: {
+    email: {
         type: String,
         required: [true, 'A user must have an email address'],
         unique: true,
         lowercase: true,
         validate: [validator.isEmail, 'Please provide a valid email']
     },
-    phoneNo: {
+    resetToken: {
+        type: String
+    },
+    tokenCreateTime: {
+        type: Date
+    },
+    /*phoneNo: {
         type: String,
         required: [true, 'A user must have a phone number'],
         unique: true,
