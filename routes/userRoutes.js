@@ -18,12 +18,12 @@ router
 //Create Reset password token
 router
     .route('/createResetToken')
-    .post(userController.createResetToken);
+    .post(authController.createResetToken);
 
 //Reset password
 router
     .route('/resetPassword')
-    .patch(userController.resetPassword);
+    .patch(authController.resetPassword);
 
 router
     .route('/addImage')
