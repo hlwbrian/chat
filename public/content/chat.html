@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TELECHAT - CHAT</title>
+        <link href="/styles/main.css" rel="stylesheet" />
+        <script src="/scripts/jquery.min.js"></script>
+        <script src="/scripts/common_functions.js"></script>
+        <script src="/socket.io/socket.io.js" defer></script>
+        <style>
+            .chatPage #chatlist, .chatPage #chatroom { float: left; padding: 0; margin: 0; }
+            .chatPage::after{ content: ''; display: table; clear: both; }
+            .chatPage #chatlist { width: 20%; min-width: 230px; border-right: 1px solid #ddd; }
+            .chatPage #chatroom { width: 80%; max-width: calc(100% - 231px); }
+        </style>
+    </head>
+    <body class="chatPage">
+        <main>
+            <!-- Left part -->
+            <div id="chatlist">
+                <!-- show personal info -->
+                <div class="userInfo">
+                    <img class="icon"/>  
+                    <span class="userID userIDwUsername"></span>
+                    <span class="moreBtn"><svg viewBox="0 0 24 24" width="24" height="24" class=""><path d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z"></path></svg></span>                    
+                </div>
+            </div>
+
+            <!-- Right part -->
+            <div id="chatroom"></div>
+        </main>
+    </body>
+</html>
