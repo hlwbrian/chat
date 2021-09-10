@@ -22,3 +22,23 @@ function formatDate(date){
 
     return [year, month, day].join('-') + ' ' + hour + ':' + minute;
 }
+
+//Common function to change tab menu
+function changeTab(showClassName){
+    if( !$('.'+showClassName).hasClass('active') ){
+        $('.main').find('.active').removeClass('active');
+        $('.'+showClassName).addClass('active');
+        $('.toggleDiv').toggle();
+    }     
+}
+
+//Check if the password & the confirm password fields are the same 
+function confirmCheck(input) {
+    if (input.value === $('#signup-password').val() || input.value.length < $('#signup-password').val().length) {
+        $('#confirmText').hide();
+        $('#signupBtn').prop('disabled', false);
+    }else{
+        $('#confirmText').show();
+        $('#signupBtn').prop('disabled', true);
+    }
+}
