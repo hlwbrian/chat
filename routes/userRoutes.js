@@ -15,10 +15,15 @@ router
     .route('/login')
     .post(authController.login);
 
-//Reset password
+//Create Reset password token
 router
     .route('/createResetToken')
     .post(userController.createResetToken);
+
+//Reset password
+router
+    .route('/resetPassword')
+    .patch(userController.resetPassword);
 
 router
     .route('/addImage')

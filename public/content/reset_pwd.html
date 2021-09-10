@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TELECHAT - RESET PASSWORD</title>
+        <link href="/styles/main.css" rel="stylesheet" />
+        <script src="/scripts/jquery.min.js"></script>
+        <style>
+            @keyframes icon {
+                0% { transform: translateX(-10px); }
+                80% { transform: translateX(2px); }
+                100% { transform: translateX(0px); }
+            }
+
+            @keyframes fadeInTop {
+                0% { transform: translateY(-15px); opacity: 0; }
+                100% { transform: translateY(0px);  opacity: 100; }
+            }
+
+            @keyframes fadeInBottom {
+                0% { transform: translateY(15px); opacity: 0; }
+                100% { transform: translateY(0px);  opacity: 100; }
+            }
+
+            @keyframes customBTN {
+                0% { transform: scale(1);}
+                100% { transform: scale(1.02); box-shadow: 0px 1px 3px black;}
+            }
+
+            /* RESET page*/
+            .header { background-color: white; padding : 30px 0px 30px 20px;  border-bottom: 1px solid #ddd; }
+            .header div {animation-name: icon; animation-duration: 1.5s;}
+            .header * {float: left;}
+            .header a { color : black; }
+            .header::after {  content: ""; clear: both; display: table; }
+            .header h1 { margin : 0 0 0 15px; line-height: 55px;}
+            .header .appIcon {height: 55px; }
+            
+            .resetForm { margin: 45px auto; max-width: 500px; border-radius: 20px; overflow: hidden; box-shadow: 0px 3px 5px 6px #ddd;}
+            .resetForm__form { max-width: 950px; margin: 0 auto; background-color: #f6fafb; animation-name: fadeInBottom; animation-duration: 1s;}
+            .resetForm__form .form { width: fit-content; margin: 0 auto; padding: 35px 0 35px 0;}
+            .resetForm__form input { width: 350px;}
+            .resetForm__form .resetBtn { width: 350px; margin: 0px; padding: 5px 0px; height: 35px; position: relative; margin-top: 15px;}
+            .resetForm__form .button {width: 100%; margin-right: 15px; font-size: 14px; border-color: #0478d1; border-radius: 10px; background-color: #0478d1; color : white; line-height: 35px; cursor: pointer; box-shadow: 0px 0px 2px black;}
+            .resetForm__form .button:hover {animation-name: customBTN; animation-duration: 0.5s; animation-fill-mode: forwards;}     
+            #confirmText {font-size: 12px; color: red; }
+
+            .footer {margin-top: 50px; background-color: #000b21; width: 100%; padding: 35px 0px;}
+            .footer .container {width: 82%; margin: 0 auto;}
+            .footer .container * {color: white;}
+            .footer .container div{float: left;}
+            .footer .container::after {content: ''; clear: both; display: table;}
+            .footer .left {width: 40%;}
+            .footer .right {width: 60%;}
+        </style>
+    </head>
+    <body class="loginPage">
+        <header class="header">
+            <a href="login.html">
+                <div>
+                    <img class="appIcon" src="/images/app_icon.png" alt="app icon" />
+                    <h1>TELECHAT</h1>
+                </div>
+            </a>
+        </header>
+
+        <main class="main">
+            <div class="resetForm">
+                <div class="resetForm__form">
+                    <div class="form">
+                        <form id="resetForm" action="">
+                            <p>Email: <span class="userEmail"></span></p>                          
+                            <p>Password:</p>
+                            <input required type="password" name="password" minlength="6" maxlength="16" id="signup-password" placeholder="Enter password"></input>
+                            <p>Password confirm:</p>
+                            <input required type="password" name="passwordConfirm"  minlength="6" maxlength="16" id="passwordConfirm" oninput="confirmCheck(this)" placeholder="Enter password again"></input>
+                                        
+                            <div class="errorMsg"></div>
+                            <div id="confirmText" style="display:none">*Confirm password & password are not matched</div>
+                            <div class="resetBtn">
+                                <button type="submit" class="resetSubmit button">RESET</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <div class="container">
+                <div class="left">
+                    <div> 
+                        <span class="copyright">© 2013–2021 TeleChat, a 501c3 nonprofit.</span><br> 
+                        TeleChat is a registered trademark in the United States and other countries. <br> <br> 
+                        For media inquiries, contact <a href="#">info@telechat.org</a></div>
+                    </div>
+
+                    <div class="right">
+                        <div class="container">
+                            <div class="columns">
+                                <div class="column"> 
+                                    <strong>Company</strong>
+                                    <ul>
+                                        <li> <a href="#">Donate</a></li>
+                                        <li> <a href="#">Careers</a></li>
+                                        <li> <a href="#">Blog</a></li>
+                                        <li> <a href="#">Terms &amp; Privacy Policy</a></li>
+                                    </ul>
+                                </div>
+                                <div class="column"> 
+                                    <strong>Download</strong>
+                                    <ul>
+                                        <li> <a href="#">Android</a></li>
+                                        <li> <a href="#">iPhone &amp; iPad</a></li>
+                                        <li> <a href="#">Windows</a></li>
+                                        <li> <a href="#">Mac</a></li>
+                                        <li> <a href="#">Linux</a></li>
+                                    </ul>
+                                </div>
+                                <div class="column"> 
+                                    <strong>Social</strong>
+                                    <ul>
+                                        <li> <a href="#" target="_blank">GitHub</a></li>
+                                        <li> <a href="#" target="_blank">Twitter</a></li>
+                                        <li> <a href="#" target="_blank">Instagram</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </body>
+    <script>
+        //INIT
+        var url_string = window.location.href;
+        var url = new URL(url_string);
+        var email = url.searchParams.get("email");
+        var token = url.searchParams.get("token");
+        $('.userEmail').html(email);
+
+        //Check if the password & the confirm password fields are the same 
+        function confirmCheck(input) {
+            if (input.value === $('#signup-password').val() || input.value.length < $('#signup-password').val().length) {
+                $('#confirmText').hide();
+                $('#resetpBtn').prop('disabled', false);
+            }else{
+                $('#confirmText').show();
+                $('#resetBtn').prop('disabled', true);
+            }
+        }
+
+        /* Reset function: pass email & password to reset */
+        function reset(){
+            //prepare related data to be passed to server side
+            var data = {
+                email: email,
+                token: token,
+                password : $('#signup-password').val(),
+                passwordConfirm : $('#passwordConfirm').val()
+            }
+            
+            //making request to server side
+            $.ajax({
+                type: 'PATCH',
+                url: '/users/resetPassword',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                async: false,
+                data: JSON.stringify(data),
+                error: function(err){
+                    //if server does not find related user informaiton
+                    if(err.status === 405){
+                        $('.errorMsg').html('Token expired, please try again and complete the procedure within 15 mins!');
+                    }else if (err.status === 404){
+                        $('.errorMsg').html('Token error, please try retry the whole process!');
+                    }
+                },
+                success: function(){
+                    //go to chat list page
+                    window.location = '/content/login.html';
+                }
+            });
+        }
+
+        /* Event listener */
+        //Submit login
+        $('#resetForm').submit( function(event) {
+            event.preventDefault();
+            reset();
+        });
+    </script>
+</html>
