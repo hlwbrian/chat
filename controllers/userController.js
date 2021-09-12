@@ -12,26 +12,21 @@ exports.updateUserName = catchAsync(async (req, res, next) => {
     //update the username in user collection
     const updatedUser = await User.updateOne({userID: req.user.userID}, {username: username});
 
-    //update all the related chat to show new username
-    const updateChatroom = await Chat.updateMany({members: req.user.username + '#' + req.user.userID}, 
-                                                        {$set : { "members.$[element]" :  username + '#' + req.user.userID}},
-                                                        {arrayFilters : [{ "element" : req.user.username + '#' + req.user.userID}]}
-                                                    );
-    if(updatedUser && updateChatroom){
+    if(updatedUser){
         res.status(201).json({
             status: 'success',
             message: 'user information updated'
         });
     }else{
         return next(
-            new AppError('Update failed', 401)
+            new AppError('Update failed', 404)
         );
     }
 });
 
 //Update user icon
-exports.changeUserIcon = catchAsync(async (req, res, next) => {
-
+exports.changeUserIcon = catchAsync(async (req, res, next) => {   
+     
     //Add image name into Image collection
     const addImage = await Image.create({name : req.body.icon});
 

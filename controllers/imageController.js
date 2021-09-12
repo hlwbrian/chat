@@ -15,7 +15,7 @@ exports.addImage = catchAsync(async (req, res, next) => {
     }
     
     imageName = image.md5 + '.' + image.mimetype.split('/')[1];
-    uploadPath = appDir + '/public/content/images/' + imageName;
+    uploadPath = appDir + '/public/images/' + imageName;
 
     //upload function
     image.mv(uploadPath, err => {
@@ -25,7 +25,7 @@ exports.addImage = catchAsync(async (req, res, next) => {
             );
         }else{
             if(req.files.profileImage){
-                res.redirect('/content/chatlist.html?uploadImg=' + imageName);
+                res.redirect('/content/chat.html?uploadImg=' + imageName);
             }else if(req.files.chatroomImage){
                 backURL=req.header('Referer') || '/';
                 res.redirect(backURL + '&uploadImg=' + imageName);

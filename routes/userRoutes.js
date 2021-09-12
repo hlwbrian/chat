@@ -15,16 +15,6 @@ router
     .route('/login')
     .post(authController.login);
 
-//Create Reset password token
-router
-    .route('/createResetToken')
-    .post(authController.createResetToken);
-
-//Reset password
-router
-    .route('/resetPassword')
-    .patch(authController.resetPassword);
-
 router
     .route('/addImage')
     .post(imageController.addImage);
@@ -36,6 +26,16 @@ router
     
 //Other routes that below this will need logged-in user to access
 router.use(authController.protect);
+
+//Create Reset password token
+router
+    .route('/createResetToken')
+    .post(authController.createResetToken);
+
+//Reset password
+router
+    .route('/resetPassword')
+    .patch(authController.resetPassword);
 
 //update user personal information
 router

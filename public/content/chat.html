@@ -8,7 +8,7 @@
         <link href="/styles/main.css" rel="stylesheet" />
         <script src="/scripts/jquery.min.js"></script>
         <script src="/scripts/common_functions.js"></script>
-        <script src="/socket.io/socket.io.js" defer></script>
+        <script src="/socket.io/socket.io.js"></script>
         <style>
             @keyframes enterFromTop {
                 0% {
@@ -84,7 +84,7 @@
 
             /* Chat page user info bar */
             .chatlist__user {padding: 5px 15px; border-bottom: 1px solid #EFEFEF;}
-            .chatlist__user .icon {height: 55px; border-radius: 50%;}
+            .chatlist__user .icon {height: 55px; width: 55px; border-radius: 50%;}
             .chatlist__user .username { font-size: 22px; font-weight: 500; vertical-align: top;  line-height: 55px; width: calc(100% - 113px); text-align:center; display: inline-block;}
             .chatlist__user .more { cursor: pointer; float: right; padding-right: 8px;}
             .chatlist__user svg:hover { transform: scale(1.15); }
@@ -97,8 +97,8 @@
             .optionContainer__content { height: fit-content; border-radius: 5px; box-shadow: 6px 4px 10px black; width: fit-content; position: absolute; inset: 0; margin: auto; padding: 25px; background-color: white; }
             .optionContainer__content .profile__title { padding: 25px 10px; background-color: #0478d1; border-radius: 10px; }
             .optionContainer__content .profile__title h3 { font-size: 1.8em; color: white;}
-            .optionContainer__content .profile__icon { padding: 15px; }
-            .optionContainer__content .profile__icon img {margin-left: 50%; border-radius: 50%; transform: translateX(-50%); }
+            .optionContainer__content .profile__icon { padding: 15px; position: relative; }
+            .optionContainer__content .profile__icon img {margin-left: 50%; border-radius: 50%; transform: translateX(-50%); height: 280px; width: 280px; cursor: pointer; }
             .optionContainer__content .profile__username { background-color: rgb(243, 243, 243); padding: 15px; border-radius: 10px; }
             .optionContainer__content .profile__username h2 { font-size: 18px; }
             .optionContainer__content .profile__username .username { display: inline-block; margin: 10px 0px; font-size: 18px;}
@@ -110,8 +110,17 @@
             .logoutBtn {width: 100%; margin-right: 15px; font-size: 14px; border-color: #0478d1; border-radius: 10px; background-color: #0478d1; color : white; line-height: 35px; cursor: pointer; box-shadow: 0px 0px 2px black;}
             .logoutBtn:hover {animation-name: customBTN; animation-duration: 0.5s; animation-fill-mode: forwards;}     
 
+            #updateName { display: none; }
+            .updateNameBtn { border: none; border-radius: 50%; background-color: rgb(243, 243, 243); cursor: pointer; }
+            .updateNameBtn:hover { background-color: #ddd; }
+            
+            #fileUpload { display: none; }
+            .overlay_icon { position: absolute; display: none; height: 280px; background-color: rgba(0,0,0, 0.5); top: 15px; left: 50%; transform: translateX(-50%); width: 280px;  border-radius: 50%; cursor: pointer; }
+            .overlay_icon p { position: absolute; inset: 0; color: white; height: fit-content; width: fit-content; margin: auto; }
+            .optionContainer__content .profile__icon img:hover + div { display: block; }
+           
             /* Create New Chatroom */
-            .chatlist__newchat { padding: 10px; background-color: #0478d1; overflow: hidden; }
+            .chatlist__newchat { padding: 10px; background-color: #0478d1; overflow: hidden; border-radius: 10px; }
             .chatlist__newchat h3 { color: white; cursor: pointer;}
             .newchatForm form {display: none;}
             .newchatForm input{ min-width: 290px; }
@@ -126,17 +135,13 @@
             #chatlist__chatrooms_list {margin-right: 0;}
             #chatlist__chatrooms_list .chatroom {padding: 15px; border-bottom: 1px solid #ddd;}
             #chatlist__chatrooms_list .chatroom:hover {background-color: #ddd;}
-            #chatlist__chatrooms_list .chatroom .icon {height: 35px; border-radius: 50%; margin-right: 15px;}
+            #chatlist__chatrooms_list .chatroom .chatroom_icon {height: 35px; border-radius: 50%; margin-right: 15px;}
             #chatlist__chatrooms_list .chatroom div {float: left;}
             #createChat .errorMsg {color: white; margin-top: 5px;}
-
-
+            #initUpdateName { cursor: pointer; margin-left: 10px; }
+            #updateName .errMsg { display: none; font-size: 12px; }
             
-            
-            
-            
-            
-            
+            /******** TODO DEL */
             /* chatlist body */
             .chatlistPage__main {background-color: white; max-width: 1280px; margin: 0 auto; height: 100%;}
             .chatlistPage .button {margin-right: 15px; font-size: 14px; border-color: #bbbfc2; border-radius: 10px; background-color: #1c98f7; color : white; line-height: 35px; cursor: pointer; box-shadow: 1px 1px 2px black;}
@@ -147,9 +152,7 @@
 
             /* chatlist chatroom list */
             #chatlist {padding: 0px 15px; background-color: #f5f5f5; margin: 0px;}
-            #chatlist li {cursor: pointer;}
-            
-            
+            #chatlist li {cursor: pointer;}          
             #chatlist .chatroom .right{width: calc(100% - 50px);}
             #chatlist .chatroom .halfWidthRight {width: calc(100% - 75px);}
             #chatlist .chatroom .message, #chatlist .chatroom .timestamp {font-size: 14px; color: #5a5a5a;}
@@ -159,23 +162,10 @@
             #chatlist .roomName {display: inline-block; font-size: 14px; font-weight: bold;}
             
             #chatlist .unreadIcon {height: 14px; margin: 11px 3px; display: inline-block; width: 15px; background-color: #1569aa; border-radius: 50%;}
+             /******** TODO DEL */
 
-            /*.moreInfo {display: none; position: absolute; left: 0; top: 0; height: 100vh; width: 100%; background-color: rgba(0, 0, 0, 0.35);}
-            .moreInfo h3 {width: 100%; text-align: center; padding: 15px 0; font-size: 22px; color: white; background-color: #1c98f7;}
-            .moreInfo .details { width: 90%; margin: 0 auto;  margin-top: 50%; transform: translateY(-50%); background-color: white;}
-            .moreInfo__icon {margin: 0 auto; width: fit-content; position: relative;}
-            .moreInfo__icon img {padding: 15px 0; width: 225px; height: 225px; border-radius: 50%}
-            .moreInfo__icon .overlay {cursor: pointer; position: absolute; transition: .5s ease; top: 0; left: 0; height: 86%; opacity: 0; width: 100%; border-radius: 50%; margin: 15px 0px; background-color: rgba(0, 0, 0, 0.35); text-align: center;}
-            .moreInfo__icon .overlay:hover {opacity: 1;}
-            .moreInfo #fileUpload {display: none;}
 
-            .moreInfo__username {padding: 10px; border-top: 1px solid #DCDCDC;}
-            .moreInfo__username p {padding: 10px;}
-            .moreInfo__username .userID {border: none; font-size: 16px; margin: 15px;}
-            .moreInfo__username .userID:focus {outline: none;}*/
-            #updateName {display: none;}
-            .moreInfo .close{width: 100%; text-align: center; padding: 10px 0px; border-top: 1px solid #DCDCDC;}
-            .closeBtn {cursor: pointer;}
+
         </style>
     </head>
     <body class="chatPage">
@@ -191,12 +181,34 @@
                     </div>  
                     <div class="profile__icon">
                         <img class="icon"/> 
+                        <div class="overlay_icon">
+                            <p>
+                                Update Image
+                                <span class="cameraImg"><svg viewBox="0 0 24 24" width="24" height="24" class=""><path fill="currentColor" d="M21.317 4.381H10.971L9.078 2.45c-.246-.251-.736-.457-1.089-.457H4.905c-.352 0-.837.211-1.078.468L1.201 5.272C.96 5.529.763 6.028.763 6.38v1.878l-.002.01v11.189a1.92 1.92 0 0 0 1.921 1.921h18.634a1.92 1.92 0 0 0 1.921-1.921V6.302a1.92 1.92 0 0 0-1.92-1.921zM12.076 18.51a5.577 5.577 0 1 1 0-11.154 5.577 5.577 0 0 1 0 11.154zm0-9.506a3.929 3.929 0 1 0 0 7.858 3.929 3.929 0 0 0 0-7.858z"></path></svg></span>
+                            </p>
+                        </div>
                     </div>
                     <div class="profile__username">
                         <h2>Your Name</h2>
-                        <span class="username"></span><br/>
+                        <span class="username"></span>
+                        <span id="initUpdateName"><svg viewBox="0 0 24 24" width="18" height="18" class=""><path fill="currentColor" d="M3.95 16.7v3.4h3.4l9.8-9.9-3.4-3.4-9.8 9.9zm15.8-9.1c.4-.4.4-.9 0-1.3l-2.1-2.1c-.4-.4-.9-.4-1.3 0l-1.6 1.6 3.4 3.4 1.6-1.6z"></path></svg></span>                    
+                        <form id="updateName">
+                            <input required type="text" maxlength="32" minlength="1" name="username" pattern="[a-zA-Z0-9]+" id="update-username" placeholder="New username"></input>
+                            <p class="errMsg"></p>
+                            <button type="submit" class="updateNameBtn"><svg viewBox="0 0 24 24" width="24" height="24" class=""><path fill="currentColor" d="M9 17.2l-4-4-1.4 1.3L9 19.9 20.4 8.5 19 7.1 9 17.2z"></path></svg></button>
+                        </form>
+                        <br/>
                         <span class="remarks">*This is not your username or pin. This name will be visible to your Telechat contacts.</span>
                     </div>
+                    <form id="fileUpload" 
+                        action='/users/addImage' 
+                        method='post' 
+                        encType="multipart/form-data"
+                        onChange="submitProfileIcon()"
+                        >
+                        <input name="profileImage" id="profileImageBtn" type="file" />
+                        <button type="submit" class="button">Upload</button>
+                    </form>
                     <div class="profile__email">
                         <h2>Your Email</h2>
                         <span class="email"></span>
@@ -252,7 +264,12 @@
         var userID;
         var allChannel = []; //used for connection IO socket
 
-        //Event listener
+        /**************** Functions *********************/
+        function submitProfileIcon(){
+            $('#fileUpload').trigger('submit');
+        }
+
+        /**************** Event listeners ***************/
         $('.chatlist__user .more').on('click', function(){
             $('#optionContainer').removeClass('closeFromBottom');
             $('#optionContainer').addClass('enterFromTop');
@@ -287,14 +304,25 @@
             }
         });
 
-        /* Initial page function, load all the chatroom detail for the user */
+        //Click to show update username form
+        $('#initUpdateName').on('click', function() {
+            $('#updateName').toggle();
+            $('#update-username').focus();
+        });
+
+        //Click to Update Profile Image
+        $('.optionContainer__content .overlay_icon').on('click', function() {
+            $('#profileImageBtn').trigger('click');          
+        });
+
+        /************ Initial page function, load all the chatroom detail for the user ***********/
         (function init(){
             $.ajax
             ({
                 type: "GET",
                 url: "/chat/init",
                 dataType: 'json',
-                async: true,
+                async: false,
                 //get the token from cookie and send to server in request's header
                 headers: {
                     "authorization": "Bearer " + getCookie('chatJWT')
@@ -322,7 +350,7 @@
                         var html = '', datetime, datetimeFormat;
                         for(var i = 0; i < data.records.length; i++){                            
                             html += '<li data-id="'+data.records[i].chatID+'" class="chatroom" id="chatroom'+data.records[i].chatID+'">' + 
-                                        '<div class="left"><img src="/images/'+ data.records[i]['icon'] +'" class="icon" /></div>' +
+                                        '<div class="left"><img src="/images/'+ data.records[i]['icon'] +'" class="chatroom_icon" /></div>' +
                                         '<div class="right"><span class="roomName">' + data.records[i]['chatroomName'] + '</span><br/>';
                                                                     
                             //Join related chatroom, to listen if any message are send to this user
@@ -381,14 +409,14 @@
                     },
                     success:function(data) {
                         //if image update success, change the icon
-                        $('.moreInfo__icon .icon').attr('src', '/images/' + data.img);
+                        $('.icon').attr('src', '/images/' + data.img);
                     },
                     error:function(data){
                     }
                 });
 
                 //hide the params
-                history.pushState(null, '', '/content/chatlist.html');
+                history.pushState(null, '', '/content/chat.html');
             }
         })();
 
@@ -442,8 +470,7 @@
 
             //prepare data
             var data = {
-                username: $('#update-username').val(),
-                password: $('#password').val(),
+                username: $('#update-username').val()
             }
             
             $.ajax
@@ -458,61 +485,21 @@
                     "authorization": "Bearer " + getCookie('chatJWT')
                 },
                 error:function(data){
-                    if(data.status === 400){
-                        alert(data.responseJSON.message);
-                    }else{
-                        alert('Incorrect password');
+                    if(data.status === 40){
+                        $('#updateName .errMsg').html('Update Failed');
                     }
                 },
                 success:function(data) {
-                    window.location = '/content/chatlist.html';
+                    $('.profile__username .username').html($('#update-username').val() + '#' + userID);
+                    $('#update-username').val('');
                 }
             });
         });
 
-        /* Event listeners */
-        /*$('#chatlist').delegate( 'li', 'click', function(){
-            window.location = '/content/chatroom.html?user='+ encodeURIComponent($('.userIDwUsername').text()) +'&chatroom=' + $(this).attr('data-id');
-        });
-
-        $('.createChatBtn').click(function() {
-            $('.chatlistPage__createChat').toggle();
-        });
-
-        $('.moreBtn').click(function() {
-            ($('.moreBtn').text() === 'more')? $('.moreBtn').text('less') : $('.moreBtn').text('more');
-            $('.moreInfo').toggle();
-        });
-
-        $('.moreInfo__icon .overlay').click(function() {
-            $('#profileImageBtn').trigger('click');
-        });*/
-
-        /*$('#profileImageBtn:file').change(function (){
-            $('#fileUpload .button').trigger('click');
-        });
-
-        $('.moreInfo__username textarea').on('input', function(){
-            if( !$('.moreInfo__username textarea').hasClass($('.moreInfo__username textarea').val()) ){
-                $('.updateNameBtn').prop('disabled', false);
-            }else{
-                $('.updateNameBtn').prop('disabled', true);
-            }
-        });
-
-        $('.moreInfo .closeBtn').click(function(){
-            $('.moreInfo').css('display', 'none');
-        })
-
-        $('.updateNameBtn').click(function() {
-            $('#update-username').val($('.moreInfo__username .userID').val().toLowerCase());
-            $('#updateName .button').trigger('click');
-        });*/
-
-        //const socket = io({query: {"username" : currentUser , 'chat' : allChannel, 'page' : 'chatlist'}}); 
+        const chatListSocket = io({query: {"username" : username, 'userID': userID, 'chat' : allChannel, 'page' : 'chatlist'}}); 
         
         //socket listen to the chatroom that has message sent out
-        /*8socket.on('chatroom list update', msg => {
+        /*chatListSocket.on('chatroom list update', msg => {
             var roomName = msg.split('#')[0].split(' ')[1];
             var message = msg.split('#')[1];
             var timestamp = msg.split('#')[2];
