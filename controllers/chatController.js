@@ -3,6 +3,26 @@ const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('../utils/appError');
 
+/* Get chatlist */
+exports.init = catchAsync(async (req, res, next) => {
+  const chatID = req.user.chatrooms;
+  const records = await Chat.find({ 'chatID': { $in: chatID } }, {'conversations' : {$slice: -1} });
+
+  const userInfo = {
+    username : req.user.username,
+    email : req.user.email,
+    phone : req.user.phoneNo,
+    userID : req.user.userID,
+    icon : req.user.icon
+  }
+
+  res.status(200).json({
+      msg: 'success',
+      records,
+      user: userInfo
+  });
+});
+
 /* Create new chat */
 exports.createChat = catchAsync(async (req, res, next) => {
     //Target user's info, this data is not the info for the user who created the user
@@ -16,7 +36,7 @@ exports.createChat = catchAsync(async (req, res, next) => {
       //if target user found
       if(user.length > 0){
         //create new chat
-        newChat = await Chat.create({chatroomName : req.body.chatroom, members : [user[0].username + '#' + user[0].userID, req.user.username + '#' + req.user.userID]});
+        newChat = await Chat.create({chatroomName : req.body.chatroom, members : [user[0].userID, req.user.userID]});
         //push chatroom number into user's chatroom list
         updatedUsers = await User.updateMany({userID : {$in : [user[0].userID, req.user.userID]}}, {$push : {chatrooms : newChat.chatID}});
         
@@ -34,26 +54,6 @@ exports.createChat = catchAsync(async (req, res, next) => {
         new AppError('Cannot create a chatroom yourself', 401)
       );
     }    
-});
-
-/* Get chatlist */
-exports.getChatList = catchAsync(async (req, res, next) => {
-  const chatID = req.user.chatrooms;
-  const records = await Chat.find({ 'chatID': { $in: chatID } }, {'conversations' : {$slice: -1} });
-
-  const userInfo = {
-    username : req.user.username,
-    email : req.user.email,
-    phone : req.user.phoneNo,
-    userID : req.user.userID,
-    icon : req.user.icon
-  }
-
-  res.status(200).json({
-      msg: 'success',
-      records,
-      user: userInfo
-  });
 });
 
 /* Get conversation for specific chatroom and update read status */

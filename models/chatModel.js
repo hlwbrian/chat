@@ -9,11 +9,11 @@ const chatSchema = mongoose.Schema({
         minlength: 1
     },
     members: [String], //save User.userID
-    conversations: [{
+    messages: [{
         sender: {
-            type: String //john#001
+            type: String //ID
         },
-        message: {
+        content: {
             type: String,
             minlength: 1,
             maxlength: 255

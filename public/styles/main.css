@@ -77,59 +77,7 @@ input[type='text'],textarea {font-size:1em;}
 .resetForm__form .button:hover {animation-name: customBTN; animation-duration: 0.5s; animation-fill-mode: forwards;}     
 #confirmText {font-size: 12px; color: red; }
 
-/* CHATLIST page */
-.chatlistPage { height: 100vh; position: relative; }
 
-/* chatlist body */
-.chatlistPage__main {background-color: white; max-width: 1280px; margin: 0 auto; height: 100%;}
-.chatlistPage .button {margin-right: 15px; font-size: 14px; border-color: #bbbfc2; border-radius: 10px; background-color: #1c98f7; color : white; line-height: 35px; cursor: pointer; box-shadow: 1px 1px 2px black;}
-
-/* chatlist user info bar */
-.userInfo {padding: 20px 10px 0px 10px; border-bottom: 1px solid #EFEFEF;}
-.userInfo .icon {height: 35px; width: 35px; border-radius: 50%;}
-.userInfo .userID { font-size: 22px; font-weight: 500; vertical-align: top;  line-height: 35px; width: calc(100% - 113px); text-align:center; display: inline-block;}
-.userInfo .moreInfo {display: none; margin: 0 auto; width: 350px;}
-.userInfo .moreInfo h3 {border-top: 1px solid #EFEFEF; margin-top: 10px; padding-top: 10px;}
-.userInfo .logout {line-height: 35px; padding: 0px 8px; float: right; background-color: #1c98f7; color: white; cursor: pointer; border-radius: 15px;}
-.userInfo .logout:hover {animation-name: changeColorBlue; animation-duration: 2s;}
-.userInfo .moreBtn {font-size: 12px; text-align: center; margin-bottom: 3px; cursor: pointer;}
- 
-/* chatlist create chat */
- .createChatBtn {display: block; text-align: center; color: blue; cursor: pointer; padding: 5px 0px; margin-top: 5px;}
- .chatlistPage__createChat {display: none; text-align: center; padding: 10px 0px;}
-
- /* chatlist chatroom list */
- #chatlist {padding: 0px 15px; background-color: #f5f5f5; margin: 0px;}
- #chatlist li {cursor: pointer;}
- #chatlist .chatroom {padding : 15px 0px; border-bottom: 1px solid #e0e0e0;}
- #chatlist .chatroom .icon {height: 35px; width: 35px; border-radius: 50%; margin-right: 15px;}
- #chatlist .chatroom div {float: left;}
- #chatlist .chatroom .right{width: calc(100% - 50px);}
- #chatlist .chatroom .halfWidthRight {width: calc(100% - 75px);}
- #chatlist .chatroom .message, #chatlist .chatroom .timestamp {font-size: 14px; color: #5a5a5a;}
- #chatlist .chatroom .timestamp {float: right;}
- #chatlist .chatroom::after {clear: both; display: table; content: "";}
- #chatlist span {vertical-align: top;}
- #chatlist .roomName {display: inline-block; font-size: 14px; font-weight: bold;}
- 
- #chatlist .unreadIcon {height: 14px; margin: 11px 3px; display: inline-block; width: 15px; background-color: #1569aa; border-radius: 50%;}
-
- .moreInfo {display: none; position: absolute; left: 0; top: 0; height: 100vh; width: 100%; background-color: rgba(0, 0, 0, 0.35);}
- .moreInfo h3 {width: 100%; text-align: center; padding: 15px 0; font-size: 22px; color: white; background-color: #1c98f7;}
- .moreInfo .details { width: 90%; margin: 0 auto;  margin-top: 50%; transform: translateY(-50%); background-color: white;}
- .moreInfo__icon {margin: 0 auto; width: fit-content; position: relative;}
- .moreInfo__icon img {padding: 15px 0; width: 225px; height: 225px; border-radius: 50%}
- .moreInfo__icon .overlay {cursor: pointer; position: absolute; transition: .5s ease; top: 0; left: 0; height: 86%; opacity: 0; width: 100%; border-radius: 50%; margin: 15px 0px; background-color: rgba(0, 0, 0, 0.35); text-align: center;}
- .moreInfo__icon .overlay:hover {opacity: 1;}
- .moreInfo #fileUpload {display: none;}
-
- .moreInfo__username {padding: 10px; border-top: 1px solid #DCDCDC;}
- .moreInfo__username p {padding: 10px;}
- .moreInfo__username .userID {border: none; font-size: 16px; margin: 15px;}
- .moreInfo__username .userID:focus {outline: none;}
- #updateName {display: none;}
- .moreInfo .close{width: 100%; text-align: center; padding: 10px 0px; border-top: 1px solid #DCDCDC;}
- .closeBtn {cursor: pointer;}
  
 /* Chatroom Page */
 .chatroomPage {background-color: white; margin: 0px; overflow: hidden;}   

@@ -19,8 +19,8 @@ router
 
 //Get the chatroom list with the lastest message
 router
-    .route('/getChatList')
-    .get(chatController.getChatList);
+    .route('/init')
+    .get(chatController.init);
 
 //secureChat save current chat ID in req.currentChatID
 router.use(authController.secureChat);
