@@ -79,8 +79,8 @@
             .chatPage #chatlist, .chatPage #chatroom { float: left; padding: 0; margin: 0; }
             .chatPage main { position: relative; }
             .chatPage main::after{ content: ''; display: table; clear: both; }
-            .chatPage #chatlist { width: 30%; min-width: 230px; border-right: 1px solid #ddd; border-left: 1px solid #ddd;}
-            .chatPage #chatroom { width: 70%; max-width: calc(100% - 231px); }
+            .chatPage #chatlist { min-width: 230px; max-width: 280px; border-right: 1px solid #ddd; border-left: 1px solid #ddd;}
+            .chatPage #chatroom { min-width: calc(100% - 233px); max-width: calc(100% - 283px); }
 
             /* Chat page user info bar */
             .chatlist__user {padding: 5px 15px; border-bottom: 1px solid #EFEFEF;}
@@ -163,9 +163,6 @@
             
             #chatlist .unreadIcon {height: 14px; margin: 11px 3px; display: inline-block; width: 15px; background-color: #1569aa; border-radius: 50%;}
              /******** TODO DEL */
-
-
-
         </style>
     </head>
     <body class="chatPage">
@@ -253,7 +250,46 @@
             </div>
 
             <!-- Right part -->
-            <div id="chatroom"></div>
+            <style>
+                #chatOptionContainer { display: none; }
+                #chatroom .chatroom_header { background-color: #f5f5f5; padding: 5px 15px;}
+                #chatroom .chatroom_header div { float: left; }
+                #chatroom .chatroom_header .chatroomMore { float: right; }
+                #chatroom .chatroom_header::after { display: table; content: ''; clear: both; }
+                #chatroom_icon { height: 45px; width: 45px; border-radius: 50%; padding: 5px;}
+
+                .chatroom__content { background-color: white; height: calc(100vh - 69px); position: relative; }
+                .chatroom__content #messages { margin: 0px; }
+                .chatroom__content__form { position: absolute!important; width: 100%; }
+                 #chatName { font-size: 22px; vertical-align: top; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 15px; }
+            </style>
+            <div id="chatroom">
+                <!-- Chatroom More Option (hidden by default) -->
+                <div id="chatOptionContainer"></div>
+
+                <!-- Chatroom information header -->
+                <div class="chatroom_header">
+                    <div class="chatroomName">
+                        <img id="chatroom_icon" src="/images/default.png"/>
+                        <span id="chatName">&nbsp;</span>
+                    </div>
+                    <div class="chatroomMore">
+                        <span class="more"><svg viewBox="0 0 24 24" width="24" height="55"><path d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z"></path></svg></span>
+                    </div>
+                </div>
+
+                <!-- Chatroom Body -->
+                <div class="chatroom__content"> 
+                    <ul id="messages">
+                        <div id="emojiPicker" style="display:none">
+                            <emoji-picker></emoji-picker>
+                        </div>
+                    </ul>
+                    <form id="form" class="chatroom__content__form" action="">
+                        <input id="input" class="chatroom__content__input" autocomplete="off"/><button type="button" onclick="$('#emojiPicker').toggle();">Emoji</button><button type="button" onclick="previewImage();">Image</button><button type="submit">Send</button>
+                    </form>
+                </div>
+            </div>         
         </main>
     </body>
     <script>
@@ -263,10 +299,85 @@
         var username;
         var userID;
         var allChannel = []; //used for connection IO socket
+        var currentChatroom = '';
+        var currentChatSocket = '';
 
         /**************** Functions *********************/
         function submitProfileIcon(){
             $('#fileUpload').trigger('submit');
+        }
+
+        //call this when join new chatroom
+        function joinChat() {
+            //Prepare data to init the chatroom
+            var data = {
+                currentChatID: currentChatroom
+            }
+
+            /* get the conversation in that chatroom */
+            $.ajax
+            ({
+                type: "POST",
+                url: "/chat/initChatroom",
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                async: false,
+                data: JSON.stringify(data),
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                //if conversation/chatroom not found
+                error:function(data){
+                },
+                success:function(data) {
+                    var chatroomName = data.content[0].chatroomName;
+                    var content = data.content[0].messages;
+                    var members = data.content[0].members;
+                    var icon = data.content[0].icon;
+                    var html = '';
+                    var loginStatus = data.loginStatus;
+
+                    $('#chatName').text(chatroomName);
+                    $('#chatroom_icon').attr('src', '../images/' + icon);
+                    if(content.length > 0){
+                        for(var value of content){
+                            var senderStyle = (userID === value.sender)? 'right' : 'left';
+
+                            //TODO: update image handling if image message
+                            if( (/[a-z0-9].jpg|.png|.jpeg/).test(value.message) ){
+                                html += '<li><div class="messageImg message  '+senderStyle+'">' +
+                                    '<div class="sender">' + value.sender + '</div>' +
+                                    '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
+                                    '<div class="img"><img src="/images/'+value.content+'" data-src="'+value.content+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                                    '<div class="hiddenMsg" data-src="'+value._id+'"><span style="display:none">' +value.content+ '</span></div>' +
+                                '</div></li>';
+                            }
+                            //if text message
+                            else{
+                                html += '<li><div class="message '+senderStyle+'">' +
+                                    '<div class="sender">' + value.sender + '</div>' +
+                                    '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' + 
+                                    '<div class="content"  data-src="'+value._id+'">' + value.content + '</div>' +                                   
+                                '</div></li>';
+                            } 
+                        }
+                        $('#messages').append(html);
+                    }
+
+                /* TODO Add last seen status
+                html = '';
+                    for(var i = 0; i < members.length; i++){
+                        loginStatus[i].lastSeen = new Date(loginStatus[i].lastSeen);
+                        let timestampFormat = loginStatus[i].isLoggedIn? 'online' : `${loginStatus[i].lastSeen.getFullYear()}/${loginStatus[i].lastSeen.getMonth()}/${loginStatus[i].lastSeen.getDate()} ${loginStatus[i].lastSeen.getHours()}:${loginStatus[i].lastSeen.getMinutes()}`;
+
+                        html += '<li>' +
+                            members[i] + '<span class="lastSeen"> ' + timestampFormat + '</span>';
+                            '</li>';
+                    }
+
+                    $('#members').append(html);*/
+                }
+            });
         }
 
         /**************** Event listeners ***************/
@@ -315,6 +426,17 @@
             $('#profileImageBtn').trigger('click');          
         });
 
+        //Click to Change Chatroom
+        $('#chatlist__chatrooms_list').delegate('.chatroom', 'click', function() {
+            if( $(this).data('id') !== currentChatroom ){
+                chatroomSocket.emit('ChangeRoom', currentChatroom);
+
+                currentChatroom = $(this).data('id');
+                //Join Clicked Chatroom
+                joinChat();
+            }     
+        });
+
         /************ Initial page function, load all the chatroom detail for the user ***********/
         (function init(){
             $.ajax
@@ -345,21 +467,24 @@
                         return timeB - timeA;                 
                     });
                     
-                    //Display the chatroom details
+                    //Display the chatlist details
                     if(data.records.length > 0){
-                        var html = '', datetime, datetimeFormat;
+                        var html = '', datetime, datetimeFormat, lastData;
                         for(var i = 0; i < data.records.length; i++){                            
                             html += '<li data-id="'+data.records[i].chatID+'" class="chatroom" id="chatroom'+data.records[i].chatID+'">' + 
                                         '<div class="left"><img src="/images/'+ data.records[i]['icon'] +'" class="chatroom_icon" /></div>' +
                                         '<div class="right"><span class="roomName">' + data.records[i]['chatroomName'] + '</span><br/>';
                                                                     
-                            //Join related chatroom, to listen if any message are send to this user
+                            //Join chatroom to listen if any message are send to this user
+                            currentChatroom = (currentChatroom === '')? data.records[i].chatID : currentChatroom;
                             allChannel.push(data.records[i].chatID);
+
+                            lastData = data.records[i].messages.length - 1;
                             if(data.records[i].messages.length > 0){                                
                                 let message, timestamp;
-                                message = (!data.records[i].messages[0].hasOwnProperty('message'))? '' : data.records[i].messages[0]['message'];
-                                timestamp = (!data.records[i].messages[0].hasOwnProperty('timestamp'))? data.records[i].chatCreate : data.records[i].messages[0]['timestamp'];
-                                html += '<span class="message">' + message + '</span><span class="timestamp">' + formatDate(timestamp) + '</span></div>';
+                                message = (!data.records[i].messages[lastData].hasOwnProperty('content'))? '' : data.records[i].messages[lastData]['content'];
+                                timestamp = (!data.records[i].messages[lastData].hasOwnProperty('timestamp'))? data.records[i].chatCreate : data.records[i].messages[lastData]['timestamp'];
+                                html += '<span class="message">' + message + '</span><span class="timestamp">' + formatDateChatList(timestamp) + '</span></div>';
                             }
                           
                             html += '</li>';
@@ -367,18 +492,23 @@
 
                         $('#chatlist__chatrooms_list').append(html);
 
-                        //Add unread remark for the channel that this user have not read yet
-                        for(var i = 0; i < data.records.length; i++){
+                        //TODO: Add unread remark for the channel that this user have not read yet
+                        /*for(var i = 0; i < data.records.length; i++){
                             if(data.records[i].messages.length > 0){
                                 if(!data.records[i].messages[0].read.includes('' + data.user.userID)){
                                     $('#chatroom'+data.records[i].chatID + ' .left span').addClass('unreadIcon');
                                     $('#chatroom'+data.records[i].chatID + ' .right').addClass('halfWidthRight');
                                 }
                             }
-                        }
+                        }*/
                     }
                 }
             });
+
+            //Join The Default Chatroom (top on the list)
+            if(currentChatroom !== ''){
+               joinChat();
+            }
 
             //get all the params
             var urlParams = new URLSearchParams(window.location.search);
@@ -496,7 +626,74 @@
             });
         });
 
-        const chatListSocket = io({query: {"username" : username, 'userID': userID, 'chat' : allChannel, 'page' : 'chatlist'}}); 
+        /* Socket IO Related */
+        //Join Chatroom socket
+        const chatroomSocket = io({query: {"userID" : userID, 'username': username, 'chatID': currentChatroom} }); 
+
+        var form = document.querySelector('.chatroom__content__form');
+        var input = document.querySelector('.chatroom__content__input');
+
+        //when user send message
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (input.value) {
+                chatroomSocket.emit('SendMSG', input.value);
+                input.value = '';
+            }
+        });
+
+        //when user receive message
+        chatroomSocket.on('Receive', msg => {
+            var message = msg.split('#')[0];
+            var timestamp = msg.split('#')[1];
+            var sender = msg.split('#')[2];
+            var senderStyle = (userID === sender)? 'right' : 'left';
+
+            //display message
+            if( (/[a-z0-9].jpg|.png|.jpeg/).test(msg) ){
+                $('#messages').append('<li><div class="messageImg message '+senderStyle+'">' +
+                                    '<div class="sender">' + sender + '</div>' +
+                                    '<div class="timestamp">' + formatDate(timestamp) + '</div>' +
+                                    '<div class="img"><img src="/images/'+message+'" data-img="'+message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                                    '<div class="hiddenMsg"><span style="display:none">' +message+ '</span></div>' +
+                                    '</div></li>');
+            }else{
+                $('#messages').append('<li><div class="message '+senderStyle+'">' +
+                                    '<div class="sender">' + sender + '</div>' +
+                                    '<div class="timestamp">' + formatDate(timestamp) + '</div>' + 
+                                    '<div class="content">' + message + '</div>' +                                   
+                                '</li>');
+            }
+
+            //get chatroom data from param
+            var data = {
+                currentChatID : urlParams.get('chatroom')
+            }
+
+            //TODO: when user receive data update the read status
+            /*$.ajax
+                ({
+                    type: "PATCH",
+                    url: "/chat/updateRead",
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    async: false,
+                    data: JSON.stringify(data),
+                    headers: {
+                        "authorization": "Bearer " + getCookie('chatJWT')
+                    },
+                    success:function(data) {
+                    },
+                    error:function(data){
+                    }
+                });*/
+
+            //scroll to bottom
+            //$(".chatroom").animate({ scrollTop: $('#messages').height() }, 1000);
+        });
+
+        //TODO: Setup Chatlist socket IO
+        //const chatListSocket = io({query: {"username" : username, 'userID': userID, 'chat' : allChannel, 'page' : 'chatlist'}}); 
         
         //socket listen to the chatroom that has message sent out
         /*chatListSocket.on('chatroom list update', msg => {
@@ -513,6 +710,6 @@
             var originalItem = $('#chatroom'+roomName);
             $('#chatroom'+roomName).remove();
             $('#chatlist').prepend(originalItem);
-        });*/
+        });*/  
     </script>
 </html>

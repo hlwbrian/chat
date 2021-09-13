@@ -21,7 +21,7 @@ if( curPage === 'chatroom.html' ){
                 }
             }
 
-             /* Page init funcction */
+        /* Page init funcction */
         (function init() {
             //get params
             var urlParams = new URLSearchParams(window.location.search);

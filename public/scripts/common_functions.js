@@ -23,6 +23,26 @@ function formatDate(date){
     return [year, month, day].join('-') + ' ' + hour + ':' + minute;
 }
 
+function formatDateChatList(date){
+    if(date === '') return '';
+    var d = new Date(date);
+    var d2 = new Date();
+    var ddiff = Math.floor( Math.abs(d2 - d) / (1000 * 60 * 60 * 24) );
+    var month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
+    year = d.getFullYear();
+    hour = d.getHours();
+    minute = d.getMinutes();
+
+    if(ddiff === 0){
+        return hour + ':' + minute;
+    }else if (ddiff === 1){
+        return 'Yesterday';
+    }else {
+        return [year, month, day].join('-');
+    }
+}
+
 //Common function to change tab menu
 function changeTab(showClassName){
     if( !$('.'+showClassName).hasClass('active') ){

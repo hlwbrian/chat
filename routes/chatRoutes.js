@@ -25,10 +25,10 @@ router
 //secureChat save current chat ID in req.currentChatID
 router.use(authController.secureChat);
 
-//Get conversation in chatroom and update read status
+//Get the messages detailes of chatroom and update read status
 router
-    .route('/initConversation')
-    .post(chatController.initConversation);
+    .route('/initChatroom')
+    .post(chatController.initChatroom);
 
 //update unread status to read
  router

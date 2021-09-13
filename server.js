@@ -50,15 +50,40 @@ app.get('/', (req, res) => {
 const io = new Server(server);
 let onlineUsers = [];
 
-io.on('connection', function(socket) {    
+io.on('connection', function(socket) {
     //Push username to check online users
-    let userID = socket.request._query['username'].split('#')[1];
+    let userID = socket.request._query['userID'];
+    let chatroomName = '';
 
-    if(onlineUsers.indexOf(socket.request._query['username']) < 0){
+    if(socket.request._query['chatID'] !== ''){
+        chatroomName = `Room<%SPACE%>${socket.request._query['chatID']}`;
+        socket.join(chatroomName);
+        
+        socket.on('SendMSG', msg => {
+            sendToRoom(chatroomName, userID, msg);
+        });
+
+        //Leave Chatroom
+        socket.on('ChangeRoom', chatID => {
+            socket.leave(`Room<%SPACE%>${chatID}`);
+        });
+    }    
+
+    //Get any users is typing now
+    socket.on('userTyping', msg => {
+        io.in(roomName).emit('showTyping', msg);
+    });
+
+    //Remove user who is done typing
+    socket.on('userDoneTyping', msg => {
+        io.in(roomName).emit('showDoneTyping', msg);
+    });
+    //TODO update login status
+    /*if(onlineUsers.indexOf(socket.request._query['username']) < 0){
         onlineUsers.push(socket.request._query['username']);
         
         //Update logged-in status in MongoDB
-        axios.patch('http://localhost:3000/users/updateLogin', {
+        axios.patch(process.env.DOMAIN + 'users/updateLogin', {
             userID: userID,
             serverSecret: '5sa9gkj#7w',
             isLoggedIn: true
@@ -69,10 +94,10 @@ io.on('connection', function(socket) {
             // handle error
             console.log(error);
         });
-    }
+    }*/
 
     //If user is in chatroom list
-    if(socket.request._query['page'] === 'chatlist'){
+    /*if(socket.request._query['page'] === 'chatlist'){
         let rooms = socket.request._query['chat'].split(',');
         let username = socket.request._query['username'];
 
@@ -85,29 +110,11 @@ io.on('connection', function(socket) {
     }
     //if user is in chatroom inner page
     else{
-        const roomName = `chatroom ${socket.request._query['chat']}`;
-        socket.join(roomName);
-
-        socket.on('chat message', msg => {
-            const resultMsg = msg;
-            let username = socket.request._query['username'];
-            sendToRoom(roomName, username, resultMsg);
-        });
-
-        //Get any users is typing now
-        socket.on('userTyping', msg => {
-            io.in(roomName).emit('showTyping', msg);
-        });
-
-        //Remove user who is done typing
-        socket.on('userDoneTyping', msg => {
-            io.in(roomName).emit('showDoneTyping', msg);
-        });
-    }
+    }*/
     
     //When user disconnected
     socket.on('disconnect', () => {
-        onlineUsers = onlineUsers.filter((curVal) => {
+        /*onlineUsers = onlineUsers.filter((curVal) => {
             return (curVal != socket.request._query['username']);
         });
 
@@ -121,7 +128,7 @@ io.on('connection', function(socket) {
         }
 
         //Update logged-out status in MongoDB
-        axios.patch('http://localhost:3000/users/updateLogin', {
+        axios.patch(process.env.DOMAIN + 'users/updateLogin', {
             userID: userID,
             serverSecret: '5sa9gkj#7w',
             isLoggedIn: false
@@ -133,20 +140,20 @@ io.on('connection', function(socket) {
             console.log(error);
         });
 
-        console.log('User disconnected');
+        console.log('User disconnected');*/
     });
 });
 
 //function sendToList()
-function sendToRoom(roomName, username, msg){
+function sendToRoom(roomName, userID, msg){
     //save to db before save send
-    let roomID = roomName.split(' ')[1];
+    let roomID = roomName.split('<%SPACE%>')[1];
     let timestamp = '';
     
-    axios.post('http://localhost:3000/chat/save', {
+    axios.post(process.env.DOMAIN + 'chat/save', {
         chatID : roomID,
         msg: msg,
-        username: username,
+        userID: userID,
         serverSecret: '5sa9gkj#7w'
     })
     .then(function (response) {
@@ -154,8 +161,8 @@ function sendToRoom(roomName, username, msg){
         timestamp = response.data.timestamp;
         
         //send data
-        io.in(roomName).emit('receive', `${msg}#${response.data.timestamp}#${username}`);
-        io.in(roomName).emit('chatroom list update', `${roomName}#${msg}#${timestamp}`);
+        io.in(roomName).emit('Receive', `${msg}#${response.data.timestamp}#${userID}`);
+        io.in(roomName).emit('ChatlistUpdate', `${roomName}#${msg}#${timestamp}`);
     })
     .catch(function (error) {
         // handle error
