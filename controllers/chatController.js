@@ -63,26 +63,68 @@ exports.initChatroom = catchAsync(async (req, res, next) => {
   };
 
   //get conversation
-  const messages = await Chat.find(data).select({"messages" : 1, 'chatroomName' : 1, 'members': 1, 'icon' : 1});
+  const messages = await Chat.find(data, {messages : {$slice: -15}})/*.select({"messages" : 1, 'chatroomName' : 1, 'members': 1, 'icon' : 1}) */;
+  //const messages = await Chat.find(data, {messages : {$slice: -1}});
+
+  //Get members username
+  const membersID = messages[0].members;
+  const members = await User.find({userID : {$in : membersID }}).select({"username": 1, "userID": 1});
 
   //set all the conversation read
-  const updateRead = await Chat.updateMany({chatID: req.chat.currentChatID}, { $addToSet : {'messages.$[].read' : req.user.userID }});
+  //const updateRead = await Chat.updateMany({chatID: req.chat.currentChatID}, { $addToSet : {'messages.$[].read' : req.user.userID }});
 
   //Find all members login status
-  let memberList = messages[0].members.map((curVal) => {
+  /*let memberList = messages[0].members.map((curVal) => {
     return curVal.split('#')[1];
   });
-  const loginStatus = await User.find({userID : {$in: memberList}}).select({"lastSeen": 1, "isLoggedIn" : 1});
+  const loginStatus = await User.find({userID : {$in: memberList}}).select({"lastSeen": 1, "isLoggedIn" : 1});*/
 
   if(messages){
     res.status(200).json({
       msg: 'success',
-      loginStatus,
-      content: messages
+      content: messages,
+      members
     });
   }else{
     return next(
       new AppError('No chat history', 404)
+    );
+  }
+});
+
+/* Get histry messages */
+exports.loadMessages = catchAsync(async (req, res, next) => {
+  var page = req.body.currentPage;
+  var data = {
+    chatID: req.chat.currentChatID
+  };
+
+  //get conversation
+  /*const messages = await Chat.aggregate([{
+    '$match' : {
+      'chatID' : req.chat.currentChatID
+    }}, {
+      '$unwind': '$Items'
+    }, {
+      '$sort': {
+        'Items.messages' : -1
+      }
+    }
+  ]);*/
+console.log(messages[0].messages);
+  //Get members username
+  const membersID = messages[0].members;
+  const members = await User.find({userID : {$in : membersID }}).select({"username": 1, "userID": 1});
+
+  if(messages){
+    res.status(200).json({
+      msg: 'success',
+      content: messages,
+      members
+    });
+  }else{
+    return next(
+      new AppError('No more history messages', 404)
     );
   }
 });

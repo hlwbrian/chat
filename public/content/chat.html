@@ -258,11 +258,13 @@
                 #chatroom .chatroom_header::after { display: table; content: ''; clear: both; }
                 #chatroom_icon { height: 45px; width: 45px; border-radius: 50%; padding: 5px;}
 
-                .chatroom__content { background-color: white; height: calc(100vh - 69px); position: relative; }
-                .chatroom__content #messages { margin: 0px; }
+                .chatroom__content { background-color: white;  position: relative; }               
+                .chatroom__content #messages { margin: 0px; height: calc(100vh - 120px); padding-bottom: 51px; overflow: auto; }
                 .chatroom__content__form { position: absolute!important; width: 100%; }
                  #chatName { font-size: 22px; vertical-align: top; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 15px; }
-            </style>
+           
+                 #messages__read, #messages__unread {margin: 5px 8px;}
+           </style>
             <div id="chatroom">
                 <!-- Chatroom More Option (hidden by default) -->
                 <div id="chatOptionContainer"></div>
@@ -280,11 +282,15 @@
 
                 <!-- Chatroom Body -->
                 <div class="chatroom__content"> 
-                    <ul id="messages">
+                    <div id="messages">
+                        <ul id="messages__read"></ul>
+                        <ul id="messages__unread"></ul>
+
+                        <!-- Emoji Picker UI -->
                         <div id="emojiPicker" style="display:none">
                             <emoji-picker></emoji-picker>
                         </div>
-                    </ul>
+                    </div>
                     <form id="form" class="chatroom__content__form" action="">
                         <input id="input" class="chatroom__content__input" autocomplete="off"/><button type="button" onclick="$('#emojiPicker').toggle();">Emoji</button><button type="button" onclick="previewImage();">Image</button><button type="submit">Send</button>
                     </form>
@@ -301,6 +307,10 @@
         var allChannel = []; //used for connection IO socket
         var currentChatroom = '';
         var currentChatSocket = '';
+        var memberMap = {};
+        var scrollLevel = document.getElementById('messages');
+        var ScrollToHeight;
+        var currentPage = 1; // 15 messages per page
 
         /**************** Functions *********************/
         function submitProfileIcon(){
@@ -336,17 +346,21 @@
                     var icon = data.content[0].icon;
                     var html = '';
                     var loginStatus = data.loginStatus;
+                    for(var [key, value] of data.members.entries()){
+                        memberMap[value.userID] = value.username;
+                    }
 
                     $('#chatName').text(chatroomName);
                     $('#chatroom_icon').attr('src', '../images/' + icon);
                     if(content.length > 0){
                         for(var value of content){
-                            var senderStyle = (userID === value.sender)? 'right' : 'left';
+                            html = '';
+                            var senderStyle = (userID.toString() === value.sender)? 'right' : 'left';
 
                             //TODO: update image handling if image message
                             if( (/[a-z0-9].jpg|.png|.jpeg/).test(value.message) ){
                                 html += '<li><div class="messageImg message  '+senderStyle+'">' +
-                                    '<div class="sender">' + value.sender + '</div>' +
+                                    '<div class="sender">' + memberMap[value.sender] + '#' + value.sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
                                     '<div class="img"><img src="/images/'+value.content+'" data-src="'+value.content+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
                                     '<div class="hiddenMsg" data-src="'+value._id+'"><span style="display:none">' +value.content+ '</span></div>' +
@@ -355,13 +369,19 @@
                             //if text message
                             else{
                                 html += '<li><div class="message '+senderStyle+'">' +
-                                    '<div class="sender">' + value.sender + '</div>' +
+                                    '<div class="sender">' + memberMap[value.sender] + '#' + value.sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' + 
                                     '<div class="content"  data-src="'+value._id+'">' + value.content + '</div>' +                                   
                                 '</div></li>';
                             } 
-                        }
-                        $('#messages').append(html);
+
+                            if(value.read.indexOf(userID.toString()) >= 0){
+                                $('#messages__read').append(html);
+                            } 
+                            else{
+                                $('#messages__unread').append(html);
+                            }
+                        }     
                     }
 
                 /* TODO Add last seen status
@@ -378,6 +398,11 @@
                     $('#members').append(html);*/
                 }
             });
+
+            //Set Client Scroll bar at bottom;
+            ScrollToHeight = document.getElementById('messages__read');
+            scrollLevel.scrollTop = scrollLevel.scrollHeight;
+            //scrollLevel.scrollTop = ScrollToHeight.offsetheight;
         }
 
         /**************** Event listeners ***************/
@@ -435,6 +460,43 @@
                 //Join Clicked Chatroom
                 joinChat();
             }     
+
+            //Set Client Scroll bar at bottom;
+            scrollLevel.scrollTop = ScrollToHeight.offsetHeight;
+        });
+
+        //Listen when user scroll to messages top then load more history messages
+        $('#messages').scroll(function() {
+            if(scrollLevel.scrollTop === 0) {
+                //Load more messages
+                if(currentPage !== -1){
+                    var data = {
+                        currentChatID: currentChatroom
+                    }
+
+                    $.ajax
+                    ({
+                        type: "POST",
+                        url: "/chat/loadMessages",
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'json',
+                        async: false,
+                        data: JSON.stringify(data),
+                        headers: {
+                            "authorization": "Bearer " + getCookie('chatJWT'),
+                            page: currentPage
+                        },
+                        //if conversation/chatroom not found
+                        error:function(data){
+                        },
+                        success:function(data) {
+                        console.log(data);
+                        }
+                    });
+                }
+               
+                currentPage++;
+            }
         });
 
         /************ Initial page function, load all the chatroom detail for the user ***********/
@@ -647,19 +709,19 @@
             var message = msg.split('#')[0];
             var timestamp = msg.split('#')[1];
             var sender = msg.split('#')[2];
-            var senderStyle = (userID === sender)? 'right' : 'left';
+            var senderStyle = (userID.toString() === sender)? 'right' : 'left';
 
             //display message
             if( (/[a-z0-9].jpg|.png|.jpeg/).test(msg) ){
                 $('#messages').append('<li><div class="messageImg message '+senderStyle+'">' +
-                                    '<div class="sender">' + sender + '</div>' +
+                                    '<div class="sender">'  + memberMap[sender] + '#' + sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(timestamp) + '</div>' +
                                     '<div class="img"><img src="/images/'+message+'" data-img="'+message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
                                     '<div class="hiddenMsg"><span style="display:none">' +message+ '</span></div>' +
                                     '</div></li>');
             }else{
                 $('#messages').append('<li><div class="message '+senderStyle+'">' +
-                                    '<div class="sender">' + sender + '</div>' +
+                                    '<div class="sender">' + memberMap[sender] + '#' + sender + '</div>' +
                                     '<div class="timestamp">' + formatDate(timestamp) + '</div>' + 
                                     '<div class="content">' + message + '</div>' +                                   
                                 '</li>');

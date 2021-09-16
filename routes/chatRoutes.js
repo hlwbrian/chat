@@ -30,6 +30,11 @@ router
     .route('/initChatroom')
     .post(chatController.initChatroom);
 
+//Get next 15 history messages
+router
+    .route('/loadMessages')
+    .post(chatController.loadMessages);
+
 //update unread status to read
  router
     .route('/updateRead')
