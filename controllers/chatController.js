@@ -94,11 +94,8 @@ exports.initChatroom = catchAsync(async (req, res, next) => {
 /* Get histry messages */
 exports.loadMessages = catchAsync(async (req, res, next) => {
   let page = req.body.page;
-  let skip = page * 2;
-  let limit = skip + 2;
-  let data = {
-    chatID: req.chat.currentChatID
-  };
+  let skip = page * 7;
+  let limit = 7;
   
   //get conversation
   const messages = await Chat.aggregate([
@@ -109,13 +106,13 @@ exports.loadMessages = catchAsync(async (req, res, next) => {
       '$unwind' : '$messages'
     },
     {
-      '$limit' : limit //skip + limit
+      '$skip' : skip
     },
     {
-      '$skip' : skip
-    }
+      '$limit' : limit
+    }   
   ]);
-
+  
   if(messages){
     res.status(200).json({
       msg: 'success',

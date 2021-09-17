@@ -140,6 +140,13 @@
             #createChat .errorMsg {color: white; margin-top: 5px;}
             #initUpdateName { cursor: pointer; margin-left: 10px; }
             #updateName .errMsg { display: none; font-size: 12px; }
+
+            /* Message body */
+            #noMoreMsg, #newMsgLine {background-color: rgba(0, 0, 0, 0.6); padding: 5px; text-align: center; width: 100%; color: white; display: none;}
+            .message {margin: 5px 0px;}
+
+            /* EMOJI picker */
+            #emojiPicker { position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%);}
             
             /******** TODO DEL */
             /* chatlist body */
@@ -283,7 +290,9 @@
                 <!-- Chatroom Body -->
                 <div class="chatroom__content"> 
                     <div id="messages">
+                        <div id="noMoreMsg">No More Previous Messages.</div>
                         <ul id="messages__read"></ul>
+                        <div id="newMsgLine">New Messages.</div>
                         <ul id="messages__unread"></ul>
 
                         <!-- Emoji Picker UI -->
@@ -382,6 +391,7 @@
                                 $('#messages__read').append(html);
                             } 
                             else{
+                                $('#newMsgLine').show();
                                 $('#messages__unread').append(html);
                             }
                         }     
@@ -493,14 +503,67 @@
                         error:function(data){
                         },
                         success:function(data) {
-                        console.log(data);
+                            //No More History data available
+                            var messages = [];
+                            if(data.content.length === 0){
+                                currentPage = -1;
+
+                                //show message to show there is no more history message for users
+                                $('#noMoreMsg').show();
+                            } 
+
+                            //If there has more history messages to prepend
+                            if(currentPage !== - 1){
+                                //Reverse the data in messages array to display
+                                for(var [key, value] of data.content.entries()){
+                                    messages.push(value.messages)
+                                }
+
+                                for(var value of messages){
+                                    html = '';
+                                    var senderStyle = (userID.toString() === value.sender)? 'right' : 'left';
+
+                                    //TODO: update image handling if image message
+                                    if( (/[a-z0-9].jpg|.png|.jpeg/).test(value.message) ){
+                                        html += '<li><div class="messageImg message  '+senderStyle+'">' +
+                                            '<div class="sender">' + memberMap[value.sender] + '#' + value.sender + '</div>' +
+                                            '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
+                                            '<div class="img"><img src="/images/'+value.content+'" data-src="'+value.content+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                                            '<div class="hiddenMsg" data-src="'+value._id+'"><span style="display:none">' +value.content+ '</span></div>' +
+                                        '</div></li>';
+                                    }
+                                    //if text message
+                                    else{
+                                        html += '<li><div class="message '+senderStyle+'">' +
+                                            '<div class="sender">' + memberMap[value.sender] + '#' + value.sender + '</div>' +
+                                            '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' + 
+                                            '<div class="content"  data-src="'+value._id+'">' + value.content + '</div>' +                                   
+                                        '</div></li>';
+                                    } 
+
+                                    if(value.read.indexOf(userID.toString()) >= 0){
+                                        $('#messages__read').prepend(html);
+                                    } 
+                                    else{
+                                        $('#messages__unread').prepend(html);
+                                    }
+                                } 
+
+                                //Fix the position of the scroll Bar 
+                                scrollLevel.scrollTop = 30;
+                                currentPage++;
+                            }         
                         }
-                    });
-                }
-               
-                currentPage++;
+                    });      
+                }        
             }
         });
+
+        //Emoji picker listener
+        document.querySelector('emoji-picker').addEventListener('emoji-click', event => {  
+            $('#input').val( $('#input').val() + event.detail.unicode);
+        });
+
 
         /************ Initial page function, load all the chatroom detail for the user ***********/
         (function init(){
@@ -777,4 +840,6 @@
             $('#chatlist').prepend(originalItem);
         });*/  
     </script>
+    <!-- EMOJI picker package -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 </html>
