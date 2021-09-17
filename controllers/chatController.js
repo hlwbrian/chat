@@ -63,8 +63,7 @@ exports.initChatroom = catchAsync(async (req, res, next) => {
   };
 
   //get conversation
-  const messages = await Chat.find(data, {messages : {$slice: -15}})/*.select({"messages" : 1, 'chatroomName' : 1, 'members': 1, 'icon' : 1}) */;
-  //const messages = await Chat.find(data, {messages : {$slice: -1}});
+  const messages = await Chat.find(data, {messages : {$slice: 7}});
 
   //Get members username
   const membersID = messages[0].members;
@@ -94,33 +93,33 @@ exports.initChatroom = catchAsync(async (req, res, next) => {
 
 /* Get histry messages */
 exports.loadMessages = catchAsync(async (req, res, next) => {
-  var page = req.body.currentPage;
-  var data = {
+  let page = req.body.page;
+  let skip = page * 2;
+  let limit = skip + 2;
+  let data = {
     chatID: req.chat.currentChatID
   };
-
+  
   //get conversation
-  /*const messages = await Chat.aggregate([{
-    '$match' : {
-      'chatID' : req.chat.currentChatID
-    }}, {
-      '$unwind': '$Items'
-    }, {
-      '$sort': {
-        'Items.messages' : -1
-      }
+  const messages = await Chat.aggregate([
+    { 
+      '$match': { chatID: req.chat.currentChatID },      
+    },
+    {
+      '$unwind' : '$messages'
+    },
+    {
+      '$limit' : limit //skip + limit
+    },
+    {
+      '$skip' : skip
     }
-  ]);*/
-console.log(messages[0].messages);
-  //Get members username
-  const membersID = messages[0].members;
-  const members = await User.find({userID : {$in : membersID }}).select({"username": 1, "userID": 1});
+  ]);
 
   if(messages){
     res.status(200).json({
       msg: 'success',
-      content: messages,
-      members
+      content: messages
     });
   }else{
     return next(
@@ -159,7 +158,7 @@ exports.saveMessage = catchAsync(async (req, res, next) => {
 
     if(req.body.isMessage) dataObj.isMessage = req.body.isMessage;
     
-    const chatData = await Chat.findOneAndUpdate({chatID: req.body.chatID}, {$push : {messages : dataObj}});
+    const chatData = await Chat.findOneAndUpdate({chatID: req.body.chatID}, {$push : {messages : { $each: [dataObj], $position: 0}}});
     
     if(chatData){
         res.status(200).json({
