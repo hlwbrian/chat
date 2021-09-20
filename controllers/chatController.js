@@ -63,10 +63,40 @@ exports.initChatroom = catchAsync(async (req, res, next) => {
   };
 
   //get conversation
-  const messages = await Chat.find(data, {messages : {$slice: 7}});
+  //const messages = await Chat.find(data, {messages : {$slice: 7}});
+  const newMsg = await Chat.aggregate([
+    {$match: data},
+    {$unwind: "$messages"},
+    {$match: { 'messages.read': {$nin : [req.user.userID.toString()]} }}
+  ]);
+
+  //limit 7 history messages
+  const oldMsg = await Chat.aggregate([
+    {$match: data},
+    {$unwind: "$messages"},
+    {$match: { 'messages.read': {$in : [req.user.userID.toString()]} }},
+    {$limit: 7}
+  ]);
+  
+  //generate result object
+  let messages = {
+    _id : newMsg[0]._id,
+    members : newMsg[0].members,
+    chatCreate : newMsg[0].chatCreate,
+    icon : newMsg[0].icon,
+    chatroomName : newMsg[0].chatroomName,
+    readMsg : [],
+    unreadMsg : []
+  }
+  for(let [, value] of oldMsg.entries()){
+    messages.readMsg.push(value.messages);
+  }
+  for(let [, value] of newMsg.entries()){
+    messages.unreadMsg.push(value.messages);
+  }
 
   //Get members username
-  const membersID = messages[0].members;
+  const membersID = messages.members;
   const members = await User.find({userID : {$in : membersID }}).select({"username": 1, "userID": 1});
 
   //set all the conversation read
@@ -99,18 +129,11 @@ exports.loadMessages = catchAsync(async (req, res, next) => {
   
   //get conversation
   const messages = await Chat.aggregate([
-    { 
-      '$match': { chatID: req.chat.currentChatID },      
-    },
-    {
-      '$unwind' : '$messages'
-    },
-    {
-      '$skip' : skip
-    },
-    {
-      '$limit' : limit
-    }   
+    { $match: { chatID: req.chat.currentChatID }, },
+    { $unwind : '$messages' },
+    { $match: { 'messages.read': {$in : [req.user.userID.toString()]} }},
+    { $skip : skip },
+    { $limit : limit }   
   ]);
   
   if(messages){

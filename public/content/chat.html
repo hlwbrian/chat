@@ -349,22 +349,29 @@
                 error:function(data){
                 },
                 success:function(data) {
-                    var chatroomName = data.content[0].chatroomName;
-                    var content = data.content[0].messages;
-                    var members = data.content[0].members;
-                    var icon = data.content[0].icon;
+                    var chatroomName = data.content.chatroomName;
+                    var unreadMsg = data.content.unreadMsg.reverse();
+                    var readMsg = data.content.readMsg.reverse();
+                    var members = data.content.members;
+                    var icon = data.content.icon;
+                    var content = [];
                     var html = '';
                     var loginStatus = data.loginStatus;
                     for(var [key, value] of data.members.entries()){
                         memberMap[value.userID] = value.username;
                     }
+                    //push all the read & unread msg into content array
+                    for(var [key, value] of unreadMsg.entries()){
+                        content.push(value);
+                    }
+                    for(var [key, value] of readMsg.entries()){
+                        content.push(value);
+                    }
+                    console.log(content);
 
                     $('#chatName').text(chatroomName);
                     $('#chatroom_icon').attr('src', '../images/' + icon);
                     if(content.length > 0){
-                        //Reverse the data in messages array to display
-                        data.content[0].messages.reverse();
-
                         for(var value of content){
                             html = '';
                             var senderStyle = (userID.toString() === value.sender)? 'right' : 'left';
@@ -466,13 +473,20 @@
 
         //Click to Change Chatroom
         $('#chatlist__chatrooms_list').delegate('.chatroom', 'click', function() {
+            // Clear Chatroom messages
+            $('#messages__read').html('');
+            $('#messages__unread').html('');
+
+            $('#noMoreMsg').hide();
+            $('#newMsgLine').hide();
+
             if( $(this).data('id') !== currentChatroom ){
                 chatroomSocket.emit('ChangeRoom', currentChatroom);
 
                 currentChatroom = $(this).data('id');
                 //Join Clicked Chatroom
                 joinChat();
-            }     
+            }
 
             //Set Client Scroll bar at bottom;
             scrollLevel.scrollTop = ScrollToHeight.offsetHeight;
