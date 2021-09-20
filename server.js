@@ -59,13 +59,18 @@ io.on('connection', function(socket) {
         chatroomName = `Room<%SPACE%>${socket.request._query['chatID']}`;
         socket.join(chatroomName);
         
+        //On send message
         socket.on('SendMSG', msg => {
             sendToRoom(chatroomName, userID, msg);
         });
 
-        //Leave Chatroom
-        socket.on('ChangeRoom', chatID => {
-            socket.leave(`Room<%SPACE%>${chatID}`);
+        //On user change chatroom
+        socket.on('ChangeRoom', msg => {
+            socket.leave(`Room<%SPACE%>${msg.oldRoom}`);
+            socket.join(`Room<%SPACE%>${msg.newRoom}`);
+
+            //Change target chatroom ID for sending messages
+            chatroomName = `Room<%SPACE%>${msg.newRoom}`;
         });
     }    
 

@@ -136,6 +136,7 @@
         var userID;
         var allChannel = []; //used for connection IO socket
         var currentChatroom = '';
+        var lastChatroom = '';
         var currentChatSocket = '';
         var memberMap = {};
         var scrollLevel = document.getElementById('messages');
@@ -147,7 +148,7 @@
             $('#fileUpload').trigger('submit');
         }
 
-        function insertMessages(messages){
+        function insertMessages(messages, pendFlow = 'pre'){
             var senderStyle = (userID.toString() === messages.sender)? 'right' : 'left';
             html = '';
 
@@ -170,11 +171,20 @@
             } 
 
             if(messages.read.indexOf(userID.toString()) >= 0){
-                $('#messages__read').prepend(html);
+                if(pendFlow === 'pre')
+                    $('#messages__read').prepend(html);
+                else{
+                    $('#messages__read').append(html);
+                }
             } 
             else{
                 $('#newMsgLine').show();
-                $('#messages__unread').prepend(html);
+
+                if(pendFlow === 'pre')
+                    $('#messages__unread').prepend(html);
+                else{
+                    $('#messages__unread').append(html);
+                }  
             }
         }
 
@@ -308,9 +318,12 @@
                 $('#noMoreMsg').hide();
                 $('#newMsgLine').hide();
 
-                chatroomSocket.emit('ChangeRoom', currentChatroom);
-
+                lastChatroom = currentChatroom;
                 currentChatroom = $(this).data('id');
+                
+                //Change socket IO chatroom ID
+                chatroomSocket.emit('ChangeRoom', {newRoom: currentChatroom, oldRoom: lastChatroom});
+
                 //Join Clicked Chatroom
                 joinChat();
 
@@ -592,26 +605,15 @@
             var sender = msg.split('#')[2];
             var senderStyle = (userID.toString() === sender)? 'right' : 'left';
 
-            //display message
-            if( (/[a-z0-9].jpg|.png|.jpeg/).test(msg) ){
-                $('#messages').append('<li><div class="messageImg message '+senderStyle+'">' +
-                                    '<div class="sender">'  + memberMap[sender] + '#' + sender + '</div>' +
-                                    '<div class="timestamp">' + formatDate(timestamp) + '</div>' +
-                                    '<div class="img"><img src="/images/'+message+'" data-img="'+message+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
-                                    '<div class="hiddenMsg"><span style="display:none">' +message+ '</span></div>' +
-                                    '</div></li>');
-            }else{
-                $('#messages').append('<li><div class="message '+senderStyle+'">' +
-                                    '<div class="sender">' + memberMap[sender] + '#' + sender + '</div>' +
-                                    '<div class="timestamp">' + formatDate(timestamp) + '</div>' + 
-                                    '<div class="content">' + message + '</div>' +                                   
-                                '</li>');
+            var data = {
+                sender: sender,
+                timestamp: timestamp,
+                content: message,
+                read: [userID]
             }
 
-            //get chatroom data from param
-            var data = {
-                currentChatID : urlParams.get('chatroom')
-            }
+            //display message
+            insertMessages(data, 'append');
 
             //TODO: when user receive data update the read status
             /*$.ajax
@@ -632,7 +634,7 @@
                 });*/
 
             //scroll to bottom
-            //$(".chatroom").animate({ scrollTop: $('#messages').height() }, 1000);
+            $('#messages').animate({ scrollTop: $('#messages__unread').height() + $('#messages__read').height() }, 1000);
         });
 
         //TODO: Setup Chatlist socket IO
