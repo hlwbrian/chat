@@ -33,7 +33,8 @@ function formatDateChatList(date){
     year = d.getFullYear();
     hour = d.getHours();
     minute = d.getMinutes();
-
+    minute = (minute.toString().length === 1)? '0' + minute : minute;
+    
     if(ddiff === 0){
         return hour + ':' + minute;
     }else if (ddiff === 1){

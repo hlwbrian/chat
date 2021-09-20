@@ -9,168 +9,6 @@
         <script src="/scripts/jquery.min.js"></script>
         <script src="/scripts/common_functions.js"></script>
         <script src="/socket.io/socket.io.js"></script>
-        <style>
-            @keyframes enterFromTop {
-                0% {
-                    margin-top: -500%;
-                }
-                100% {
-                    margin-top: 0%;
-                }
-            }
-
-            @keyframes expendFromTop {
-                0% {
-                    opacity: 0;
-                    margin-top: -50%;
-                }
-                80% {
-                    opacity: 0;
-                }
-                100% {
-                    opacity: 1;
-                    margin-top: 0%;
-                }
-            }
-
-            @keyframes closeFromBottom {
-                0% {
-                    margin-top: 0%;
-                }
-                100% {
-                    margin-top: -500%;
-                }
-            }
-
-            /* Common */
-            .enterFromTop {animation-name: enterFromTop; animation-duration: 0.8s; animation-fill-mode: forwards; }
-            .closeFromBottom {animation-name: closeFromBottom; animation-duration: 3s; animation-fill-mode: forwards; }
-            .expendFromTop {animation-name: expendFromTop; animation-duration: 0.5s; animation-fill-mode: forwards; }
-
-            .arrow {
-                border: solid black;
-                border-width: 0 7px 7px 0;
-                display: inline-block;
-                padding: 10px;
-            }
-
-            .arrow_right {
-                transform: rotate(-45deg);
-                -webkit-transform: rotate(-45deg);
-            }
-
-            .arrow_left {
-                transform: rotate(135deg);
-                -webkit-transform: rotate(135deg);
-            }
-
-            .arrow_up {
-                transform: rotate(-135deg);
-                -webkit-transform: rotate(-135deg);
-            }
-
-            .arrow_down {
-                transform: rotate(45deg);
-                -webkit-transform: rotate(45deg);
-            }
-
-            /* Chat page base settings */
-            .chatPage { height: 95vh; position: relative; background-color: #183a55; overflow: hidden; }
-            .chatPage #chatlist, .chatPage #chatroom { float: left; padding: 0; margin: 0; }
-            .chatPage main { position: relative; }
-            .chatPage main::after{ content: ''; display: table; clear: both; }
-            .chatPage #chatlist { min-width: 230px; max-width: 280px; border-right: 1px solid #ddd; border-left: 1px solid #ddd;}
-            .chatPage #chatroom { min-width: calc(100% - 233px); max-width: calc(100% - 283px); }
-
-            /* Chat page user info bar */
-            .chatlist__user {padding: 5px 15px; border-bottom: 1px solid #EFEFEF;}
-            .chatlist__user .icon {height: 55px; width: 55px; border-radius: 50%;}
-            .chatlist__user .username { font-size: 22px; font-weight: 500; vertical-align: top;  line-height: 55px; width: calc(100% - 113px); text-align:center; display: inline-block;}
-            .chatlist__user .more { cursor: pointer; float: right; padding-right: 8px;}
-            .chatlist__user svg:hover { transform: scale(1.15); }
-
-            /* More option div */
-            #optionContainer { height: 100vh; margin-top: -500%; overflow: hidden; position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 999; }
-            #optionContainer .closeArrow { position: absolute; box-shadow: 6px 4px 10px black; cursor: pointer; bottom: 0; left: 50%; transform: translate(-50%, 50%); background-color: #0478d1; border-radius: 50%; height: 55px; width: 55px;}
-            #optionContainer .arrow {margin: 13px 18px; border: solid white; border-width:  0 5px 5px 0; padding: 7px;}
-
-            .optionContainer__content { height: fit-content; border-radius: 5px; box-shadow: 6px 4px 10px black; width: fit-content; position: absolute; inset: 0; margin: auto; padding: 25px; background-color: white; }
-            .optionContainer__content .profile__title { padding: 25px 10px; background-color: #0478d1; border-radius: 10px; }
-            .optionContainer__content .profile__title h3 { font-size: 1.8em; color: white;}
-            .optionContainer__content .profile__icon { padding: 15px; position: relative; }
-            .optionContainer__content .profile__icon img {margin-left: 50%; border-radius: 50%; transform: translateX(-50%); height: 280px; width: 280px; cursor: pointer; }
-            .optionContainer__content .profile__username { background-color: rgb(243, 243, 243); padding: 15px; border-radius: 10px; }
-            .optionContainer__content .profile__username h2 { font-size: 18px; }
-            .optionContainer__content .profile__username .username { display: inline-block; margin: 10px 0px; font-size: 18px;}
-            .optionContainer__content .profile__username .remarks { font-size: 12px; }
-            .optionContainer__content .profile__email { background-color: rgb(243, 243, 243); padding: 15px; margin-top: 15px; border-radius: 10px; }
-            .optionContainer__content .profile__email h2 { font-size: 18px; }
-            .optionContainer__content .profile__email .email { display: inline-block; margin: 10px 0px; font-size: 18px;}
-            .logout { width: 350px; margin: 15px auto; height: 35px; position: relative; }
-            .logoutBtn {width: 100%; margin-right: 15px; font-size: 14px; border-color: #0478d1; border-radius: 10px; background-color: #0478d1; color : white; line-height: 35px; cursor: pointer; box-shadow: 0px 0px 2px black;}
-            .logoutBtn:hover {animation-name: customBTN; animation-duration: 0.5s; animation-fill-mode: forwards;}     
-
-            #updateName { display: none; }
-            .updateNameBtn { border: none; border-radius: 50%; background-color: rgb(243, 243, 243); cursor: pointer; }
-            .updateNameBtn:hover { background-color: #ddd; }
-            
-            #fileUpload { display: none; }
-            .overlay_icon { position: absolute; display: none; height: 280px; background-color: rgba(0,0,0, 0.5); top: 15px; left: 50%; transform: translateX(-50%); width: 280px;  border-radius: 50%; cursor: pointer; }
-            .overlay_icon p { position: absolute; inset: 0; color: white; height: fit-content; width: fit-content; margin: auto; }
-            .optionContainer__content .profile__icon img:hover + div { display: block; }
-           
-            /* Create New Chatroom */
-            .chatlist__newchat { padding: 10px; background-color: #0478d1; overflow: hidden; border-radius: 10px; }
-            .chatlist__newchat h3 { color: white; cursor: pointer;}
-            .newchatForm form {display: none;}
-            .newchatForm input{ min-width: 290px; }
-            #createChat { color: white; }
-            .createChatBtn {min-width: 300px; margin-top: 20px; font-size: 14px; border-radius: 10px; background-color: white; line-height: 35px; cursor: pointer;}
-            .createChatBtn:hover {animation-name: customBTN; animation-duration: 0.5s; animation-fill-mode: forwards;}     
-            .createChatArrow { float: right; padding-right: 5px; margin-top: -2px; }
-            .createChatArrow .arrow {border: solid white; border-width: 0 4px 4px 0; padding: 5px; }
-
-            /* Show Joined Chatrooms */
-            .chatlist__chatrooms {background-color: white; max-height: calc(100vh - 112px); height: 100vh; overflow: auto;}
-            #chatlist__chatrooms_list {margin-right: 0;}
-            #chatlist__chatrooms_list .chatroom {padding: 15px; border-bottom: 1px solid #ddd;}
-            #chatlist__chatrooms_list .chatroom:hover {background-color: #ddd;}
-            #chatlist__chatrooms_list .chatroom .chatroom_icon {height: 35px; border-radius: 50%; margin-right: 15px;}
-            #chatlist__chatrooms_list .chatroom div {float: left;}
-            #createChat .errorMsg {color: white; margin-top: 5px;}
-            #initUpdateName { cursor: pointer; margin-left: 10px; }
-            #updateName .errMsg { display: none; font-size: 12px; }
-
-            /* Message body */
-            #noMoreMsg, #newMsgLine {background-color: rgba(0, 0, 0, 0.6); padding: 5px; text-align: center; width: 100%; color: white; display: none;}
-            .message {margin: 5px 0px;}
-
-            /* EMOJI picker */
-            #emojiPicker { position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%);}
-            
-            /******** TODO DEL */
-            /* chatlist body */
-            .chatlistPage__main {background-color: white; max-width: 1280px; margin: 0 auto; height: 100%;}
-            .chatlistPage .button {margin-right: 15px; font-size: 14px; border-color: #bbbfc2; border-radius: 10px; background-color: #1c98f7; color : white; line-height: 35px; cursor: pointer; box-shadow: 1px 1px 2px black;}
-
-            /* chatlist create chat */
-            .chatlistPage__createChat {text-align: center; padding: 10px 0px;}
-           
-
-            /* chatlist chatroom list */
-            #chatlist {padding: 0px 15px; background-color: #f5f5f5; margin: 0px;}
-            #chatlist li {cursor: pointer;}          
-            #chatlist .chatroom .right{width: calc(100% - 50px);}
-            #chatlist .chatroom .halfWidthRight {width: calc(100% - 75px);}
-            #chatlist .chatroom .message, #chatlist .chatroom .timestamp {font-size: 14px; color: #5a5a5a;}
-            #chatlist .chatroom .timestamp {float: right;}
-            #chatlist .chatroom::after {clear: both; display: table; content: "";}
-            #chatlist span {vertical-align: top;}
-            #chatlist .roomName {display: inline-block; font-size: 14px; font-weight: bold;}
-            
-            #chatlist .unreadIcon {height: 14px; margin: 11px 3px; display: inline-block; width: 15px; background-color: #1569aa; border-radius: 50%;}
-             /******** TODO DEL */
-        </style>
     </head>
     <body class="chatPage">
         <main>
@@ -257,21 +95,6 @@
             </div>
 
             <!-- Right part -->
-            <style>
-                #chatOptionContainer { display: none; }
-                #chatroom .chatroom_header { background-color: #f5f5f5; padding: 5px 15px;}
-                #chatroom .chatroom_header div { float: left; }
-                #chatroom .chatroom_header .chatroomMore { float: right; }
-                #chatroom .chatroom_header::after { display: table; content: ''; clear: both; }
-                #chatroom_icon { height: 45px; width: 45px; border-radius: 50%; padding: 5px;}
-
-                .chatroom__content { background-color: white;  position: relative; }               
-                .chatroom__content #messages { margin: 0px; height: calc(100vh - 120px); padding-bottom: 51px; overflow: auto; }
-                .chatroom__content__form { position: absolute!important; width: 100%; }
-                 #chatName { font-size: 22px; vertical-align: top; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 15px; }
-           
-                 #messages__read, #messages__unread {margin: 5px 8px;}
-           </style>
             <div id="chatroom">
                 <!-- Chatroom More Option (hidden by default) -->
                 <div id="chatOptionContainer"></div>
@@ -309,8 +132,6 @@
     </body>
     <script>
         //Variables declaration
-        var path = window.location.pathname;
-        var curPage = path.split('/').pop();
         var username;
         var userID;
         var allChannel = []; //used for connection IO socket
@@ -324,6 +145,37 @@
         /**************** Functions *********************/
         function submitProfileIcon(){
             $('#fileUpload').trigger('submit');
+        }
+
+        function insertMessages(messages){
+            var senderStyle = (userID.toString() === messages.sender)? 'right' : 'left';
+            html = '';
+
+            //TODO: update image handling if image message
+            if( (/[a-z0-9].jpg|.png|.jpeg/).test(messages.message) ){
+                html += '<li><div class="messageImg message  '+senderStyle+'">' +
+                    '<div class="sender">' + memberMap[messages.sender] + '#' + messages.sender + '</div>' +
+                    '<div class="timestamp">' + formatDate(messages.timestamp) + '</div>' +
+                    '<div class="img"><img src="/images/'+messages.content+'" data-src="'+messages.content+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                    '<div class="hiddenMsg" data-src="'+messages._id+'"><span style="display:none">' +messages.content+ '</span></div>' +
+                '</div></li>';
+            }
+            //if text message
+            else{
+                html += '<li><div class="message '+senderStyle+'">' +
+                    '<div class="sender">' + memberMap[messages.sender] + '#' + messages.sender + '</div>' +
+                    '<div class="timestamp">' + formatDate(messages.timestamp) + '</div>' + 
+                    '<div class="content"  data-src="'+messages._id+'">' + messages.content + '</div>' +                                   
+                '</div></li>';
+            } 
+
+            if(messages.read.indexOf(userID.toString()) >= 0){
+                $('#messages__read').prepend(html);
+            } 
+            else{
+                $('#newMsgLine').show();
+                $('#messages__unread').prepend(html);
+            }
         }
 
         //call this when join new chatroom
@@ -367,40 +219,16 @@
                     for(var [key, value] of readMsg.entries()){
                         content.push(value);
                     }
-                    console.log(content);
+                    //Reverse the messages array, latest at bottom
+                    content.reverse();
 
                     $('#chatName').text(chatroomName);
                     $('#chatroom_icon').attr('src', '../images/' + icon);
                     if(content.length > 0){
+
+                        //Prepend all loaded messages
                         for(var value of content){
-                            html = '';
-                            var senderStyle = (userID.toString() === value.sender)? 'right' : 'left';
-
-                            //TODO: update image handling if image message
-                            if( (/[a-z0-9].jpg|.png|.jpeg/).test(value.message) ){
-                                html += '<li><div class="messageImg message  '+senderStyle+'">' +
-                                    '<div class="sender">' + memberMap[value.sender] + '#' + value.sender + '</div>' +
-                                    '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
-                                    '<div class="img"><img src="/images/'+value.content+'" data-src="'+value.content+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
-                                    '<div class="hiddenMsg" data-src="'+value._id+'"><span style="display:none">' +value.content+ '</span></div>' +
-                                '</div></li>';
-                            }
-                            //if text message
-                            else{
-                                html += '<li><div class="message '+senderStyle+'">' +
-                                    '<div class="sender">' + memberMap[value.sender] + '#' + value.sender + '</div>' +
-                                    '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' + 
-                                    '<div class="content"  data-src="'+value._id+'">' + value.content + '</div>' +                                   
-                                '</div></li>';
-                            } 
-
-                            if(value.read.indexOf(userID.toString()) >= 0){
-                                $('#messages__read').append(html);
-                            } 
-                            else{
-                                $('#newMsgLine').show();
-                                $('#messages__unread').append(html);
-                            }
+                            insertMessages(value);
                         }     
                     }
 
@@ -419,10 +247,9 @@
                 }
             });
 
-            //Set Client Scroll bar at bottom;
-            ScrollToHeight = document.getElementById('messages__read');
-            scrollLevel.scrollTop = scrollLevel.scrollHeight;
-            //scrollLevel.scrollTop = ScrollToHeight.offsetheight;
+            //Set Client Scroll bar at bottom of read messages;
+            ScrollToHeight = document.getElementById('messages__unread');
+            scrollLevel.scrollTop = ScrollToHeight.offsetheight;
         }
 
         /**************** Event listeners ***************/
@@ -473,23 +300,23 @@
 
         //Click to Change Chatroom
         $('#chatlist__chatrooms_list').delegate('.chatroom', 'click', function() {
-            // Clear Chatroom messages
-            $('#messages__read').html('');
-            $('#messages__unread').html('');
-
-            $('#noMoreMsg').hide();
-            $('#newMsgLine').hide();
-
             if( $(this).data('id') !== currentChatroom ){
+                // Clear Chatroom messages
+                $('#messages__read').html('');
+                $('#messages__unread').html('');
+
+                $('#noMoreMsg').hide();
+                $('#newMsgLine').hide();
+
                 chatroomSocket.emit('ChangeRoom', currentChatroom);
 
                 currentChatroom = $(this).data('id');
                 //Join Clicked Chatroom
                 joinChat();
-            }
 
-            //Set Client Scroll bar at bottom;
-            scrollLevel.scrollTop = ScrollToHeight.offsetHeight;
+                //Reset current page
+                currentPage = 1;
+            }
         });
 
         //Listen when user scroll to messages top then load more history messages
@@ -533,34 +360,9 @@
                                     messages.push(value.messages)
                                 }
 
+                                //Prepend loaded messages
                                 for(var value of messages){
-                                    html = '';
-                                    var senderStyle = (userID.toString() === value.sender)? 'right' : 'left';
-
-                                    //TODO: update image handling if image message
-                                    if( (/[a-z0-9].jpg|.png|.jpeg/).test(value.message) ){
-                                        html += '<li><div class="messageImg message  '+senderStyle+'">' +
-                                            '<div class="sender">' + memberMap[value.sender] + '#' + value.sender + '</div>' +
-                                            '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' +
-                                            '<div class="img"><img src="/images/'+value.content+'" data-src="'+value.content+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
-                                            '<div class="hiddenMsg" data-src="'+value._id+'"><span style="display:none">' +value.content+ '</span></div>' +
-                                        '</div></li>';
-                                    }
-                                    //if text message
-                                    else{
-                                        html += '<li><div class="message '+senderStyle+'">' +
-                                            '<div class="sender">' + memberMap[value.sender] + '#' + value.sender + '</div>' +
-                                            '<div class="timestamp">' + formatDate(value.timestamp) + '</div>' + 
-                                            '<div class="content"  data-src="'+value._id+'">' + value.content + '</div>' +                                   
-                                        '</div></li>';
-                                    } 
-
-                                    if(value.read.indexOf(userID.toString()) >= 0){
-                                        $('#messages__read').prepend(html);
-                                    } 
-                                    else{
-                                        $('#messages__unread').prepend(html);
-                                    }
+                                    insertMessages(value);
                                 } 
 
                                 //Fix the position of the scroll Bar 
@@ -620,12 +422,11 @@
                             //Join chatroom to listen if any message are send to this user
                             currentChatroom = (currentChatroom === '')? data.records[i].chatID : currentChatroom;
                             allChannel.push(data.records[i].chatID);
-
-                            lastData = data.records[i].messages.length - 1;
+                            
                             if(data.records[i].messages.length > 0){                                
                                 let message, timestamp;
-                                message = (!data.records[i].messages[lastData].hasOwnProperty('content'))? '' : data.records[i].messages[lastData]['content'];
-                                timestamp = (!data.records[i].messages[lastData].hasOwnProperty('timestamp'))? data.records[i].chatCreate : data.records[i].messages[lastData]['timestamp'];
+                                message = (!data.records[i].messages[0].hasOwnProperty('content'))? '' : data.records[i].messages[0]['content'];
+                                timestamp = (!data.records[i].messages[0].hasOwnProperty('timestamp'))? data.records[i].chatCreate : data.records[i].messages[0]['timestamp'];
                                 html += '<span class="message">' + message + '</span><span class="timestamp">' + formatDateChatList(timestamp) + '</span></div>';
                             }
                           
