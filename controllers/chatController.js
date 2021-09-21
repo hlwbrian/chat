@@ -63,13 +63,12 @@ exports.initChatroom = catchAsync(async (req, res, next) => {
   };
 
   //get conversation
-  //const messages = await Chat.find(data, {messages : {$slice: 7}});
   const newMsg = await Chat.aggregate([
     {$match: data},
     {$unwind: "$messages"},
     {$match: { 'messages.read': {$nin : [req.user.userID.toString()]} }}
   ]);
-
+  
   //limit 7 history messages
   const oldMsg = await Chat.aggregate([
     {$match: data},
@@ -80,21 +79,26 @@ exports.initChatroom = catchAsync(async (req, res, next) => {
   
   //generate result object
   let messages = {
-    _id : newMsg[0]._id,
-    members : newMsg[0].members,
-    chatCreate : newMsg[0].chatCreate,
-    icon : newMsg[0].icon,
-    chatroomName : newMsg[0].chatroomName,
+    _id : oldMsg[0]._id,
+    members : oldMsg[0].members,
+    chatCreate : oldMsg[0].chatCreate,
+    icon : oldMsg[0].icon,
+    chatroomName : oldMsg[0].chatroomName,
     readMsg : [],
     unreadMsg : []
   }
-  for(let [, value] of oldMsg.entries()){
-    messages.readMsg.push(value.messages);
+  if(oldMsg.length > 0){
+    for(let [, value] of oldMsg.entries()){
+      messages.readMsg.push(value.messages);
+    }
   }
-  for(let [, value] of newMsg.entries()){
-    messages.unreadMsg.push(value.messages);
+  
+  if(newMsg.length > 0){
+    for(let [, value] of newMsg.entries()){
+      messages.unreadMsg.push(value.messages);
+    }
   }
-
+  
   //Get members username
   const membersID = messages.members;
   const members = await User.find({userID : {$in : membersID }}).select({"username": 1, "userID": 1});
@@ -151,7 +155,7 @@ exports.loadMessages = catchAsync(async (req, res, next) => {
 /* update read status for user in chat */
 exports.updateUnread = catchAsync(async (req, res, next) => {
     //set all the conversation read
-    const updateRead = await Chat.updateMany({chatID: req.chat.currentChatID}, { $addToSet : {'conversations.$[].read' : req.user.userID }});
+    const updateRead = await Chat.updateMany({chatID: req.chat.currentChatID}, { $addToSet : {'messages.$[].read' : req.user.userID }});
   
     if(updateRead){
       res.status(201).json({

@@ -142,6 +142,7 @@
         var scrollLevel = document.getElementById('messages');
         var ScrollToHeight;
         var currentPage = 1; // 15 messages per page
+        var loadReady = false; //true for intersection observer to set status
 
         /**************** Functions *********************/
         function submitProfileIcon(){
@@ -397,6 +398,55 @@
             $('#input').val( $('#input').val() + event.detail.unicode);
         });
 
+        //Intersection observer to update read status
+        var observerTarget = document.getElementById('messages__unread');
+        const obsCallback = function() {
+            var data = {
+                currentChatID: currentChatroom
+            }
+
+            if(loadReady === true && $('#messages__unread').height() > 0){
+                alert('Update read!');
+                //Update user read status by inserting userID into the chat.read array
+                $.ajax
+                ({
+                    type: "PATCH",
+                    url: "/chat/updateRead",
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    async: false,
+                    data: JSON.stringify(data),
+                    headers: {
+                        "authorization": "Bearer " + getCookie('chatJWT')
+                    },
+                    success:function(data) {
+                        //Push unread messages into read messages
+                        $('#messages__read').append($('#messages__unread').html());
+
+                        //Hide new message line
+                        $('#messages__unread').html('');
+                        $('#newMsgLine').hide();
+
+                        //Remove chatroom border right
+                        $('#chatroom'+currentChatID).css('border-right', 'none');
+                    },
+                    error:function(data){
+                    }
+                });
+            }
+
+            //When page load it will trigger this callback function, this can avoid updating read status when page load
+            if($('#messages__unread').height() > 0)
+                loadReady = true;           
+        };
+
+        const observer = new IntersectionObserver(obsCallback, {
+            //options
+            root: null,
+            threshold: 0.2 //need more than 20% to be 'Intersecting'
+        });
+        observer.observe(observerTarget);
+
         /************ Initial page function, load all the chatroom detail for the user ***********/
         (function init(){
             $.ajax
@@ -575,7 +625,7 @@
                     "authorization": "Bearer " + getCookie('chatJWT')
                 },
                 error:function(data){
-                    if(data.status === 40){
+                    if(data.status === 404){
                         $('#updateName .errMsg').html('Update Failed');
                     }
                 },
@@ -621,24 +671,6 @@
             //display message
             insertMessages(data, 'append');
             
-            //TODO: when user receive data update the read status
-            /*$.ajax
-                ({
-                    type: "PATCH",
-                    url: "/chat/updateRead",
-                    contentType: 'application/json; charset=utf-8',
-                    dataType: 'json',
-                    async: false,
-                    data: JSON.stringify(data),
-                    headers: {
-                        "authorization": "Bearer " + getCookie('chatJWT')
-                    },
-                    success:function(data) {
-                    },
-                    error:function(data){
-                    }
-                });*/
-
             //scroll to bottom
             $('#messages').animate({ scrollTop: $('#messages__unread').height() + $('#messages__read').height() }, 1000);
         });

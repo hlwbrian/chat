@@ -40,6 +40,10 @@ const chatSchema = mongoose.Schema({
     icon: {
         type: String,
         default: 'default_chatroom.png'
+    },
+    isImage: {
+        type: Boolean,
+        default: false
     }
 });
 
