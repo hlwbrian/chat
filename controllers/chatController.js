@@ -185,7 +185,8 @@ exports.saveMessage = catchAsync(async (req, res, next) => {
         res.status(200).json({
           status: 'success',
           msg: 'added',
-          timestamp: timestamp
+          timestamp: timestamp,
+          content: chatData
         });
     }
   }else{

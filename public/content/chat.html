@@ -321,6 +321,10 @@
                 lastChatroom = currentChatroom;
                 currentChatroom = $(this).data('id');
                 
+                //Change Highlighted chatroom
+                $('#chatroom'+lastChatroom).removeClass('activeChat');
+                $('#chatroom'+currentChatroom).addClass('activeChat');
+
                 //Change socket IO chatroom ID
                 chatroomSocket.emit('ChangeRoom', {newRoom: currentChatroom, oldRoom: lastChatroom});
 
@@ -393,7 +397,6 @@
             $('#input').val( $('#input').val() + event.detail.unicode);
         });
 
-
         /************ Initial page function, load all the chatroom detail for the user ***********/
         (function init(){
             $.ajax
@@ -426,12 +429,13 @@
                     
                     //Display the chatlist details
                     if(data.records.length > 0){
-                        var html = '', datetime, datetimeFormat, lastData;
-                        for(var i = 0; i < data.records.length; i++){                            
-                            html += '<li data-id="'+data.records[i].chatID+'" class="chatroom" id="chatroom'+data.records[i].chatID+'">' + 
+                        var html = '', datetime, datetimeFormat, lastData, styleClass;
+                        for(var i = 0; i < data.records.length; i++){          
+                            styleClass = (i === 0)? 'activeChat' : '';
+                            html += '<li data-id="'+data.records[i].chatID+'" class="chatroom '+styleClass+'" id="chatroom'+data.records[i].chatID+'">' + 
                                         '<div class="left"><img src="/images/'+ data.records[i]['icon'] +'" class="chatroom_icon" /></div>' +
                                         '<div class="right"><span class="roomName">' + data.records[i]['chatroomName'] + '</span><br/>';
-                                                                    
+                                                 
                             //Join chatroom to listen if any message are send to this user
                             currentChatroom = (currentChatroom === '')? data.records[i].chatID : currentChatroom;
                             allChannel.push(data.records[i].chatID);
@@ -584,7 +588,7 @@
 
         /* Socket IO Related */
         //Join Chatroom socket
-        const chatroomSocket = io({query: {"userID" : userID, 'username': username, 'chatID': currentChatroom} }); 
+        const chatroomSocket = io({query: {"userID" : userID, 'username': username, 'chatID': currentChatroom, 'chatlist': allChannel} }); 
 
         var form = document.querySelector('.chatroom__content__form');
         var input = document.querySelector('.chatroom__content__input');
@@ -603,18 +607,20 @@
             var message = msg.split('#')[0];
             var timestamp = msg.split('#')[1];
             var sender = msg.split('#')[2];
-            var senderStyle = (userID.toString() === sender)? 'right' : 'left';
+            var messageID = msg.split('#')[3];
+            var senderStyle = (userID.toString() === sender)? 'right' : 'left';     
 
             var data = {
                 sender: sender,
                 timestamp: timestamp,
                 content: message,
-                read: [userID]
+                read: [userID],
+                _id: messageID
             }
 
             //display message
             insertMessages(data, 'append');
-
+            
             //TODO: when user receive data update the read status
             /*$.ajax
                 ({
@@ -637,25 +643,24 @@
             $('#messages').animate({ scrollTop: $('#messages__unread').height() + $('#messages__read').height() }, 1000);
         });
 
-        //TODO: Setup Chatlist socket IO
-        //const chatListSocket = io({query: {"username" : username, 'userID': userID, 'chat' : allChannel, 'page' : 'chatlist'}}); 
-        
         //socket listen to the chatroom that has message sent out
-        /*chatListSocket.on('chatroom list update', msg => {
-            var roomName = msg.split('#')[0].split(' ')[1];
-            var message = msg.split('#')[1];
-            var timestamp = msg.split('#')[2];
+        chatroomSocket.on('ChatlistUpdate', msg => {
+            var message = msg.split('#')[0];
+            var timestamp = msg.split('#')[1];
+            var roomID = msg.split('#')[2];
+            var senderUserID = parseInt(msg.split('#')[3]);
 
-            $('#chatroom'+roomName+' .message').text(message);
-            $('#chatroom'+roomName+' .timestamp').text( formatDate(timestamp) );
-            
-            $('#chatroom'+roomName + ' .left span').addClass('unreadIcon');
-            $('#chatroom'+roomName + ' .right').addClass('halfWidthRight');
+            $('#chatroom'+roomID+' .message').text(message);
+            $('#chatroom'+roomID+' .timestamp').text( formatDateChatList(timestamp) );
+            if(userID !== senderUserID){
+                $('#chatroom'+roomID).css('border-right', '5px solid #183a55');
+            }
+
             //move the chat to the top
-            var originalItem = $('#chatroom'+roomName);
-            $('#chatroom'+roomName).remove();
-            $('#chatlist').prepend(originalItem);
-        });*/  
+            var originalItem = $('#chatroom'+roomID);
+            $('#chatroom'+roomID).remove();
+            $('#chatlist__chatrooms_list').prepend(originalItem);
+        });
     </script>
     <!-- EMOJI picker package -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>

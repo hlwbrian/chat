@@ -54,8 +54,15 @@ io.on('connection', function(socket) {
     //Push username to check online users
     let userID = socket.request._query['userID'];
     let chatroomName = '';
+    let chatlist = socket.request._query['chatlist'].split(',');
 
     if(socket.request._query['chatID'] !== ''){
+        /* Chatlist socket functions */
+        for(let [key, value] of chatlist.entries()){
+            socket.join(`Chatlist<%SPACE%>${value}`);
+        }
+
+        /* Chatroom socket functions */
         chatroomName = `Room<%SPACE%>${socket.request._query['chatID']}`;
         socket.join(chatroomName);
         
@@ -165,9 +172,10 @@ function sendToRoom(roomName, userID, msg){
         // handle success
         timestamp = response.data.timestamp;
         
-        //send data
-        io.in(roomName).emit('Receive', `${msg}#${response.data.timestamp}#${userID}`);
-        io.in(roomName).emit('ChatlistUpdate', `${roomName}#${msg}#${timestamp}`);
+        //send data in chatroom
+        io.in(roomName).emit('Receive', `${msg}#${response.data.timestamp}#${userID}#${response.data.content._id}`);
+        //update chatlist
+        io.in(`Chatlist<%SPACE%>${roomID}`).emit('ChatlistUpdate', `${msg}#${response.data.timestamp}#${roomID}#${userID}`);
     })
     .catch(function (error) {
         // handle error

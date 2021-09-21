@@ -215,6 +215,8 @@ input[type='text'],textarea {font-size:1em;}
 #chatlist span {vertical-align: top;}
 #chatlist .roomName {display: inline-block; font-size: 14px; font-weight: bold;}
 
+.activeChat {background-color: #ddd;}
+
 /* Message body */
 #noMoreMsg, #newMsgLine {background-color: rgba(0, 0, 0, 0.6); padding: 5px; text-align: center; width: 100%; color: white; display: none;}
 .message {margin: 5px 0px;}
