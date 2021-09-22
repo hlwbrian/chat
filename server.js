@@ -104,7 +104,7 @@ io.on('connection', function(socket) {
             socket.join(`Chatlist<%SPACE%>${chatID}`);
         });
 
-        //Save iamge
+        //Save image
         socket.on('saveImage', data => {
             let base64Data = data.base64Img.replace(/^data:image\/jpeg;base64,/, "");
             base64Data = base64Data.replace(/^data:image\/png;base64,/, "");
@@ -114,6 +114,11 @@ io.on('connection', function(socket) {
             fs.writeFile('./public/chatimages/' + data.timestamp + '.png', buf, function(err) {
                 console.log(err);
             });
+        });
+
+        //Update user to update chatroom name
+        socket.on('UpdateChatroomName', data => {
+            io.in(`Chatlist<%SPACE%>${data.chatID}`).emit('ChatroomNameUpdated', {newName: data.newRoomName, chatID: data.chatID});
         });
     }    
 

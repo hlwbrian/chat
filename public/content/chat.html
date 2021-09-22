@@ -97,26 +97,54 @@
             <!-- Right part -->
             <div id="chatroom">
                 <!-- Chatroom More Option (hidden by default) -->
-                <div id="chatOptionContainer"></div>
+                <div id="chatOptionContainer">
+                    <div class="chatOptionContainer__content chatOp"> 
+                        <span class="chatOp__close">X</span>
+                        <div class="chatOp__title">
+                            <h3>Chat Info</h3>
+                        </div> 
+
+                        <div class="chatOp__icon">
+                            <img class="group_icon"/> 
+                            <div class="overlay_icon">
+                                <p>
+                                    Update Image
+                                    <span class="cameraImg"><svg viewBox="0 0 24 24" width="24" height="24" class=""><path fill="currentColor" d="M21.317 4.381H10.971L9.078 2.45c-.246-.251-.736-.457-1.089-.457H4.905c-.352 0-.837.211-1.078.468L1.201 5.272C.96 5.529.763 6.028.763 6.38v1.878l-.002.01v11.189a1.92 1.92 0 0 0 1.921 1.921h18.634a1.92 1.92 0 0 0 1.921-1.921V6.302a1.92 1.92 0 0 0-1.92-1.921zM12.076 18.51a5.577 5.577 0 1 1 0-11.154 5.577 5.577 0 0 1 0 11.154zm0-9.506a3.929 3.929 0 1 0 0 7.858 3.929 3.929 0 0 0 0-7.858z"></path></svg></span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="chatOp__chatname">
+                            <h2>Chatroom Name</h2>
+                            <span class="name"></span>
+                            <span id="initUpdateChatName"><svg viewBox="0 0 24 24" width="18" height="18" class=""><path fill="currentColor" d="M3.95 16.7v3.4h3.4l9.8-9.9-3.4-3.4-9.8 9.9zm15.8-9.1c.4-.4.4-.9 0-1.3l-2.1-2.1c-.4-.4-.9-.4-1.3 0l-1.6 1.6 3.4 3.4 1.6-1.6z"></path></svg></span>                    
+                            <form id="updateChatName">
+                                <input required type="text" maxlength="32" minlength="1" name="chatname" pattern="[a-zA-Z0-9]+" id="update-chatname" placeholder="New chatroom"></input>
+                                <p class="errMsg"></p>
+                                <button type="submit" class="updateNameBtn"><svg viewBox="0 0 24 24" width="24" height="24" class=""><path fill="currentColor" d="M9 17.2l-4-4-1.4 1.3L9 19.9 20.4 8.5 19 7.1 9 17.2z"></path></svg></button>
+                            </form>
+                        </div>
+                        <br/>
+                        <div class="chatOp__members">
+                            <h2>Chatroom Members</h2>
+                            <ul class="members"></ul>
+                        </div>
+                        <br/>
+                        <div class="chatOp__addMem">
+                            <form id="addMem">
+                                <p>Enter your friend username</p>
+                                <input type="text" placeholder="e.g. john#315" pattern="[a-z0-9]+#[0-9]+" required id="memUsername">
+                                <button type="submit" class="addMemBtn">ADD</button>
+                            </form>
+                        </div>
+                        <br/>
+                        <div class="leaveroom">
+                            <button class="leaveBtn">LEAVE</button>
+                        </div>
+                    </div>     
+                </div>
 
                 <!-- Chatroom information header -->
-                <script>
-                    function sendImg() {
-                        const preview = document.querySelector('#theimage');
-                        const file = document.querySelector('#theinput[type=file]').files[0];
-                        const reader = new FileReader();
-
-                        reader.addEventListener("load", function () {
-                            var sendTimestamp = Date.now();
-                            chatroomSocket.emit('saveImage', {base64Img: reader.result, timestamp: sendTimestamp});
-                            chatroomSocket.emit('SendMSG', {msg: sendTimestamp+'.png', isImage: true});
-                        }, false);
-
-                        if (file) {
-                            reader.readAsDataURL(file);
-                        }
-                    }
-                </script>
                 <div class="chatroom_header">
                     <input type="file" id="theinput" onchange="sendImg()" style="display: none">
                     <div class="chatroomName">
@@ -155,7 +183,6 @@
         var allChannel = []; //used for connection IO socket
         var currentChatroom = '';
         var lastChatroom = '';
-        var currentChatSocket = '';
         var memberMap = {};
         var scrollLevel = document.getElementById('messages');
         var ScrollToHeight;
@@ -206,6 +233,23 @@
             }
         }
 
+        //Send Image Function
+        function sendImg() {
+            const preview = document.querySelector('#theimage');
+            const file = document.querySelector('#theinput[type=file]').files[0];
+            const reader = new FileReader();
+
+            reader.addEventListener("load", function () {
+                var sendTimestamp = Date.now();
+                chatroomSocket.emit('saveImage', {base64Img: reader.result, timestamp: sendTimestamp});
+                chatroomSocket.emit('SendMSG', {msg: sendTimestamp+'.png', isImage: true});
+            }, false);
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
         //call this when join new chatroom
         function joinChat() {
             //Prepare data to init the chatroom
@@ -235,12 +279,19 @@
                     var content = [];
                     var html = '';
                     var loginStatus = data.loginStatus;
+                    $('.chatOp__members .members').html(''); //reset member list
                     for(var [key, value] of data.members.entries()){
                         memberMap[value.userID] = value.username;
+
+                        //Insert memberlist into chat info
+                        $('.chatOp__members .members').append('<li>' + value.username + '#' + value.userID  + '<span id="onlineStatus#'+value.userID+'"></span></li>');
                     }
 
                     $('#chatName').text(chatroomName);
                     $('#chatroom_icon').attr('src', '../images/' + icon);
+                    $('.group_icon').attr('src', '../images/' + icon);
+                    $('.chatOp__chatname .name').text(chatroomName);
+
                     if(data.content.unreadMsg.length > 0 || data.content.readMsg.length > 0){
                         var unreadMsg = data.content.unreadMsg;
                         var readMsg = data.content.readMsg;
@@ -320,6 +371,42 @@
             $('#update-username').focus();
         });
 
+        //Click to show update group form
+        $('#initUpdateChatName').on('click', function() {
+            $('#updateChatName').toggle();
+            $('#update-chatname').focus();
+        });
+
+        //Update Chatroom name
+        $('#updateChatName').submit(function(e){
+            e.preventDefault();
+
+            var data = {
+                currentChatID: currentChatroom,
+                chatroomName: $('#update-chatname').val()
+            }
+
+            $.ajax
+            ({
+                type: "PATCH",
+                url: "/chat/changeChatName",
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                async: false,
+                data: JSON.stringify(data),
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                //if conversation/chatroom not found
+                error:function(data){
+                },
+                success:function(data) {
+                    //Change socket IO chatroom ID
+                    chatroomSocket.emit('UpdateChatroomName', {newRoomName: $('#update-chatname').val(), chatID: currentChatroom});
+                }
+            });   
+        })
+
         //Click to Update Profile Image
         $('.optionContainer__content .overlay_icon').on('click', function() {
             $('#profileImageBtn').trigger('click');          
@@ -351,6 +438,16 @@
                 //Reset current page
                 currentPage = 1;
             }
+        });
+
+        //Show chat info overlay
+        $('.chatroomMore').on('click', function(){
+            $('#chatOptionContainer').show();
+        });
+
+        //Close chat info overlay
+        $('.chatOp__close').on('click', function(){
+            $('#chatOptionContainer').hide();
         });
 
         //Listen when user scroll to messages top then load more history messages
@@ -723,6 +820,15 @@
 
             $('#chatlist__chatrooms_list').prepend(html);
         });
+
+        //Update chatroom name
+        chatroomSocket.on('ChatroomNameUpdated', data => {
+            $('#chatroom'+data.chatID + ' .roomName').html(data.newName);
+
+            if(currentChatroom == data.chatID)
+                $('#chatName').html(data.newName);
+        });
+        
 
         //socket listen to the chatroom that has message sent out
         chatroomSocket.on('ChatlistUpdate', msg => {
