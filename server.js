@@ -56,6 +56,9 @@ io.on('connection', function(socket) {
     let chatroomName = '';
     let chatlist = socket.request._query['chatlist'].split(',');
 
+    //If online join member room
+    socket.join(`Member<%SPACE%>${userID}`);
+
     if(socket.request._query['chatID'] !== ''){
         /* Chatlist socket functions */
         for(let [key, value] of chatlist.entries()){
@@ -78,6 +81,26 @@ io.on('connection', function(socket) {
 
             //Change target chatroom ID for sending messages
             chatroomName = `Room<%SPACE%>${msg.newRoom}`;
+        });
+
+        //If a new chatroom is created
+        socket.on('CreatedNewChat', msg => {
+            let otherMembers = msg.records.members.filter( (curVal) => {
+                return curVal !== userID;
+            });
+
+            //Join chatlist socket room
+            socket.join(`Chatlist<%SPACE%>${msg.records.chatID}`);
+
+            //Emit new chatroom info to other members
+            for(let value of otherMembers){
+                io.in(`Member<%SPACE%>${value}`).emit('SomeoneCreatedAChatWithYou', msg);
+            }  
+        });
+
+        //Join a new chatlist room
+        socket.on('JoinChatlistRoom', chatID => {
+            socket.join(`Chatlist<%SPACE%>${chatID}`);
         });
     }    
 
@@ -171,7 +194,7 @@ function sendToRoom(roomName, userID, msg){
     .then(function (response) {
         // handle success
         timestamp = response.data.timestamp;
-        
+
         //send data in chatroom
         io.in(roomName).emit('Receive', `${msg}#${response.data.timestamp}#${userID}#${response.data.content._id}`);
         //update chatlist

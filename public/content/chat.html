@@ -213,8 +213,6 @@
                 },
                 success:function(data) {
                     var chatroomName = data.content.chatroomName;
-                    var unreadMsg = data.content.unreadMsg.reverse();
-                    var readMsg = data.content.readMsg.reverse();
                     var members = data.content.members;
                     var icon = data.content.icon;
                     var content = [];
@@ -223,19 +221,20 @@
                     for(var [key, value] of data.members.entries()){
                         memberMap[value.userID] = value.username;
                     }
-                    //push all the read & unread msg into content array
-                    for(var [key, value] of unreadMsg.entries()){
-                        content.push(value);
-                    }
-                    for(var [key, value] of readMsg.entries()){
-                        content.push(value);
-                    }
-                    //Reverse the messages array, latest at bottom
-                    content.reverse();
 
                     $('#chatName').text(chatroomName);
                     $('#chatroom_icon').attr('src', '../images/' + icon);
-                    if(content.length > 0){
+                    if(data.content.unreadMsg.length > 0 || data.content.readMsg.length > 0){
+                        var unreadMsg = data.content.unreadMsg;
+                        var readMsg = data.content.readMsg;
+
+                        //push all the read & unread msg into content array
+                        for(var [key, value] of unreadMsg.entries()){
+                            content.push(value);
+                        }
+                        for(var [key, value] of readMsg.entries()){
+                            content.push(value);
+                        }
 
                         //Prepend all loaded messages
                         for(var value of content){
@@ -401,12 +400,12 @@
         //Intersection observer to update read status
         var observerTarget = document.getElementById('messages__unread');
         const obsCallback = function() {
+            var isScrollable = $('#messages').height() - $('#noMoreMsg').height() - $('#messages__read').height() - $('#newMsgLine').height();
             var data = {
                 currentChatID: currentChatroom
             }
 
-            if(loadReady === true && $('#messages__unread').height() > 0){
-                alert('Update read!');
+            if(loadReady === true && $('#messages__unread').height() > 0 || isScrollable > 0){
                 //Update user read status by inserting userID into the chat.read array
                 $.ajax
                 ({
@@ -428,7 +427,7 @@
                         $('#newMsgLine').hide();
 
                         //Remove chatroom border right
-                        $('#chatroom'+currentChatID).css('border-right', 'none');
+                        $('#chatroom'+currentChatroom).css('border-right', 'none');
                     },
                     error:function(data){
                     }
@@ -443,7 +442,7 @@
         const observer = new IntersectionObserver(obsCallback, {
             //options
             root: null,
-            threshold: 0.2 //need more than 20% to be 'Intersecting'
+            threshold: 0.1 //need more than 10% to be 'Intersecting'
         });
         observer.observe(observerTarget);
 
@@ -585,11 +584,19 @@
                 success:function(data) {
                     //insert chatlist data
                     var html='', datetime, datetimeFormat;
+
                     html += '<li data-id="'+data.records.chatID+'" class="chatroom" id="chatroom'+data.records.chatID+'">' + 
-                            '<div class="left"><img src="/images/'+ data.records['icon'] +'" class="icon" /></div>' +
-                            '<div class="right"><span class="roomName">' + data.records['chatroomName'] + '</span><br/>' +
-                            '</li>';
-                            
+                                '<div class="left"><img src="/images/'+ data.records.icon +'" class="chatroom_icon" /></div>' +
+                                '<div class="right"><span class="roomName">' + data.records.chatroomName + '</span><br><span class="message"></span><span class="timestamp"></span>';
+                    html += '</li>';       
+
+                    //Join chatroom to listen if any message are send to this user
+                    allChannel.push(data.records.chatID);
+                    
+                    //Emit message to add chatlist
+                    //Join member socket room
+                    chatroomSocket.emit('CreatedNewChat', data);
+
                     $('#chatlist__chatrooms_list').prepend(html);
                 },
                 error:function(err){
@@ -673,6 +680,25 @@
             
             //scroll to bottom
             $('#messages').animate({ scrollTop: $('#messages__unread').height() + $('#messages__read').height() }, 1000);
+        });
+
+        //When other member created a chatroom and added u
+        chatroomSocket.on('SomeoneCreatedAChatWithYou', data => {
+            //Prepend the new chatroom in the chatlist
+            var html='', datetime, datetimeFormat;
+
+            html += '<li data-id="'+data.records.chatID+'" class="chatroom" id="chatroom'+data.records.chatID+'">' + 
+                        '<div class="left"><img src="/images/'+ data.records.icon +'" class="chatroom_icon" /></div>' +
+                        '<div class="right"><span class="roomName">' + data.records.chatroomName + '</span><br><span class="message"></span><span class="timestamp"></span>';
+            html += '</li>';       
+
+            //Join chatroom to listen if any message are send to this user
+            allChannel.push(data.records.chatID);
+
+            //Join chatlist room
+            chatroomSocket.emit('JoinChatlistRoom', data.records.chatID);
+
+            $('#chatlist__chatrooms_list').prepend(html);
         });
 
         //socket listen to the chatroom that has message sent out

@@ -61,6 +61,7 @@ exports.initChatroom = catchAsync(async (req, res, next) => {
   var data = {
     chatID: req.chat.currentChatID
   };
+  let messages = {};
 
   //get conversation
   const newMsg = await Chat.aggregate([
@@ -77,28 +78,43 @@ exports.initChatroom = catchAsync(async (req, res, next) => {
     {$limit: 7}
   ]);
   
-  //generate result object
-  let messages = {
-    _id : oldMsg[0]._id,
-    members : oldMsg[0].members,
-    chatCreate : oldMsg[0].chatCreate,
-    icon : oldMsg[0].icon,
-    chatroomName : oldMsg[0].chatroomName,
-    readMsg : [],
-    unreadMsg : []
-  }
-  if(oldMsg.length > 0){
-    for(let [, value] of oldMsg.entries()){
-      messages.readMsg.push(value.messages);
+  if(newMsg.length > 0 || oldMsg.length > 0){
+    //generate result object
+    messages = {
+      _id : (oldMsg.length > 0)? oldMsg[0]._id:newMsg[0]._id,
+      members : (oldMsg.length > 0)? oldMsg[0].members:newMsg[0].members,
+      chatCreate : (oldMsg.length > 0)? oldMsg[0].chatCreate:newMsg[0].chatCreate,
+      icon : (oldMsg.length > 0)? oldMsg[0].icon:newMsg[0].icon,
+      chatroomName : (oldMsg.length > 0)? oldMsg[0].chatroomName:newMsg[0].chatroomName,
+      readMsg : [],
+      unreadMsg : []
     }
-  }
-  
-  if(newMsg.length > 0){
-    for(let [, value] of newMsg.entries()){
-      messages.unreadMsg.push(value.messages);
+
+    if(oldMsg.length > 0){
+      for(let [, value] of oldMsg.entries()){
+        messages.readMsg.push(value.messages);
+      }
     }
+
+    if(newMsg.length > 0){
+      for(let [, value] of newMsg.entries()){
+        messages.unreadMsg.push(value.messages);
+      }
+    }
+  }else{
+    //GET chatroom info
+    const chat = await Chat.find(data);
+    messages = {
+      _id : chat[0]._id,
+      members : chat[0].members,
+      chatCreate : chat[0].chatCreate,
+      icon : chat[0].icon,
+      chatroomName : chat[0].chatroomName,
+      readMsg : [],
+      unreadMsg : []
+    };
   }
-  
+
   //Get members username
   const membersID = messages.members;
   const members = await User.find({userID : {$in : membersID }}).select({"username": 1, "userID": 1});
