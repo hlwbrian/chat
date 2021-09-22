@@ -100,7 +100,25 @@
                 <div id="chatOptionContainer"></div>
 
                 <!-- Chatroom information header -->
+                <script>
+                    function sendImg() {
+                        const preview = document.querySelector('#theimage');
+                        const file = document.querySelector('#theinput[type=file]').files[0];
+                        const reader = new FileReader();
+
+                        reader.addEventListener("load", function () {
+                            var sendTimestamp = Date.now();
+                            chatroomSocket.emit('saveImage', {base64Img: reader.result, timestamp: sendTimestamp});
+                            chatroomSocket.emit('SendMSG', {msg: sendTimestamp+'.png', isImage: true});
+                        }, false);
+
+                        if (file) {
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                </script>
                 <div class="chatroom_header">
+                    <input type="file" id="theinput" onchange="sendImg()" style="display: none">
                     <div class="chatroomName">
                         <img id="chatroom_icon" src="/images/default.png"/>
                         <span id="chatName">&nbsp;</span>
@@ -124,7 +142,7 @@
                         </div>
                     </div>
                     <form id="form" class="chatroom__content__form" action="">
-                        <input id="input" class="chatroom__content__input" autocomplete="off"/><button type="button" onclick="$('#emojiPicker').toggle();">Emoji</button><button type="button" onclick="previewImage();">Image</button><button type="submit">Send</button>
+                        <input id="input" class="chatroom__content__input" autocomplete="off"/><button type="button" onclick="$('#emojiPicker').toggle();">Emoji</button><button type="button" onclick="$('#theinput').click();">Image</button><button type="submit">Send</button>
                     </form>
                 </div>
             </div>         
@@ -153,13 +171,12 @@
             var senderStyle = (userID.toString() === messages.sender)? 'right' : 'left';
             html = '';
 
-            //TODO: update image handling if image message
-            if( (/[a-z0-9].jpg|.png|.jpeg/).test(messages.message) ){
-                html += '<li><div class="messageImg message  '+senderStyle+'">' +
+            //Send Image
+            if( messages.isImage === true || messages.isImage === 'true' ){
+                html += '<li><div class="message  '+senderStyle+'">' +
                     '<div class="sender">' + memberMap[messages.sender] + '#' + messages.sender + '</div>' +
                     '<div class="timestamp">' + formatDate(messages.timestamp) + '</div>' +
-                    '<div class="img"><img src="/images/'+messages.content+'" data-src="'+messages.content+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
-                    '<div class="hiddenMsg" data-src="'+messages._id+'"><span style="display:none">' +messages.content+ '</span></div>' +
+                    '<div class="img"><img src="/chatimages/'+messages.content+'" data-src="'+messages.content+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
                 '</div></li>';
             }
             //if text message
@@ -167,7 +184,7 @@
                 html += '<li><div class="message '+senderStyle+'">' +
                     '<div class="sender">' + memberMap[messages.sender] + '#' + messages.sender + '</div>' +
                     '<div class="timestamp">' + formatDate(messages.timestamp) + '</div>' + 
-                    '<div class="content"  data-src="'+messages._id+'">' + messages.content + '</div>' +                                   
+                    '<div class="content" data-src="'+messages._id+'">' + messages.content + '</div>' +                                   
                 '</div></li>';
             } 
 
@@ -490,8 +507,12 @@
                             allChannel.push(data.records[i].chatID);
                             
                             if(data.records[i].messages.length > 0){                                
-                                let message, timestamp;
+                                let message, timestamp, isImage;
+
+                                isImage = (!data.records[i].messages[0].hasOwnProperty('isImage'))? '' : data.records[i].messages[0]['isImage'];
                                 message = (!data.records[i].messages[0].hasOwnProperty('content'))? '' : data.records[i].messages[0]['content'];
+                                message = (isImage)? 'Image' : message;
+
                                 timestamp = (!data.records[i].messages[0].hasOwnProperty('timestamp'))? data.records[i].chatCreate : data.records[i].messages[0]['timestamp'];
                                 html += '<span class="message">' + message + '</span><span class="timestamp">' + formatDateChatList(timestamp) + '</span></div>';
                             }
@@ -654,7 +675,7 @@
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             if (input.value) {
-                chatroomSocket.emit('SendMSG', input.value);
+                chatroomSocket.emit('SendMSG', {msg: input.value, isImage: false});
                 input.value = '';
             }
         });
@@ -665,6 +686,7 @@
             var timestamp = msg.split('#')[1];
             var sender = msg.split('#')[2];
             var messageID = msg.split('#')[3];
+            var isImage = msg.split('#')[4];
             var senderStyle = (userID.toString() === sender)? 'right' : 'left';     
 
             var data = {
@@ -672,6 +694,7 @@
                 timestamp: timestamp,
                 content: message,
                 read: [userID],
+                isImage: isImage,
                 _id: messageID
             }
 
@@ -707,6 +730,8 @@
             var timestamp = msg.split('#')[1];
             var roomID = msg.split('#')[2];
             var senderUserID = parseInt(msg.split('#')[3]);
+            var isImage = msg.split('#')[4];
+            message = (isImage === 'true')? 'image' : message;
 
             $('#chatroom'+roomID+' .message').text(message);
             $('#chatroom'+roomID+' .timestamp').text( formatDateChatList(timestamp) );

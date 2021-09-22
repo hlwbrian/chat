@@ -193,6 +193,7 @@ exports.saveMessage = catchAsync(async (req, res, next) => {
     let dataObj = {
       sender: req.body.userID,
       content: req.body.msg,
+      isImage: req.body.isImage,
       timestamp: timestamp,
       read: [req.body.userID]
     }

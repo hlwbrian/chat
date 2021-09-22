@@ -31,6 +31,9 @@ const chatSchema = mongoose.Schema({
         timestamp: {
             type: Date,
             required: [true, 'A message must has a timestamp']           
+        },
+        isImage: {
+            type: Boolean
         }
     }],
     chatCreate: {

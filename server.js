@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const { Server } = require('socket.io');
 const axios = require('axios');
+const fs = require('fs');
 
 /* HANDLE for unexpected error on server starts */
 process.on('uncaughtException', err => {
@@ -102,6 +103,18 @@ io.on('connection', function(socket) {
         socket.on('JoinChatlistRoom', chatID => {
             socket.join(`Chatlist<%SPACE%>${chatID}`);
         });
+
+        //Save iamge
+        socket.on('saveImage', data => {
+            let base64Data = data.base64Img.replace(/^data:image\/jpeg;base64,/, "");
+            base64Data = base64Data.replace(/^data:image\/png;base64,/, "");
+            buf = new Buffer(base64Data, 'base64');
+            
+            //console.log(base64Data);
+            fs.writeFile('./public/chatimages/' + data.timestamp + '.png', buf, function(err) {
+                console.log(err);
+            });
+        });
     }    
 
     //Get any users is typing now
@@ -180,14 +193,15 @@ io.on('connection', function(socket) {
 });
 
 //function sendToList()
-function sendToRoom(roomName, userID, msg){
+function sendToRoom(roomName, userID, data){
     //save to db before save send
     let roomID = roomName.split('<%SPACE%>')[1];
     let timestamp = '';
-    
+
     axios.post(process.env.DOMAIN + 'chat/save', {
         chatID : roomID,
-        msg: msg,
+        msg: data.msg,
+        isImage: data.isImage,
         userID: userID,
         serverSecret: '5sa9gkj#7w'
     })
@@ -196,9 +210,9 @@ function sendToRoom(roomName, userID, msg){
         timestamp = response.data.timestamp;
 
         //send data in chatroom
-        io.in(roomName).emit('Receive', `${msg}#${response.data.timestamp}#${userID}#${response.data.content._id}`);
+        io.in(roomName).emit('Receive', `${data.msg}#${response.data.timestamp}#${userID}#${response.data.content._id}#${data.isImage}`);
         //update chatlist
-        io.in(`Chatlist<%SPACE%>${roomID}`).emit('ChatlistUpdate', `${msg}#${response.data.timestamp}#${roomID}#${userID}`);
+        io.in(`Chatlist<%SPACE%>${roomID}`).emit('ChatlistUpdate', `${data.msg}#${response.data.timestamp}#${roomID}#${userID}#${data.isImage}`);
     })
     .catch(function (error) {
         // handle error
