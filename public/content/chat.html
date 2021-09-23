@@ -141,83 +141,7 @@
                         <br/>
                         <div class="leaveroom">
                             <button class="leaveBtn">LEAVE</button>
-                        </div>
-                        <script>
-                            //Click to leave Chatroom
-                            $('.leaveBtn').on('click', function(){
-                                //prepare data
-                                var data = {
-                                    currentChatID: currentChatroom
-                                }
-
-                                $.ajax
-                                ({
-                                    type: "PATCH",
-                                    url: "/chat/leave",
-                                    contentType: 'application/json; charset=utf-8',
-                                    dataType: 'json',
-                                    async: false,
-                                    data: JSON.stringify(data),
-                                    headers: {
-                                        "authorization": "Bearer " + getCookie('chatJWT')
-                                    },
-                                    //if conversation/chatroom not found
-                                    error:function(err){
-                                    },
-                                    success:function(data) {
-                                        //remove chatlist li
-                                        $('#chatroom'+ currentChatroom).remove();
-
-                                        //leave chatlist & chatroom socket
-                                        chatroomSocket.emit('LeaveRoom', currentChatroom);
-                                    }
-                                }); 
-                            });
-
-                            //Submit form to add new member
-                            $('#addMem').submit(function(e){
-                                //prevent pagereload
-                                e.preventDefault();
-
-                                //prepare data
-                                var data = {
-                                    currentChatID: currentChatroom,
-                                    username: $('#memUsername').val()
-                                }
-
-                                $.ajax
-                                ({
-                                    type: "POST",
-                                    url: "/chat/addMember",
-                                    contentType: 'application/json; charset=utf-8',
-                                    dataType: 'json',
-                                    async: false,
-                                    data: JSON.stringify(data),
-                                    headers: {
-                                        "authorization": "Bearer " + getCookie('chatJWT')
-                                    },
-                                    //if conversation/chatroom not found
-                                    error:function(err){
-                                        //handle error  
-                                        $('.chatOp__addMem .errMsg').show();
-                                        if(err.responseJSON.error.statusCode === 401){
-                                            $('.chatOp__addMem .errMsg').html('*Cannot add yourself.');          
-                                        }else if(err.responseJSON.error.statusCode === 404){
-                                            $('.chatOp__addMem .errMsg').html('*Target user not found.');          
-                                        }else if(err.responseJSON.error.statusCode === 402){
-                                            $('.chatOp__addMem .errMsg').html('*Target already in the chat.');         
-                                        }
-                                    },
-                                    success:function(data) {
-                                        //insert the new member in members list
-                                        $('.chatOp__members .members').append('<li>' + data.member  + '<span id="onlineStatus#'+ data.member.split('#')[1] +'"></span></li>');
-                                        
-                                        //Alert the new member
-                                        chatroomSocket.emit('AddedMember', {memID : data.member.split('#')[1], chatInfo : data.chatroomInfo});
-                                    }
-                                });   
-                            });
-                        </script>
+                        </div>                       
                     </div>     
                 </div>
 
@@ -246,6 +170,7 @@
                             <emoji-picker></emoji-picker>
                         </div>
                     </div>
+                    <p id="showTyping">is typing</p>
                     <form id="form" class="chatroom__content__form" action="">
                         <input id="input" class="chatroom__content__input" autocomplete="off"/><button type="button" onclick="$('#emojiPicker').toggle();">Emoji</button><button type="button" onclick="$('#theinput').click();">Image</button><button type="submit">Send</button>
                     </form>
@@ -265,6 +190,8 @@
         var ScrollToHeight;
         var currentPage = 1; // 15 messages per page
         var loadReady = false; //true for intersection observer to set status
+        var form = document.getElementById('form');
+        var input = document.getElementById('input');
 
         /**************** Functions *********************/
         function submitProfileIcon(){
@@ -411,6 +338,10 @@
                     $('.group_icon').attr('src', '../chatimages/' + icon);
                     $('.chatOp__chatname .name').text(chatroomName);
 
+                    //Hide typing 
+                    $('#showTyping').html('is typing');
+                    $('#showTyping').hide();
+                    
                     if(data.content.unreadMsg.length > 0 || data.content.readMsg.length > 0){
                         var unreadMsg = data.content.unreadMsg;
                         var readMsg = data.content.readMsg;
@@ -623,6 +554,81 @@
                     });      
                 }        
             }
+        });
+
+        //Click to leave Chatroom
+        $('.leaveBtn').on('click', function(){
+            //prepare data
+            var data = {
+                currentChatID: currentChatroom
+            }
+
+            $.ajax
+            ({
+                type: "PATCH",
+                url: "/chat/leave",
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                async: false,
+                data: JSON.stringify(data),
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                //if conversation/chatroom not found
+                error:function(err){
+                },
+                success:function(data) {
+                    //remove chatlist li
+                    $('#chatroom'+ currentChatroom).remove();
+
+                    //leave chatlist & chatroom socket
+                    chatroomSocket.emit('LeaveRoom', currentChatroom);
+                }
+            }); 
+        });
+
+        //Submit form to add new member
+        $('#addMem').submit(function(e){
+            //prevent pagereload
+            e.preventDefault();
+
+            //prepare data
+            var data = {
+                currentChatID: currentChatroom,
+                username: $('#memUsername').val()
+            }
+
+            $.ajax
+            ({
+                type: "POST",
+                url: "/chat/addMember",
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                async: false,
+                data: JSON.stringify(data),
+                headers: {
+                    "authorization": "Bearer " + getCookie('chatJWT')
+                },
+                //if conversation/chatroom not found
+                error:function(err){
+                    //handle error  
+                    $('.chatOp__addMem .errMsg').show();
+                    if(err.responseJSON.error.statusCode === 401){
+                        $('.chatOp__addMem .errMsg').html('*Cannot add yourself.');          
+                    }else if(err.responseJSON.error.statusCode === 404){
+                        $('.chatOp__addMem .errMsg').html('*Target user not found.');          
+                    }else if(err.responseJSON.error.statusCode === 402){
+                        $('.chatOp__addMem .errMsg').html('*Target already in the chat.');         
+                    }
+                },
+                success:function(data) {
+                    //insert the new member in members list
+                    $('.chatOp__members .members').append('<li>' + data.member  + '<span id="onlineStatus#'+ data.member.split('#')[1] +'"></span></li>');
+                    
+                    //Alert the new member
+                    chatroomSocket.emit('AddedMember', {memID : data.member.split('#')[1], chatInfo : data.chatroomInfo});
+                }
+            });   
         });
 
         //Emoji picker listener
@@ -875,7 +881,16 @@
                 },
                 success:function(data) {
                     $('.profile__username .username').html($('#update-username').val() + '#' + userID);
-                    $('#update-username').val('');
+
+                    //update username
+                    username = $('#update-username').val();
+
+                    //update membermapping after update name
+                    memberMap[userID] = $('#update-username').val();
+
+                    //socket alert other member to update its member map
+                    chatroomSocket.emit('UpdateMemberMap', {chatID: currentChatroom, username: username, userID: userID});
+                    $('#update-username').val('');      
                 }
             });
         });
@@ -933,6 +948,66 @@
             document.querySelector('#chatroom'+msg.chatID + ' img').src = '/chatimages/'+msg.image;
         });
 
+        /* Show typing listener */
+        //Show which username typing
+        var typeTimer;                //timer identifier
+        var doneTypingInterval = 3000;  //time in ms, 5 second for example
+        var timerInput = $('#input');
+        var usertyping = [];
+
+        //on keyup, start the countdown
+        timerInput.on('keyup', function () {
+            clearTimeout(typeTimer);
+            typeTimer = setTimeout(doneTyping, doneTypingInterval);
+        });
+
+        //on keydown, clear the countdown 
+        timerInput.on('keydown', function () {
+            chatroomSocket.emit('UserTyping', {userID: userID, chatID: currentChatroom});
+            clearTimeout(typeTimer);
+        });
+
+        //Typing is ended
+        function doneTyping () {
+            chatroomSocket.emit('UserDoneTyping', {userID: userID, chatID: currentChatroom});
+        }
+
+        //show who is typing
+        chatroomSocket.on('ShowUserTyping', msg => {
+            if(usertyping.indexOf(msg) < 0 ){
+                usertyping.push(msg);
+
+                //show typing msg
+                if($('#showTyping').html().indexOf(memberMap[msg]+'#'+msg) < 0)
+                    $('#showTyping').html( ' ' + memberMap[msg]+'#'+msg + ' ' + $('#showTyping').html());
+                $('#showTyping').show();
+            }
+        });
+
+        //remove user tpying name
+        chatroomSocket.on('AlertUserDoneTyping', msg => {
+            if(usertyping.indexOf(msg) >= 0 ){
+                usertyping = usertyping.filter( curVal => {
+                    return curVal !== msg;
+                })
+
+                //show typing msg
+                if(usertyping.length > 0 ){
+                    $('#showTyping').html().replace( memberMap[msg]+'#'+msg, '');
+                }else{
+                    $('#showTyping').html('is typing');
+                    $('#showTyping').hide();
+                }
+            }
+        });
+        
+        /*socket.on('showTyping', msg => {
+            console.log('typing|' + msg);
+        });
+        socket.on('showDoneTyping', msg => {
+            console.log('doneTyping|' + msg);
+        });*/
+
         //When other member created a chatroom and added u
         chatroomSocket.on('SomeoneCreatedAChatWithYou', data => {
             //Prepend the new chatroom in the chatlist
@@ -959,7 +1034,11 @@
             if(currentChatroom == data.chatID)
                 $('#chatName').html(data.newName);
         });
-        
+
+        //Update member map
+        chatroomSocket.on('AlertUpdateMemberMap', data => {
+            memberMap[data.userID] = data.username;
+        });
 
         //socket listen to the chatroom that has message sent out
         chatroomSocket.on('ChatlistUpdate', msg => {

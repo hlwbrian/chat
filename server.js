@@ -136,17 +136,23 @@ io.on('connection', function(socket) {
         socket.on('UpdateChatroomName', data => {
             io.in(`Chatlist<%SPACE%>${data.chatID}`).emit('ChatroomNameUpdated', {newName: data.newRoomName, chatID: data.chatID});
         });
-    }    
 
-    //Get any users is typing now
-    socket.on('userTyping', msg => {
-        io.in(roomName).emit('showTyping', msg);
-    });
+        //Update member map
+        socket.on('UpdateMemberMap', msg => {
+            io.in(`Room<%SPACE%>${msg.chatID}`).emit('AlertUpdateMemberMap', {userID: msg.userID, username: msg.username});
+        });
 
-    //Remove user who is done typing
-    socket.on('userDoneTyping', msg => {
-        io.in(roomName).emit('showDoneTyping', msg);
-    });
+        //Get any users is typing now
+        socket.on('UserTyping', msg => {
+            io.in(`Room<%SPACE%>${msg.chatID}`).emit('ShowUserTyping', msg.userID);
+        });
+
+        //Remove user who is done typing
+        socket.on('UserDoneTyping', msg => {
+            io.in(`Room<%SPACE%>${msg.chatID}`).emit('AlertUserDoneTyping', msg.userID);
+        });
+    }
+    
     //TODO update login status
     /*if(onlineUsers.indexOf(socket.request._query['username']) < 0){
         onlineUsers.push(socket.request._query['username']);

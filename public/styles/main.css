@@ -254,6 +254,8 @@ input[type='text'],textarea {font-size:1em;}
 #messages .right { background-color: rgb(176, 235, 88); float: right;}
 #messages .left  { background-color:rgb(231, 231, 231); }
 
+#showTyping { display: none; position: absolute; background-color: rgba(0,0,0, 0.5); width: 100%; bottom: 48px; color: white; padding: 5px 0px;}
+
 /* Chat form */
 #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
 #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
