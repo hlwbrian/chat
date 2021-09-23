@@ -199,7 +199,7 @@ input[type='text'],textarea {font-size:1em;}
 #chatlist__chatrooms_list {margin-right: 0;}
 #chatlist__chatrooms_list .chatroom {padding: 15px; border-bottom: 1px solid #ddd;}
 #chatlist__chatrooms_list .chatroom:hover {background-color: #ddd;}
-#chatlist__chatrooms_list .chatroom .chatroom_icon {height: 35px; border-radius: 50%; margin-right: 15px;}
+#chatlist__chatrooms_list .chatroom .chatroom_icon {height: 35px; width: 35px; border-radius: 50%; margin-right: 15px;}
 #chatlist__chatrooms_list .chatroom div {float: left;}
 #createChat .errorMsg {color: white; margin-top: 5px;}
 #initUpdateName { cursor: pointer; margin-left: 10px; }
@@ -235,6 +235,7 @@ input[type='text'],textarea {font-size:1em;}
 #initUpdateChatName {cursor: pointer; }
 #updateChatName {display: none;}
 #updateChatName .errMsg{display: none;}
+.chatOp__addMem .errMsg {display: none; font-size: 12px; color: red;}
 
 #chatroom .chatroom_header { background-color: #f5f5f5; padding: 5px 15px;}
 #chatroom .chatroom_header div { float: left; }

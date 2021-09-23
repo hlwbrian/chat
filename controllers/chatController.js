@@ -222,27 +222,28 @@ exports.addMember = catchAsync(async (req, res, next) => {
     const userData = req.body.username.split('#');
 
     if(userData[1] != req.user.userID){
-      const user = await User.find({username: userData[0], userID: userData[1]});
+      const user = await User.find({userID: userData[1]});
       
       if(user.length > 0){
         //find if user is already in chatroom
         targetChatroom = await Chat.findOne({chatID : req.chat.currentChatID});
-        let isExist = targetChatroom.members.includes(userData[0] + '#' + userData[1]);
+        let isExist = targetChatroom.members.includes(userData[1]);
 
         if(!isExist){
           //push member id into chatroom array
-          updatedUsers = await User.updateOne({userID : userData[1]}, {$push : {chatrooms : req.chat.currentChatID}});
-          //push chat id into chatroom array
-          updatedChat = await Chat.updateOne({chatID : req.chat.currentChatID}, {$push : {members : user[0].username + '#' + user[0].userID}});
+          updatedUsers = await User.updateOne({userID : userData[1]}, {$addToSet : {chatrooms : req.chat.currentChatID}});
+          //push chat id into chatroom array & set history messages 'read' for that user
+          updatedChat = await Chat.updateOne({chatID : req.chat.currentChatID}, {$push : {members : user[0].userID}, $addToSet : {'messages.$[].read' :  user[0].userID }});
 
           res.status(201).json({
             status: 'success',
             message: 'Member added',
-            member : userData.join('#')
+            member : userData.join('#'),
+            chatroomInfo : targetChatroom
           });
         }else{
           return next(
-            new AppError('User is already in the chatroom', 401)
+            new AppError('User is already in the chatroom', 402)
           );
         }
       }else{
@@ -276,7 +277,7 @@ exports.changeChatName = catchAsync(async (req, res, next) => {
 
 /* Update Chatroom member list, remove target user */
 exports.leaveChat = catchAsync(async (req, res, next) => {
-  const userData = `${req.user.username}#${req.user.userID}`;
+  const userData = req.user.userID;
   
   const chatRecord = await Chat.findOne({chatID: req.chat.currentChatID});
   if(chatRecord.members.length > 1){
@@ -305,12 +306,11 @@ exports.leaveChat = catchAsync(async (req, res, next) => {
 });
 
 exports.changeIcon = catchAsync(async (req, res, next) => {
-  const updateChatIcon = await Chat.findOneAndUpdate({chatID : req.chat.currentChatID}, {icon: req.body.icon});
+  const updateChatIcon = await Chat.findOneAndUpdate({chatID : req.chat.currentChatID}, {icon: req.body.imageName});
 
   if(updateChatIcon){
     res.status(200).json({
-      msg: 'success',
-      icon: req.body.icon
+      msg: 'success'
     });
   }else{
     return next(

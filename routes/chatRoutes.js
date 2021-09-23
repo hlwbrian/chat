@@ -58,6 +58,6 @@ router
 //Update chatroom icon
  router
     .route('/changeIcon')
-    .post(chatController.changeIcon);
+    .patch(chatController.changeIcon);
 
 module.exports = router;

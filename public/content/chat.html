@@ -106,14 +106,14 @@
 
                         <div class="chatOp__icon">
                             <img class="group_icon"/> 
-                            <div class="overlay_icon">
+                            <div class="overlay_icon" onclick="$('#chatIconUpdate').click();">
                                 <p>
                                     Update Image
                                     <span class="cameraImg"><svg viewBox="0 0 24 24" width="24" height="24" class=""><path fill="currentColor" d="M21.317 4.381H10.971L9.078 2.45c-.246-.251-.736-.457-1.089-.457H4.905c-.352 0-.837.211-1.078.468L1.201 5.272C.96 5.529.763 6.028.763 6.38v1.878l-.002.01v11.189a1.92 1.92 0 0 0 1.921 1.921h18.634a1.92 1.92 0 0 0 1.921-1.921V6.302a1.92 1.92 0 0 0-1.92-1.921zM12.076 18.51a5.577 5.577 0 1 1 0-11.154 5.577 5.577 0 0 1 0 11.154zm0-9.506a3.929 3.929 0 1 0 0 7.858 3.929 3.929 0 0 0 0-7.858z"></path></svg></span>
                                 </p>
                             </div>
                         </div>
-
+                        <input type="file" id="chatIconUpdate" onchange="updateChatIcon()" style="display: none">
                         <div class="chatOp__chatname">
                             <h2>Chatroom Name</h2>
                             <span class="name"></span>
@@ -136,11 +136,88 @@
                                 <input type="text" placeholder="e.g. john#315" pattern="[a-z0-9]+#[0-9]+" required id="memUsername">
                                 <button type="submit" class="addMemBtn">ADD</button>
                             </form>
+                            <p class="errMsg"></p>
                         </div>
                         <br/>
                         <div class="leaveroom">
                             <button class="leaveBtn">LEAVE</button>
                         </div>
+                        <script>
+                            //Click to leave Chatroom
+                            $('.leaveBtn').on('click', function(){
+                                //prepare data
+                                var data = {
+                                    currentChatID: currentChatroom
+                                }
+
+                                $.ajax
+                                ({
+                                    type: "PATCH",
+                                    url: "/chat/leave",
+                                    contentType: 'application/json; charset=utf-8',
+                                    dataType: 'json',
+                                    async: false,
+                                    data: JSON.stringify(data),
+                                    headers: {
+                                        "authorization": "Bearer " + getCookie('chatJWT')
+                                    },
+                                    //if conversation/chatroom not found
+                                    error:function(err){
+                                    },
+                                    success:function(data) {
+                                        //remove chatlist li
+                                        $('#chatroom'+ currentChatroom).remove();
+
+                                        //leave chatlist & chatroom socket
+                                        chatroomSocket.emit('LeaveRoom', currentChatroom);
+                                    }
+                                }); 
+                            });
+
+                            //Submit form to add new member
+                            $('#addMem').submit(function(e){
+                                //prevent pagereload
+                                e.preventDefault();
+
+                                //prepare data
+                                var data = {
+                                    currentChatID: currentChatroom,
+                                    username: $('#memUsername').val()
+                                }
+
+                                $.ajax
+                                ({
+                                    type: "POST",
+                                    url: "/chat/addMember",
+                                    contentType: 'application/json; charset=utf-8',
+                                    dataType: 'json',
+                                    async: false,
+                                    data: JSON.stringify(data),
+                                    headers: {
+                                        "authorization": "Bearer " + getCookie('chatJWT')
+                                    },
+                                    //if conversation/chatroom not found
+                                    error:function(err){
+                                        //handle error  
+                                        $('.chatOp__addMem .errMsg').show();
+                                        if(err.responseJSON.error.statusCode === 401){
+                                            $('.chatOp__addMem .errMsg').html('*Cannot add yourself.');          
+                                        }else if(err.responseJSON.error.statusCode === 404){
+                                            $('.chatOp__addMem .errMsg').html('*Target user not found.');          
+                                        }else if(err.responseJSON.error.statusCode === 402){
+                                            $('.chatOp__addMem .errMsg').html('*Target already in the chat.');         
+                                        }
+                                    },
+                                    success:function(data) {
+                                        //insert the new member in members list
+                                        $('.chatOp__members .members').append('<li>' + data.member  + '<span id="onlineStatus#'+ data.member.split('#')[1] +'"></span></li>');
+                                        
+                                        //Alert the new member
+                                        chatroomSocket.emit('AddedMember', {memID : data.member.split('#')[1], chatInfo : data.chatroomInfo});
+                                    }
+                                });   
+                            });
+                        </script>
                     </div>     
                 </div>
 
@@ -203,7 +280,7 @@
                 html += '<li><div class="message  '+senderStyle+'">' +
                     '<div class="sender">' + memberMap[messages.sender] + '#' + messages.sender + '</div>' +
                     '<div class="timestamp">' + formatDate(messages.timestamp) + '</div>' +
-                    '<div class="img"><img src="/chatimages/'+messages.content+'" data-src="'+messages.content+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                    '<div class="img"><img src="/chatimages/'+messages.content+'" data-src="'+messages._id+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
                 '</div></li>';
             }
             //if text message
@@ -235,7 +312,6 @@
 
         //Send Image Function
         function sendImg() {
-            const preview = document.querySelector('#theimage');
             const file = document.querySelector('#theinput[type=file]').files[0];
             const reader = new FileReader();
 
@@ -248,6 +324,49 @@
             if (file) {
                 reader.readAsDataURL(file);
             }
+        }
+
+        //Update Chatroom Icon
+        function updateChatIcon() {
+            const file = document.querySelector('#chatIconUpdate[type=file]').files[0];
+            const reader = new FileReader();
+
+            reader.addEventListener("load", function () {
+                var sendTimestamp = Date.now();
+
+                chatroomSocket.emit('saveImage', {base64Img: reader.result, timestamp: sendTimestamp});
+                chatroomSocket.emit('ChatIconUpdated', {image: sendTimestamp+'.png', chatID: currentChatroom});
+
+                //Ajax to update image path
+                var data = {
+                    currentChatID: currentChatroom,
+                    imageName: sendTimestamp+'.png'
+                }
+
+                $.ajax
+                ({
+                    type: "PATCH",
+                    url: "/chat/changeIcon",
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    async: false,
+                    data: JSON.stringify(data),
+                    headers: {
+                        "authorization": "Bearer " + getCookie('chatJWT')
+                    },
+                    //if conversation/chatroom not found
+                    error:function(data){
+                    },
+                    success:function(data) {
+                        //Change socket IO chatroom ID
+                        chatroomSocket.emit('UpdateChatroomName', {newRoomName: $('#update-chatname').val(), chatID: currentChatroom});
+                    }
+                }); 
+            }, false);
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }   
         }
 
         //call this when join new chatroom
@@ -288,8 +407,8 @@
                     }
 
                     $('#chatName').text(chatroomName);
-                    $('#chatroom_icon').attr('src', '../images/' + icon);
-                    $('.group_icon').attr('src', '../images/' + icon);
+                    $('#chatroom_icon').attr('src', '../chatimages/' + icon);
+                    $('.group_icon').attr('src', '../chatimages/' + icon);
                     $('.chatOp__chatname .name').text(chatroomName);
 
                     if(data.content.unreadMsg.length > 0 || data.content.readMsg.length > 0){
@@ -519,7 +638,7 @@
                 currentChatID: currentChatroom
             }
 
-            if(loadReady === true && $('#messages__unread').height() > 0 || isScrollable > 0){
+            if((loadReady === true && $('#messages__unread').height() > 0 || isScrollable > 0) && currentChatroom !== ''){
                 //Update user read status by inserting userID into the chat.read array
                 $.ajax
                 ({
@@ -596,7 +715,7 @@
                         for(var i = 0; i < data.records.length; i++){          
                             styleClass = (i === 0)? 'activeChat' : '';
                             html += '<li data-id="'+data.records[i].chatID+'" class="chatroom '+styleClass+'" id="chatroom'+data.records[i].chatID+'">' + 
-                                        '<div class="left"><img src="/images/'+ data.records[i]['icon'] +'" class="chatroom_icon" /></div>' +
+                                        '<div class="left"><img src="/chatimages/'+ data.records[i]['icon'] +'" class="chatroom_icon" /></div>' +
                                         '<div class="right"><span class="roomName">' + data.records[i]['chatroomName'] + '</span><br/>';
                                                  
                             //Join chatroom to listen if any message are send to this user
@@ -704,7 +823,7 @@
                     var html='', datetime, datetimeFormat;
 
                     html += '<li data-id="'+data.records.chatID+'" class="chatroom" id="chatroom'+data.records.chatID+'">' + 
-                                '<div class="left"><img src="/images/'+ data.records.icon +'" class="chatroom_icon" /></div>' +
+                                '<div class="left"><img src="/chatimages/'+ data.records.icon +'" class="chatroom_icon" /></div>' +
                                 '<div class="right"><span class="roomName">' + data.records.chatroomName + '</span><br><span class="message"></span><span class="timestamp"></span>';
                     html += '</li>';       
 
@@ -802,6 +921,18 @@
             $('#messages').animate({ scrollTop: $('#messages__unread').height() + $('#messages__read').height() }, 1000);
         });
 
+        //Update Chaticon
+        chatroomSocket.on('UpdateChatIcon', msg => {
+            //update chatroom image
+            if(msg.chatID === currentChatroom){
+                document.getElementById('chatroom_icon').src = '/chatimages/'+msg.image;
+                document.querySelector('.group_icon').src = '/chatimages/'+msg.image;
+            }
+
+            //update chatlist image
+            document.querySelector('#chatroom'+msg.chatID + ' img').src = '/chatimages/'+msg.image;
+        });
+
         //When other member created a chatroom and added u
         chatroomSocket.on('SomeoneCreatedAChatWithYou', data => {
             //Prepend the new chatroom in the chatlist
@@ -809,7 +940,7 @@
 
             html += '<li data-id="'+data.records.chatID+'" class="chatroom" id="chatroom'+data.records.chatID+'">' + 
                         '<div class="left"><img src="/images/'+ data.records.icon +'" class="chatroom_icon" /></div>' +
-                        '<div class="right"><span class="roomName">' + data.records.chatroomName + '</span><br><span class="message"></span><span class="timestamp"></span>';
+                        '<div class="right"><span class="roomName">' + data.records.chatroomName + '</span><br><span class="message">*New Chatroom*</span><span class="timestamp"></span>';
             html += '</li>';       
 
             //Join chatroom to listen if any message are send to this user

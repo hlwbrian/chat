@@ -99,9 +99,20 @@ io.on('connection', function(socket) {
             }  
         });
 
+        //Add a new member in chat
+        socket.on('AddedMember', data => {
+            io.in(`Member<%SPACE%>${data.memID}`).emit('SomeoneCreatedAChatWithYou', {records: data.chatInfo});
+        });
+
         //Join a new chatlist room
         socket.on('JoinChatlistRoom', chatID => {
             socket.join(`Chatlist<%SPACE%>${chatID}`);
+        });
+
+        //Leave room, leave sockets
+        socket.on('LeaveRoom', chatID => {
+            socket.leave(`Chatlist<%SPACE%>${chatID}`);
+            socket.leave(`Room<%SPACE%>${chatID}`);
         });
 
         //Save image
@@ -114,6 +125,11 @@ io.on('connection', function(socket) {
             fs.writeFile('./public/chatimages/' + data.timestamp + '.png', buf, function(err) {
                 console.log(err);
             });
+        });
+
+        //Alert update chaticon
+        socket.on('ChatIconUpdated', data => {
+            io.in(`Chatlist<%SPACE%>${data.chatID}`).emit('UpdateChatIcon', data);
         });
 
         //Update user to update chatroom name
