@@ -61,9 +61,17 @@ io.on('connection', function(socket) {
     socket.join(`Member<%SPACE%>${userID}`);
 
     if(socket.request._query['chatID'] !== ''){
+        //Add user into onlineUsers array if it is inside of the array
+        if(onlineUsers.indexOf(userID) < 0){
+            onlineUsers.push(userID);
+        }
+
         /* Chatlist socket functions */
-        for(let [key, value] of chatlist.entries()){
-            socket.join(`Chatlist<%SPACE%>${value}`);
+        for(let chatID of chatlist){
+            socket.join(`Chatlist<%SPACE%>${chatID}`);
+
+            //Alert other user this user is now online
+            io.in(`Room<%SPACE%>${chatID}`).emit('MemberOnline', {userID: userID});
         }
 
         /* Chatroom socket functions */
@@ -151,71 +159,38 @@ io.on('connection', function(socket) {
         socket.on('UserDoneTyping', msg => {
             io.in(`Room<%SPACE%>${msg.chatID}`).emit('AlertUserDoneTyping', msg.userID);
         });
-    }
-    
-    //TODO update login status
-    /*if(onlineUsers.indexOf(socket.request._query['username']) < 0){
-        onlineUsers.push(socket.request._query['username']);
-        
-        //Update logged-in status in MongoDB
-        axios.patch(process.env.DOMAIN + 'users/updateLogin', {
-            userID: userID,
-            serverSecret: '5sa9gkj#7w',
-            isLoggedIn: true
-        })
-        .then(function (response) {
-        })
-        .catch(function (error) {
-            // handle error
-            console.log(error);
+
+        //Get now online users
+        socket.on('GetOnlineUsers', data => {
+            io.in(`Member<%SPACE%>${data.userID}`).emit('ReceiveOnlineMember', onlineUsers); //Return member list to the user
         });
-    }*/
-
-    //If user is in chatroom list
-    /*if(socket.request._query['page'] === 'chatlist'){
-        let rooms = socket.request._query['chat'].split(',');
-        let username = socket.request._query['username'];
-
-        for(let value of rooms){
-            let roomName = `chatroom ${value}`;
-            socket.join(roomName);
-
-            io.in(roomName).emit('onlineMsg', `${username}`);
-        }
     }
-    //if user is in chatroom inner page
-    else{
-    }*/
     
     //When user disconnected
     socket.on('disconnect', () => {
-        /*onlineUsers = onlineUsers.filter((curVal) => {
-            return (curVal != socket.request._query['username']);
+        //Remove user from onlineUsers array
+        onlineUsers = onlineUsers.filter((curVal) => {
+            return (curVal != userID);
         });
 
-        let rooms = socket.request._query['chat'].split(',');
-        let username = socket.request._query['username'];
         let lastSeenTime = new Date();
-        lastSeenTimeFormat = `${lastSeenTime.getFullYear()}/${lastSeenTime.getMonth()}/${lastSeenTime.getDate()} ${lastSeenTime.getHours()}:${lastSeenTime.getMinutes()}`;
-        for(let value of rooms){
-            let roomName = `chatroom ${value}`;
-            io.in(roomName).emit('offlineMsg', `${username}#${lastSeenTimeFormat}`);
+        //Emit offline message
+        /* Chatlist socket functions */
+        for(let chatID of chatlist){
+            io.in(`Room<%SPACE%>${chatID}`).emit('MemberOffline', {userID: userID, lastSeen: lastSeenTime});
         }
 
-        //Update logged-out status in MongoDB
+        //Update User.lastSeen field in MongoDB
         axios.patch(process.env.DOMAIN + 'users/updateLogin', {
             userID: userID,
-            serverSecret: '5sa9gkj#7w',
-            isLoggedIn: false
+            lastSeenTime: lastSeenTime,
+            serverSecret: '5sa9gkj#7w'
         })
         .then(function (response) {
         })
         .catch(function (error) {
-            // handle error
-            console.log(error);
+            console.log(error)
         });
-
-        console.log('User disconnected');*/
     });
 });
 

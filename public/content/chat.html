@@ -324,13 +324,13 @@
                     var icon = data.content.icon;
                     var content = [];
                     var html = '';
-                    var loginStatus = data.loginStatus;
+                    
                     $('.chatOp__members .members').html(''); //reset member list
                     for(var [key, value] of data.members.entries()){
                         memberMap[value.userID] = value.username;
 
                         //Insert memberlist into chat info
-                        $('.chatOp__members .members').append('<li>' + value.username + '#' + value.userID  + '<span id="onlineStatus#'+value.userID+'"></span></li>');
+                        $('.chatOp__members .members').append('<li>' + value.username + '#' + value.userID  + ' <span id="onlineStatus-'+value.userID+'">'+ formatDateChatList(value.lastSeen) +'</span></li>');
                     }
 
                     $('#chatName').text(chatroomName);
@@ -359,19 +359,6 @@
                             insertMessages(value);
                         }     
                     }
-
-                /* TODO Add last seen status
-                html = '';
-                    for(var i = 0; i < members.length; i++){
-                        loginStatus[i].lastSeen = new Date(loginStatus[i].lastSeen);
-                        let timestampFormat = loginStatus[i].isLoggedIn? 'online' : `${loginStatus[i].lastSeen.getFullYear()}/${loginStatus[i].lastSeen.getMonth()}/${loginStatus[i].lastSeen.getDate()} ${loginStatus[i].lastSeen.getHours()}:${loginStatus[i].lastSeen.getMinutes()}`;
-
-                        html += '<li>' +
-                            members[i] + '<span class="lastSeen"> ' + timestampFormat + '</span>';
-                            '</li>';
-                    }
-
-                    $('#members').append(html);*/
                 }
             });
 
@@ -484,6 +471,9 @@
 
                 //Join Clicked Chatroom
                 joinChat();
+
+                //Get all online users
+                chatroomSocket.emit('GetOnlineUsers', {userID: userID});
 
                 //Reset current page
                 currentPage = 1;
@@ -623,7 +613,7 @@
                 },
                 success:function(data) {
                     //insert the new member in members list
-                    $('.chatOp__members .members').append('<li>' + data.member  + '<span id="onlineStatus#'+ data.member.split('#')[1] +'"></span></li>');
+                    $('.chatOp__members .members').append('<li>' + data.member  + '<span id="onlineStatus-'+ data.member.split('#')[1] +'"></span></li>');
                     
                     //Alert the new member
                     chatroomSocket.emit('AddedMember', {memID : data.member.split('#')[1], chatInfo : data.chatroomInfo});
@@ -743,16 +733,6 @@
                         }
 
                         $('#chatlist__chatrooms_list').append(html);
-
-                        //TODO: Add unread remark for the channel that this user have not read yet
-                        /*for(var i = 0; i < data.records.length; i++){
-                            if(data.records[i].messages.length > 0){
-                                if(!data.records[i].messages[0].read.includes('' + data.user.userID)){
-                                    $('#chatroom'+data.records[i].chatID + ' .left span').addClass('unreadIcon');
-                                    $('#chatroom'+data.records[i].chatID + ' .right').addClass('halfWidthRight');
-                                }
-                            }
-                        }*/
                     }
                 }
             });
@@ -899,6 +879,9 @@
         //Join Chatroom socket
         const chatroomSocket = io({query: {"userID" : userID, 'username': username, 'chatID': currentChatroom, 'chatlist': allChannel} }); 
 
+        //Get all online users
+        chatroomSocket.emit('GetOnlineUsers', {userID: userID});
+
         var form = document.querySelector('.chatroom__content__form');
         var input = document.querySelector('.chatroom__content__input');
 
@@ -1000,13 +983,6 @@
                 }
             }
         });
-        
-        /*socket.on('showTyping', msg => {
-            console.log('typing|' + msg);
-        });
-        socket.on('showDoneTyping', msg => {
-            console.log('doneTyping|' + msg);
-        });*/
 
         //When other member created a chatroom and added u
         chatroomSocket.on('SomeoneCreatedAChatWithYou', data => {
@@ -1060,6 +1036,23 @@
             $('#chatroom'+roomID).remove();
             $('#chatlist__chatrooms_list').prepend(originalItem);
         });
+
+        //Receive array to show online users
+        chatroomSocket.on('ReceiveOnlineMember', data => {
+            for(let userID of data){
+                $('#onlineStatus-'+userID).html('online');
+            }
+        });
+
+        //Update user lastSeen if they went offline
+        chatroomSocket.on('MemberOffline', data => {
+            $('#onlineStatus-'+data.userID).html( formatDateChatList(data.lastSeen) );
+        });
+
+        //Update user lastSeen if they went online
+        chatroomSocket.on('MemberOnline', data => {
+            $('#onlineStatus-'+data.userID).html('online');
+        });    
     </script>
     <!-- EMOJI picker package -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>

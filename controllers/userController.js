@@ -55,16 +55,13 @@ exports.updateLogin = catchAsync(async (req, res, next) => {
         );
     }
 
-    const updateStatus = await User.updateOne({userID: req.body.userID}, {isLoggedIn: req.body.isLoggedIn});
-    if(req.body.isLoggedIn === false){
-        const updateLastSeenTime = await User.updateOne({userID: req.body.userID}, {lastSeen: new Date()});
-    }
+    const updateLastSeenTime = await User.updateOne({userID: req.body.userID}, {lastSeen: req.body.lastSeenTime});
 
-    if(updateStatus){
+    if(updateLastSeenTime){
         res.status(201).json({
             status: 'success',
             message: 'Login status Updated',
-            img: req.body.icon
+            updated: req.body.lastSeenTime
         });
     }else{
         return next(

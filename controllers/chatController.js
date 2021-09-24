@@ -117,7 +117,7 @@ exports.initChatroom = catchAsync(async (req, res, next) => {
 
   //Get members username
   const membersID = messages.members;
-  const members = await User.find({userID : {$in : membersID }}).select({"username": 1, "userID": 1});
+  const members = await User.find({userID : {$in : membersID }}).select({"username": 1, "userID": 1, "lastSeen": 1});
 
   //set all the conversation read
   //const updateRead = await Chat.updateMany({chatID: req.chat.currentChatID}, { $addToSet : {'messages.$[].read' : req.user.userID }});
