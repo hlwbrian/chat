@@ -164,6 +164,11 @@ io.on('connection', function(socket) {
         socket.on('GetOnlineUsers', data => {
             io.in(`Member<%SPACE%>${data.userID}`).emit('ReceiveOnlineMember', onlineUsers); //Return member list to the user
         });
+
+        //Alert user to remove msg
+        socket.on('MSGRemoved', data => {
+            io.in(`Room<%SPACE%>${data.chatID}`).emit('AlertMSGRemoved', {msgID: data.msgID}); //Return member list to the user
+        });
     }
     
     //When user disconnected

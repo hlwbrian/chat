@@ -93,6 +93,54 @@ input[type='text'],textarea {font-size:1em;}
     -webkit-transform: rotate(45deg);
 }
 
+/* Message dropdown menu */
+.dropbtn {
+  border-radius: 50%;
+  background-color: rgba(255,255,255, 0.3);
+  color: white;
+  padding: 5px;
+  font-size: 16px;
+  border: none;
+  transform: rotate(90deg);
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+  position: absolute;
+  display: inline-block;
+  top: 0;
+  right: 15px;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #ddd;}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {display: block;}
+.right .dropdown:hover .dropdown-content {display: block; right: 50%;}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {background-color: rgba(255,255,255, 0.5);}
+
 /* Common HEADER*/
 .header { background-color: white; padding : 30px 0px 30px 20px;  border-bottom: 1px solid #ddd; }
 .header div {animation-name: icon; animation-duration: 1.5s;}
@@ -219,7 +267,7 @@ input[type='text'],textarea {font-size:1em;}
 
 /* Message body */
 #noMoreMsg, #newMsgLine {background-color: rgba(0, 0, 0, 0.6); padding: 5px; text-align: center; width: 100%; color: white; display: none;}
-.message {margin: 5px 0px;}
+.message {margin: 5px 0px; position: relative; }
 .message img {width: 250px;}
 
 #chatOptionContainer { display: none; position: absolute; height: 100vh; width: 100%; z-index: 995; background-color: rgba(0, 0, 0, 0.6);}
@@ -243,7 +291,7 @@ input[type='text'],textarea {font-size:1em;}
 #chatroom .chatroom_header::after { display: table; content: ''; clear: both; }
 #chatroom_icon { height: 45px; width: 45px; border-radius: 50%; padding: 5px;}
 
-.chatroom__content { background-color: white;  position: relative; }               
+.chatroom__content { background-color: grey;  position: relative; }               
 .chatroom__content #messages { margin: 0px; height: calc(100vh - 120px); padding-bottom: 51px; overflow: auto; }
 .chatroom__content__form { position: absolute!important; width: 100%; }
 #chatName { font-size: 22px; vertical-align: top; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 15px; }
@@ -254,7 +302,7 @@ input[type='text'],textarea {font-size:1em;}
 #messages .right { background-color: rgb(176, 235, 88); float: right;}
 #messages .left  { background-color:rgb(231, 231, 231); }
 
-#showTyping { display: none; position: absolute; background-color: rgba(0,0,0, 0.5); width: 100%; bottom: 48px; color: white; padding: 5px 0px;}
+#showTyping { display: none; position: absolute; background-color: rgba(0,0,0, 0.5); width: 100%; top: 0px; color: white; padding: 5px 0px;}
 
 /* Chat form */
 #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
@@ -271,7 +319,7 @@ input[type='text'],textarea {font-size:1em;}
 .imagePreview__content img { max-height: 50%; max-width: 100%; }
 .previewClose {cursor: pointer;}
 
-#messages { list-style-type: none; margin: 0; margin-bottom: 150px; padding: 0; }
+#messages { list-style-type: none; margin: 0; margin-bottom: 150px; padding: 0; background: url(/chatimages/chatbackground.jpg); background-size: cover;}
 #messages > li { padding: 0.5rem 1rem; }
 
 /*FOOTER*/

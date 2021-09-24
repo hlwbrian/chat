@@ -185,6 +185,24 @@ exports.updateUnread = catchAsync(async (req, res, next) => {
     } 
 });
 
+/* Remove messages: set hideStatus = true  */
+exports.removeMsg = catchAsync(async (req, res, next) => {
+  //set all the conversation read
+  const removeMsg = await Chat.updateOne({chatID: req.chat.currentChatID, 'messages._id': req.body.msgID}, { $set : {'messages.$.hideStatus' : true }});
+
+  if(removeMsg){
+    res.status(201).json({
+      status: 'success',
+      message: 'Removed',
+      msgID: req.body.msgID
+    })
+  }else{
+    return next(
+      new AppError('Failed to update read status', 404)
+    );
+  } 
+});
+
 /* Save message should only call by server */
 exports.saveMessage = catchAsync(async (req, res, next) => {
   //if match hardcode secret

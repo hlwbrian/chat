@@ -40,6 +40,11 @@ router
     .route('/updateRead')
     .patch(chatController.updateUnread);
     
+//Remove message
+router
+    .route('/removeMsg')
+    .patch(chatController.removeMsg);
+
 //Add new member into the chatroom
 router
     .route('/addMember')

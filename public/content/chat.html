@@ -192,6 +192,9 @@
         var loadReady = false; //true for intersection observer to set status
         var form = document.getElementById('form');
         var input = document.getElementById('input');
+        var dropdownMenuHTMLRight = '<div class="dropdown"><button class="dropbtn">></button><div class="dropdown-content"><a class="msgRemoveBtn">Remove</a><a onclick="alert(\'Quote\')">Quote</a></div></div>';
+        var dropdownMenuHTMLLeft = '<div class="dropdown"><button class="dropbtn">></button><div class="dropdown-content"><a onclick="alert(\'Quote\')">Quote</a></div></div>';     
+        var removeTarget = '';
 
         /**************** Functions *********************/
         function submitProfileIcon(){
@@ -200,22 +203,30 @@
 
         function insertMessages(messages, pendFlow = 'pre'){
             var senderStyle = (userID.toString() === messages.sender)? 'right' : 'left';
+            var dropdownHTML = (userID.toString() === messages.sender)? dropdownMenuHTMLRight : dropdownMenuHTMLLeft;
+            //Hide message
+            if(messages.hideStatus){
+                messages.content = '!This Message Has Been Removed!';
+            }
+
             html = '';
 
             //Send Image
-            if( messages.isImage === true || messages.isImage === 'true' ){
+            if( (messages.isImage === true || messages.isImage === 'true') && !messages.hideStatus){
                 html += '<li><div class="message  '+senderStyle+'">' +
+                    dropdownHTML +
                     '<div class="sender">' + memberMap[messages.sender] + '#' + messages.sender + '</div>' +
                     '<div class="timestamp">' + formatDate(messages.timestamp) + '</div>' +
-                    '<div class="img"><img src="/chatimages/'+messages.content+'" data-src="'+messages._id+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +
+                    '<div class="img"><img src="/chatimages/'+messages.content+'" data-src="'+messages._id+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +         
                 '</div></li>';
             }
             //if text message
             else{
                 html += '<li><div class="message '+senderStyle+'">' +
+                    dropdownHTML +  
                     '<div class="sender">' + memberMap[messages.sender] + '#' + messages.sender + '</div>' +
                     '<div class="timestamp">' + formatDate(messages.timestamp) + '</div>' + 
-                    '<div class="content" data-src="'+messages._id+'">' + messages.content + '</div>' +                                   
+                    '<div class="content" data-src="'+messages._id+'">' + messages.content + '</div>' +                                           
                 '</div></li>';
             } 
 
@@ -236,7 +247,7 @@
                 }  
             }
         }
-
+        
         //Send Image Function
         function sendImg() {
             const file = document.querySelector('#theinput[type=file]').files[0];
@@ -543,6 +554,47 @@
                         }
                     });      
                 }        
+            }
+        });
+        
+        //Remove Message BTN 
+        $('#messages').delegate('.msgRemoveBtn', 'click', function (){
+            if($(this).parents('.message').find('.sender').html().split('#')[1] === userID.toString()){
+                
+                if($(this).parents('.message').find('.content').data('src') !== undefined)
+                    removeTarget = $(this).parents('.message').find('.content').data('src');
+                else
+                    removeTarget = $(this).parents('.message').find('img').data('src');
+
+                //Perform remove hide = true
+                //prepare data
+                var data = {
+                    currentChatID: currentChatroom,
+                    msgID: removeTarget
+                }
+
+                $.ajax
+                ({
+                    type: "PATCH",
+                    url: "/chat/removeMsg",
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    async: false,
+                    data: JSON.stringify(data),
+                    headers: {
+                        "authorization": "Bearer " + getCookie('chatJWT')
+                    },
+                    //if conversation/chatroom not found
+                    error:function(err){
+                    },
+                    success:function(data) {
+                        //Remove MSG from Sender View
+                        $('*[data-src="'+data.msgID+'"]').html('!This Message Has Been Removed!');
+
+                        //Send Alert to Remove other users' view
+                        chatroomSocket.emit('MSGRemoved', {chatID: currentChatroom, msgID: data.msgID});
+                    }
+                }); 
             }
         });
 
@@ -982,6 +1034,16 @@
                     $('#showTyping').hide();
                 }
             }
+        });
+
+        //Remove Msg
+        chatroomSocket.on('AlertMSGRemoved', data => {
+            //Remove text
+            $('*[data-src="'+data.msgID+'"]').html('!This Message Has Been Removed!');
+
+            //Remove Image
+            if($('*[data-src="'+data.msgID+'"]').parent().hasClass('img'))
+                $('*[data-src="'+data.msgID+'"]').parent().html('<div class="content">!This Message Has Been Removed!</div>')
         });
 
         //When other member created a chatroom and added u

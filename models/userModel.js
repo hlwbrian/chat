@@ -26,11 +26,6 @@ const userSchema = new mongoose.Schema({
     tokenCreateTime: {
         type: Date
     },
-    /*phoneNo: {
-        type: String,
-        required: [true, 'A user must have a phone number'],
-        unique: true,
-    },*/
     isLoggedIn: {
         type: Boolean,
         default: false
