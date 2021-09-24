@@ -172,7 +172,7 @@
                     </div>
                     <p id="showTyping">is typing</p>
                     <form id="form" class="chatroom__content__form" action="">
-                        <input id="input" class="chatroom__content__input" autocomplete="off"/><button type="button" onclick="$('#emojiPicker').toggle();">Emoji</button><button type="button" onclick="$('#theinput').click();">Image</button><button type="submit">Send</button>
+                        <input id="input" class="chatroom__content__input" autocomplete="off"/><button type="button" id="setDelBtn" onclick="setAutoDel();">Del Msg(5mins)</button><button type="button" onclick="$('#emojiPicker').toggle();">Emoji</button><button type="button" onclick="$('#theinput').click();">Image</button><button type="submit">Send</button>
                     </form>
                 </div>
             </div>         
@@ -195,8 +195,19 @@
         var dropdownMenuHTMLRight = '<div class="dropdown"><button class="dropbtn">></button><div class="dropdown-content"><a class="msgRemoveBtn">Remove</a><a onclick="alert(\'Quote\')">Quote</a></div></div>';
         var dropdownMenuHTMLLeft = '<div class="dropdown"><button class="dropbtn">></button><div class="dropdown-content"><a onclick="alert(\'Quote\')">Quote</a></div></div>';     
         var removeTarget = '';
+        var timeoutDel = 0;
 
         /**************** Functions *********************/
+        function setAutoDel(){
+            if(timeoutDel === 0){
+                $('#setDelBtn').html('Disable auto del');
+                timeoutDel = 5; //5mins
+            }else{
+                $('#setDelBtn').html('Del Msg(5mins)');
+                timeoutDel = 0; //5mins
+            }
+        }
+
         function submitProfileIcon(){
             $('#fileUpload').trigger('submit');
         }
@@ -256,7 +267,7 @@
             reader.addEventListener("load", function () {
                 var sendTimestamp = Date.now();
                 chatroomSocket.emit('saveImage', {base64Img: reader.result, timestamp: sendTimestamp});
-                chatroomSocket.emit('SendMSG', {msg: sendTimestamp+'.png', isImage: true});
+                chatroomSocket.emit('SendMSG', {msg: sendTimestamp+'.png', isImage: true, timeoutDel: timeoutDel});
             }, false);
 
             if (file) {
@@ -941,7 +952,7 @@
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             if (input.value) {
-                chatroomSocket.emit('SendMSG', {msg: input.value, isImage: false});
+                chatroomSocket.emit('SendMSG', {msg: input.value, isImage: false, timeoutDel: timeoutDel});
                 input.value = '';
             }
         });

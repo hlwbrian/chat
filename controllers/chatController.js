@@ -187,7 +187,6 @@ exports.updateUnread = catchAsync(async (req, res, next) => {
 
 /* Remove messages: set hideStatus = true  */
 exports.removeMsg = catchAsync(async (req, res, next) => {
-  //set all the conversation read
   const removeMsg = await Chat.updateOne({chatID: req.chat.currentChatID, 'messages._id': req.body.msgID}, { $set : {'messages.$.hideStatus' : true }});
 
   if(removeMsg){
@@ -219,18 +218,47 @@ exports.saveMessage = catchAsync(async (req, res, next) => {
     if(req.body.isMessage) dataObj.isMessage = req.body.isMessage;
     
     const chatData = await Chat.findOneAndUpdate({chatID: req.body.chatID}, {$push : {messages : { $each: [dataObj], $position: 0}}});
-    
+    //getNewMsgID
+    const getNewMsgID = await Chat.aggregate([
+      {$match: {chatID: parseInt(req.body.chatID)}},
+      {$unwind: "$messages"},
+      {$limit:1}
+    ]);
+
     if(chatData){
         res.status(200).json({
           status: 'success',
           msg: 'added',
           timestamp: timestamp,
-          content: chatData
+          content: chatData,
+          msgID: getNewMsgID[0].messages._id
         });
     }
   }else{
     return next(
       new AppError('Failed to save message', 404)
+    );
+  }
+});
+
+/* Del message after timeout */
+exports.timeoutDel = catchAsync(async (req, res, next) => {
+  //if match hardcode secret
+  if(req.body.serverSecret === '5sa9gkj#7w'){
+    //Set message Hide Status to true
+    const removeMsg = await Chat.updateOne({chatID: req.body.chatID, 'messages._id': req.body.msgID}, { $set : {'messages.$.hideStatus' : true }});
+
+    if(removeMsg){
+        res.status(200).json({
+          status: 'success',
+          msg: 'added',
+          chatID: req.body.chatID,
+          msgID: req.body.msgID
+        });
+    }
+  }else{
+    return next(
+      new AppError('Failed to del msg', 404)
     );
   }
 });

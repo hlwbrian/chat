@@ -167,7 +167,7 @@ io.on('connection', function(socket) {
 
         //Alert user to remove msg
         socket.on('MSGRemoved', data => {
-            io.in(`Room<%SPACE%>${data.chatID}`).emit('AlertMSGRemoved', {msgID: data.msgID}); //Return member list to the user
+            io.in(`Room<%SPACE%>${data.chatID}`).emit('AlertMSGRemoved', {msgID: data.msgID});
         });
     }
     
@@ -204,6 +204,7 @@ function sendToRoom(roomName, userID, data){
     //save to db before save send
     let roomID = roomName.split('<%SPACE%>')[1];
     let timestamp = '';
+    let timeoutDel = data.timeoutDel;
 
     axios.post(process.env.DOMAIN + 'chat/save', {
         chatID : roomID,
@@ -217,9 +218,32 @@ function sendToRoom(roomName, userID, data){
         timestamp = response.data.timestamp;
 
         //send data in chatroom
-        io.in(roomName).emit('Receive', `${data.msg}#${response.data.timestamp}#${userID}#${response.data.content._id}#${data.isImage}`);
+        io.in(roomName).emit('Receive', `${data.msg}#${response.data.timestamp}#${userID}#${response.data.msgID}#${data.isImage}`);
+        
         //update chatlist
         io.in(`Chatlist<%SPACE%>${roomID}`).emit('ChatlistUpdate', `${data.msg}#${response.data.timestamp}#${roomID}#${userID}#${data.isImage}`);
+
+        //set timeout function to del message
+        //0 means do not delete the message
+        if(timeoutDel !== 0){
+            setTimeout(() => {
+
+                //Call API to del message
+                axios.patch(process.env.DOMAIN + 'chat/timeoutDel', {
+                    chatID : roomID,
+                    msgID: response.data.msgID,
+                    serverSecret: '5sa9gkj#7w'
+                })
+                .then(function (response) {
+                    io.in(`Room<%SPACE%>${response.data.chatID}`).emit('AlertMSGRemoved', {msgID: response.data.msgID});
+                })
+                .catch(function (error) {
+                    // handle error
+                    console.log(error);
+                });
+
+            }, timeoutDel * 60 * 1000);// testing set del message after 2 sec
+        }
     })
     .catch(function (error) {
         // handle error

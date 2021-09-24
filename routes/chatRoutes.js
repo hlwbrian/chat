@@ -9,6 +9,11 @@ router
     .route('/save')
     .post(chatController.saveMessage);
 
+//Del message after timeout
+router
+    .route('/timeoutDel')
+    .patch(chatController.timeoutDel);
+
 //Protect all routes with authController.protect
 router.use(authController.protect);
 
