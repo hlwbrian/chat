@@ -210,6 +210,7 @@ function sendToRoom(roomName, userID, data){
         chatID : roomID,
         msg: data.msg,
         isImage: data.isImage,
+        replyContent: data.replyContent,
         userID: userID,
         serverSecret: '5sa9gkj#7w'
     })
@@ -218,7 +219,7 @@ function sendToRoom(roomName, userID, data){
         timestamp = response.data.timestamp;
 
         //send data in chatroom
-        io.in(roomName).emit('Receive', `${data.msg}#${response.data.timestamp}#${userID}#${response.data.msgID}#${data.isImage}`);
+        io.in(roomName).emit('Receive', `${data.msg}#${response.data.timestamp}#${userID}#${response.data.msgID}#${data.isImage}#${data.replyContent.isReply}#${data.replyContent.content}#${data.replyContent.id}#${data.replyContent.senderID}#${data.replyContent.isImage}`);
         
         //update chatlist
         io.in(`Chatlist<%SPACE%>${roomID}`).emit('ChatlistUpdate', `${data.msg}#${response.data.timestamp}#${roomID}#${userID}#${data.isImage}`);

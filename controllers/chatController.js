@@ -212,6 +212,7 @@ exports.saveMessage = catchAsync(async (req, res, next) => {
       content: req.body.msg,
       isImage: req.body.isImage,
       timestamp: timestamp,
+      reply: req.body.replyContent,
       read: [req.body.userID]
     }
 
@@ -231,7 +232,8 @@ exports.saveMessage = catchAsync(async (req, res, next) => {
           msg: 'added',
           timestamp: timestamp,
           content: chatData,
-          msgID: getNewMsgID[0].messages._id
+          msgID: getNewMsgID[0].messages._id,
+          reply: req.body.replyContent
         });
     }
   }else{

@@ -34,6 +34,13 @@ const chatSchema = mongoose.Schema({
         },
         isImage: {
             type: Boolean
+        },
+        reply: {
+            isReply: Boolean,
+            isImage: Boolean,
+            content: String,
+            senderID: String,
+            id: String
         }
     }],
     chatCreate: {

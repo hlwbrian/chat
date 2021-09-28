@@ -165,6 +165,16 @@
                         <div id="newMsgLine">New Messages.</div>
                         <ul id="messages__unread"></ul>
 
+                        <!-- Quote Pannel -->
+                        <div id="quotePanel">
+                            <p>Reply:<span class="close">X</span></p>
+                            
+                            <div class="replyContent">
+                                <p class="sender"></p>
+                                <div class="message"><span></span><img src="#" style="display: none; height: 55px; width: 55px;" /></div>
+                            </div>
+                        </div>
+
                         <!-- Emoji Picker UI -->
                         <div id="emojiPicker" style="display:none">
                             <emoji-picker></emoji-picker>
@@ -192,10 +202,11 @@
         var loadReady = false; //true for intersection observer to set status
         var form = document.getElementById('form');
         var input = document.getElementById('input');
-        var dropdownMenuHTMLRight = '<div class="dropdown"><button class="dropbtn">></button><div class="dropdown-content"><a class="msgRemoveBtn">Remove</a><a onclick="alert(\'Quote\')">Quote</a></div></div>';
+        var dropdownMenuHTMLRight = '<div class="dropdown"><button class="dropbtn">></button><div class="dropdown-content"><a class="msgRemoveBtn">Remove</a><a class="msgQuoteBtn">Quote</a></div></div>';
         var dropdownMenuHTMLLeft = '<div class="dropdown"><button class="dropbtn">></button><div class="dropdown-content"><a onclick="alert(\'Quote\')">Quote</a></div></div>';     
         var removeTarget = '';
         var timeoutDel = 0;
+        $('#quotePanel .message').data('id', 'none');
 
         /**************** Functions *********************/
         function setAutoDel(){
@@ -215,6 +226,17 @@
         function insertMessages(messages, pendFlow = 'pre'){
             var senderStyle = (userID.toString() === messages.sender)? 'right' : 'left';
             var dropdownHTML = (userID.toString() === messages.sender)? dropdownMenuHTMLRight : dropdownMenuHTMLLeft;
+            var replyMsgHTML = '';
+
+            if(messages.reply.isReply === 'true' || messages.reply.isReply === true){
+                //if reply is an image
+                if(messages.reply.isImage === 'true' || messages.reply.isImage === true){
+                    replyMsgHTML = '<div class="replyMsg">Quote:<br/><div class="replySender">'+memberMap[messages.reply.senderID]+'</div><div class="replyContent" data-src="'+messages.reply.id+'"><img src="'+messages.reply.content+'" style="height: 35px; width: 35px;" /></div></div>';
+                }else{
+                    replyMsgHTML = '<div class="replyMsg">Quote:<br/><div class="replySender">'+memberMap[messages.reply.senderID]+'</div><div class="replyContent" data-src="'+messages.reply.id+'">'+messages.reply.content+'</div></div>';
+                }
+            }
+
             //Hide message
             if(messages.hideStatus){
                 messages.content = '!This Message Has Been Removed!';
@@ -226,6 +248,7 @@
             if( (messages.isImage === true || messages.isImage === 'true') && !messages.hideStatus){
                 html += '<li><div class="message  '+senderStyle+'">' +
                     dropdownHTML +
+                    replyMsgHTML +
                     '<div class="sender">' + memberMap[messages.sender] + '#' + messages.sender + '</div>' +
                     '<div class="timestamp">' + formatDate(messages.timestamp) + '</div>' +
                     '<div class="img"><img src="/chatimages/'+messages.content+'" data-src="'+messages._id+'" onError="$(this).hide(); $(this).parent().find(\'span\').show();"></div>' +         
@@ -235,6 +258,7 @@
             else{
                 html += '<li><div class="message '+senderStyle+'">' +
                     dropdownHTML +  
+                    replyMsgHTML +
                     '<div class="sender">' + memberMap[messages.sender] + '#' + messages.sender + '</div>' +
                     '<div class="timestamp">' + formatDate(messages.timestamp) + '</div>' + 
                     '<div class="content" data-src="'+messages._id+'">' + messages.content + '</div>' +                                           
@@ -261,18 +285,22 @@
         
         //Send Image Function
         function sendImg() {
+            var replyContent = getReply();
+
             const file = document.querySelector('#theinput[type=file]').files[0];
             const reader = new FileReader();
 
             reader.addEventListener("load", function () {
                 var sendTimestamp = Date.now();
                 chatroomSocket.emit('saveImage', {base64Img: reader.result, timestamp: sendTimestamp});
-                chatroomSocket.emit('SendMSG', {msg: sendTimestamp+'.png', isImage: true, timeoutDel: timeoutDel});
+                chatroomSocket.emit('SendMSG', {msg: sendTimestamp+'.png', isImage: true, timeoutDel: timeoutDel, replyContent});
             }, false);
 
             if (file) {
                 reader.readAsDataURL(file);
             }
+
+            $('#quotePanel .close').trigger('click');
         }
 
         //Update Chatroom Icon
@@ -316,6 +344,39 @@
             if (file) {
                 reader.readAsDataURL(file);
             }   
+        }
+
+        //Get reply Content
+        function getReply() {
+            var replyContent = { 
+                isReply: false,
+                isImage: false,
+                content: '',
+                senderID: '',
+                id: ''
+            };
+
+            //check if there is reply data
+            if( $('#quotePanel .message').data('id') !== 'none'){
+                replyContent.isReply = true;
+
+                //check if it is a image
+                replyContent.isImage = $('#quotePanel .message img').attr('src') !== '#'? true : false;
+
+                //prepare reply content
+                if(replyContent.isImage){
+                    replyContent.content = $('#quotePanel .message img').attr('src');
+                }else{
+                    replyContent.content = $('#quotePanel .message span').html();
+                }
+
+                //prepare sender id
+                replyContent.senderID = $('#quotePanel .sender').html().split('#')[1];
+
+                //prepare message id
+                replyContent.id = $('#quotePanel .message').data('id');
+            }
+            return replyContent;
         }
 
         //call this when join new chatroom
@@ -404,6 +465,15 @@
         $('.logoutBtn').on('click', function(){
             document.cookie = "chatJWT=; path=/; expires = Thu, 01 Jan 1970 00:00:00 GMT"
             window.location = '/content/login.html';
+        });
+
+        //Close Quote Panel
+        $('#quotePanel .close').on('click', function() {
+            $('#quotePanel').hide();
+            $('#quotePanel .message').data('id', 'none');
+            $('#quotePanel .sender').html('');
+            $('#quotePanel .message span').html('');
+            $('#quotePanel img').attr('src', '#');
         });
 
         //Click to show create chat form
@@ -607,6 +677,46 @@
                     }
                 }); 
             }
+        });
+
+        
+        //On click Quote message
+        $('#messages').delegate('.msgQuoteBtn', 'click', function (){
+            var replyMessage = $(this).parents('.message').find('.content').html();
+            var replyMessageID = $(this).parents('.message').find('.content').data('src');
+
+            var replyImage = $(this).parents('.message').find('img').attr('src');
+            var replyImageID = $(this).parents('.message').find('img').data('src');
+
+            var replySender =  $(this).parents('.message').find('.sender').html();
+
+            //If this is a text message
+            if(replyMessage || replyMessageID){
+                //make sure not to include image src in quote
+                //hide data
+                $('#quotePanel img').attr('src', '#');
+                $('#quotePanel img').hide();
+
+                //prepare data
+                $('#quotePanel .message span').html(replyMessage);
+                //prepare id for quote message
+                $('#quotePanel .message').data('id', replyMessageID);
+            //if this is a image message
+            }else{
+                //hide data
+                $('#quotePanel .message span').html('');
+
+                //prepare data
+                $('#quotePanel img').attr('src', replyImage);
+                $('#quotePanel img').show();
+
+                 //prepare id for quote message
+                 $('#quotePanel .message').data('id', replyImageID);
+            }
+            //insert sender's name
+            $('#quotePanel .sender').html(replySender);
+            
+            $('#quotePanel').show();
         });
 
         //Click to leave Chatroom
@@ -950,11 +1060,16 @@
 
         //when user send message
         form.addEventListener('submit', function(e) {
+            var replyContent = getReply();
+
             e.preventDefault();
             if (input.value) {
-                chatroomSocket.emit('SendMSG', {msg: input.value, isImage: false, timeoutDel: timeoutDel});
+                chatroomSocket.emit('SendMSG', {msg: input.value, isImage: false, timeoutDel: timeoutDel, replyContent});
                 input.value = '';
             }
+
+            //close quote panel
+            $('#quotePanel .close').trigger('click');
         });
 
         //when user receive message
@@ -965,6 +1080,13 @@
             var messageID = msg.split('#')[3];
             var isImage = msg.split('#')[4];
             var senderStyle = (userID.toString() === sender)? 'right' : 'left';     
+            var replyContent = {
+                isReply: msg.split('#')[5],
+                content: msg.split('#')[6],
+                id: msg.split('#')[7],
+                senderID: msg.split('#')[8],
+                isImage: msg.split('#')[9]
+            }
 
             var data = {
                 sender: sender,
@@ -972,6 +1094,7 @@
                 content: message,
                 read: [userID],
                 isImage: isImage,
+                reply: replyContent,
                 _id: messageID
             }
 
