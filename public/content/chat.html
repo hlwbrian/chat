@@ -113,6 +113,66 @@
                                 </p>
                             </div>
                         </div>
+
+                        <!-- Search message -->
+                        <div class="chatOp__SearchMsg">
+                            <h2>Search Message</h2>
+                            <input type="text" id="searchMsg" />
+                            <ul class="searchResultList"></ul>
+                        </div>
+
+                        <script>
+                            $('#searchMsg').on('keyup', function() {
+                                var searchContent = $('#searchMsg').val();
+                                
+                                //Ajax to update image path
+                                var data = {
+                                    currentChatID: currentChatroom,
+                                    text: searchContent
+                                }
+
+                                //Clear search
+                                $('.searchResultList').html('');
+
+                                $.ajax
+                                ({
+                                    type: "POST",
+                                    url: "/chat/search",
+                                    contentType: 'application/json; charset=utf-8',
+                                    dataType: 'json',
+                                    async: false,
+                                    data: JSON.stringify(data),
+                                    headers: {
+                                        "authorization": "Bearer " + getCookie('chatJWT')
+                                    },
+                                    //if conversation/chatroom not found
+                                    error:function(data){
+                                    },
+                                    success:function(data) {
+                                        //Insert Message to search list
+                                        if(data.searchContent.length > 0){
+                                            $('.searchResultList').show();
+
+                                            var searchContentHTML = '';
+
+                                            //insert search content
+                                            for(var data of data.searchContent){
+                                                searchContentHTML += '<li class="searchResult" data-id="'+data.messages._id+'">';
+                                                searchContentHTML += '<span class="sender">'+ memberMap[data.messages.sender] + '#' + data.messages.sender +'</span>';
+                                                searchContentHTML += '<span class="content">'+ data.messages.content +'</span>';
+                                                searchContentHTML += '<span class="timestamp">'+ formatDateChatList(data.messages.timestamp) +'</span>';
+                                                searchContentHTML += '</li>';
+                                            }
+                                            
+                                            $('.searchResultList').append(searchContentHTML);
+                                        }else{
+                                            $('.searchResultList').hide();
+                                        }
+                                    }
+                                }); 
+                            });
+                        </script>
+
                         <input type="file" id="chatIconUpdate" onchange="updateChatIcon()" style="display: none">
                         <div class="chatOp__chatname">
                             <h2>Chatroom Name</h2>

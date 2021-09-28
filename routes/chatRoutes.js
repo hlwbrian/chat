@@ -70,4 +70,9 @@ router
     .route('/changeIcon')
     .patch(chatController.changeIcon);
 
+//Update chatroom icon
+ router
+ .route('/search')
+ .post(chatController.searchMessages);
+
 module.exports = router;

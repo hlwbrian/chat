@@ -264,6 +264,11 @@ input[type='text'],textarea {font-size:1em;}
 #chatlist .roomName {display: inline-block; font-size: 14px; font-weight: bold;}
 
 .activeChat {background-color: #ddd;}
+.searchResultList { max-height: 350px; overflow-y: scroll; }
+.searchResult {padding: 15px; box-sizing: border-box; border-bottom: 1px solid #ddd}
+.searchResult span {display: block; }
+.searchResult .content {word-break: break-word;}
+.searchResult .timestamp {float: right;}
 
 /* Message body */
 #noMoreMsg, #newMsgLine {background-color: rgba(0, 0, 0, 0.6); padding: 5px; text-align: center; width: 100%; color: white; display: none;}

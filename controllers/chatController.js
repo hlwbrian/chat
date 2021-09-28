@@ -2,6 +2,7 @@ const Chat = require('./../models/chatModel');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('../utils/appError');
+const { crossOriginOpenerPolicy } = require('helmet');
 
 /* Get chatlist */
 exports.init = catchAsync(async (req, res, next) => {
@@ -258,6 +259,29 @@ exports.timeoutDel = catchAsync(async (req, res, next) => {
           msgID: req.body.msgID
         });
     }
+  }else{
+    return next(
+      new AppError('Failed to del msg', 404)
+    );
+  }
+});
+
+/* Search message */
+exports.searchMessages = catchAsync(async (req, res, next) => {
+  const regText = new RegExp(req.body.text, 'i');
+
+  const searchMsg =  await Chat.aggregate([
+    {$match: {chatID: req.chat.currentChatID}},
+    {$unwind: "$messages"},
+    {$match: {"messages.content" : {$regex: regText}} },
+    {$limit: 30}
+  ]);
+  
+  if(searchMsg){
+    res.status(200).json({
+      status: 'success',
+      searchContent: searchMsg
+    });
   }else{
     return next(
       new AppError('Failed to del msg', 404)
