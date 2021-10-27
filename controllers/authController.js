@@ -8,7 +8,7 @@ const { profileEnd } = require('console');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 
-/* testing
+/*
 Sign token function
  expires in 60 days
 */
